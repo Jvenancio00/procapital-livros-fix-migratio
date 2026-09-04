@@ -1,0 +1,440 @@
+// Esquema da base de dados da Pro Capital — livraria digital
+// Depois de teres a "connection string", corre:
+//   npx prisma migrate dev --name correcoes-relatorio
+//   npx prisma generate
+//   npx tsx prisma/seed.ts
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum Currency {
+  KZ
+  MT
+  EUR
+  BRL
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(CUSTOMER)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+
+  // --- 2FA (TOTP, sem dependência de SMS/email externo) ---
+  totpSecret  String?
+  totpEnabled Boolean @default(false)
+
+  orders        Order[]
+  reviews       Review[]
+  favorites     Favorite[]
+  library       LibraryItem[]
+  readingNotes  ReadingNote[]
+  clientProfile ClientProfile?
+  loginEvents   LoginEvent[]
+}
+
+// Histórico de acessos — corrige a ausência apontada na secção "Entrar".
+model LoginEvent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  ip        String?
+  userAgent String?
+  success   Boolean  @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Categorias — passam a ser hierárquicas e geridas na base de dados
+// (corrige "Problema 1 – Categorias rígidas" e "Problema 2 – Hierarquia
+// inexistente" do relatório original).
+// ---------------------------------------------------------------------------
+model Category {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String  @unique
+  description String? // usado na página /categoria/[slug] para SEO
+  faq         Json? // lista [{ pergunta, resposta }] para a FAQ da página de categoria
+
+  parentId String?
+  parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryTree")
+
+  books Book[]
+
+  @@index([parentId])
+}
+
+// ---------------------------------------------------------------------------
+// Editoras — passam a ser uma entidade relacional (corrige a secção
+// "Editoras": antes o campo Book.editora era apenas texto livre, sem
+// integridade referencial).
+// ---------------------------------------------------------------------------
+model Editora {
+  id      String  @id @default(cuid())
+  slug    String  @unique
+  name    String  @unique
+  country String?
+  logo    String?
+  phone   String?
+  email   String?
+  address String?
+  website String?
+
+  books Book[]
+}
+
+model Book {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  author      String
+  editora     String // mantido como legado/fallback de apresentação
+  description String?
+  isbn        String?
+  coverUrl    String?
+  pdfUrl      String?
+  pages       Int?
+  year        Int?
+  free        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // --- Destaques (secção 8): mantém-se um botão manual, mas passa a
+  // aceitar uma janela de datas, para permitir regras automáticas
+  // ("novo lançamento fica em destaque 15 dias") em vez de um boolean fixo.
+  featured     Boolean   @default(false)
+  featuredFrom DateTime?
+  featuredTo   DateTime?
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  editoraId  String?
+  editoraRef Editora? @relation(fields: [editoraId], references: [id])
+
+  prices       Price[]
+  orderItems   OrderItem[]
+  reviews      Review[]
+  favorites    Favorite[]
+  libraryOf    LibraryItem[]
+  readingNotes ReadingNote[]
+  licenses     License[]
+}
+
+// Preço de um livro numa moeda específica (KZ, MT, EUR, BRL)
+model Price {
+  id       String   @id @default(cuid())
+  amount   Decimal
+  currency Currency
+
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, currency])
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  status      OrderStatus @default(PENDING)
+  currency    Currency    @default(KZ)
+  totalAmount Decimal
+  createdAt   DateTime    @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  items OrderItem[]
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  quantity  Int
+  unitPrice Decimal
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id])
+
+  @@index([bookId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int // 1 a 5
+  comment   String?
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  // Preço observado no momento em que foi guardado como favorito, para
+  // permitir detetar "baixou de preço desde que guardaste" (secção Favoritos).
+  priceAtSaveKZ Decimal?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+}
+
+// Biblioteca pessoal — livros comprados ou obtidos gratuitamente
+model LibraryItem {
+  id         String   @id @default(cuid())
+  acquiredAt DateTime @default(now())
+  source     String // "purchase" | "free-download"
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookId])
+}
+
+// Marcadores e notas do leitor integrado (corrige "Problema 3 – Leitor
+// próprio" da secção Livro Digital).
+enum NoteKind {
+  BOOKMARK
+  NOTE
+}
+
+model ReadingNote {
+  id        String   @id @default(cuid())
+  page      Int
+  kind      NoteKind
+  content   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([userId, bookId])
+}
+
+// Licenciamento (corrige "Problema 4 – Licenciamento" da secção Livro
+// Digital). Não é DRM real — não impede tecnicamente a cópia — mas dá à
+// editora controlo sobre quantas licenças/dispositivos e validade.
+model License {
+  id          String    @id @default(cuid())
+  code        String    @unique @default(cuid())
+  buyerEmail  String
+  maxDevices  Int       @default(1)
+  devicesUsed Int       @default(0)
+  issuedAt    DateTime  @default(now())
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@index([bookId])
+}
+
+// ---------------------------------------------------------------------------
+// Convénios
+// ---------------------------------------------------------------------------
+
+enum TipoInstituicao {
+  ESCOLA
+  UNIVERSIDADE
+  LIVRARIA
+  EDITORA
+  OUTRO
+}
+
+enum EstadoConvenio {
+  PENDENTE
+  EM_ANALISE
+  APROVADO
+  REJEITADO
+}
+
+model ConvenioPedido {
+  id          String          @id @default(cuid())
+  nome        String
+  instituicao String
+  tipo        TipoInstituicao
+  email       String
+  telefone    String?
+  numAlunos   Int?
+  mensagem    String?
+  estado      EstadoConvenio  @default(PENDENTE)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([estado])
+}
+
+// ---------------------------------------------------------------------------
+// Eventos
+// ---------------------------------------------------------------------------
+
+enum TipoEvento {
+  LANCAMENTO
+  FEIRA
+  WORKSHOP
+  OUTRO
+}
+
+model Evento {
+  id         String     @id @default(cuid())
+  slug       String     @unique
+  titulo     String
+  tipo       TipoEvento @default(OUTRO)
+  descricao  String
+  local      String
+  endereco   String?
+  // Coordenadas ficam prontas no esquema para quando houver uma chave de
+  // mapa (Google Maps/Mapbox) — sem isso, a UI só mostra endereço em texto.
+  latitude   Float?
+  longitude  Float?
+  imageUrl   String?
+  dataInicio DateTime
+  dataFim    DateTime?
+  capacidade Int?
+  editora    String?
+  livroSlug  String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  inscricoes Inscricao[]
+
+  @@index([dataInicio])
+}
+
+enum EstadoInscricao {
+  CONFIRMADA
+  LISTA_ESPERA
+  CANCELADA
+}
+
+model Inscricao {
+  id          String          @id @default(cuid())
+  nome        String
+  email       String
+  telefone    String?
+  estado      EstadoInscricao @default(CONFIRMADA)
+  createdAt   DateTime        @default(now())
+  // Check-in no dia do evento via QR Code gerado localmente (biblioteca
+  // "qrcode", sem serviço externo) — corrige "não existe check-in".
+  checkinCode String          @unique @default(cuid())
+  checkedInAt DateTime?
+
+  eventoId String
+  evento   Evento @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+
+  @@unique([eventoId, email])
+}
+
+// ---------------------------------------------------------------------------
+// Área de Cliente unificada (corrige o achado de dois sistemas paralelos:
+// /loja/entrar com NextAuth+Prisma vs /cliente/login com lista fixa em
+// data/authorized-clients.ts). Agora há um único login (NextAuth) e o
+// perfil B2B vive ligado ao mesmo User.
+// ---------------------------------------------------------------------------
+enum ClientType {
+  PARTICULAR
+  LIVRARIA
+  REVENDEDOR
+  ESCOLA
+  UNIVERSIDADE
+  EDITORA
+}
+
+model ClientProfile {
+  id              String     @id @default(cuid())
+  companyName     String?
+  type            ClientType @default(PARTICULAR)
+  discountPercent Int        @default(0)
+  createdAt       DateTime   @default(now())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Blog — deixa de ser uma página escrita à mão em código (secção Blog).
+// ---------------------------------------------------------------------------
+model BlogPost {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  excerpt     String
+  content     String
+  coverUrl    String?
+  authorName  String?
+  published   Boolean  @default(true)
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, publishedAt])
+}
+
+// ---------------------------------------------------------------------------
+// Fale Connosco — passa a qualificar o motivo do contacto (secção "Fale
+// Connosco – Problema 2: não qualifica o contacto").
+// ---------------------------------------------------------------------------
+enum ContactReason {
+  PUBLICAR
+  COMPRAR
+  PARCERIA
+  SUPORTE_TECNICO
+  COMERCIAL
+  OUTRO
+}
+
+model ContactRequest {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  reason    ContactReason
+  message   String
+  createdAt DateTime      @default(now())
+
+  @@index([reason, createdAt])
+}
