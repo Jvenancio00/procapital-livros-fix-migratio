@@ -1,0 +1,50 @@
+{
+  "name": "procapital-livros",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "build": "prisma migrate deploy || echo \"⚠️  Migrate skipped (DATABASE_URL ausente ou sem BD — usando mock em memória)\"; next build",
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "lint": "eslint",
+    "postinstall": "prisma generate || echo \"⚠️  prisma generate falhou (binários bloqueados) — usando mock em memória, OK para dev\"; node scripts/patch-prisma.js || true",
+    "seed": "tsx prisma/seed.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev --name correcoes-livros",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6",
+    "bcryptjs": "^2.4.3",
+    "docx": "^8.5.0",
+    "html2canvas": "^1.4.1",
+    "ics": "^3.7.6",
+    "jspdf": "^2.5.2",
+    "lucide-react": "^1.24.0",
+    "next": "16.2.10",
+    "next-auth": "^5.0.0-beta.25",
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.4",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^20",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "prisma": "^6",
+    "tailwindcss": "^4",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}
