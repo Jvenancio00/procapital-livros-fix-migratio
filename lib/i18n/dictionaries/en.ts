@@ -36,6 +36,16 @@ export const en: Dictionary = {
     ctaClientArea: "Client Area",
     highlightsLabel: "This week's highlights",
     deliveryNote: "Delivering to Mozambique · Angola · Portugal · Brazil",
+    stats: [
+      { value: "50+", label: "Partner publishers" },
+      { value: "1000+", label: "Titles in catalog" },
+      { value: "4", label: "Countries served" }
+    ],
+    scroll: "Explore",
+    playFilm: "Play the film",
+    pauseFilm: "Pause the film",
+    posterAlt:
+      "Bookshop interior at golden hour: wooden shelves full of books, shafts of sunlight and people browsing titles.",
   },
   search: {
     placeholder: "Search by title, author or category...",
