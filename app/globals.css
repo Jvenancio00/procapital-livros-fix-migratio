@@ -35,7 +35,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, Arial, Helvetica, sans-serif;
 }
 
 @keyframes marquee {
@@ -49,4 +49,253 @@ body {
 
 .animate-marquee {
   animation: marquee 22s linear infinite;
+}
+
+/* ------------------------------------------------------------------ *
+ * Banner cinematográfico (components/HeroSection.tsx)
+ *
+ * O "movimento" do banner é 100% CSS/GPU: Ken Burns lento no cartaz, um
+ * varrimento de luz, grão de película e parallax de rato. Assim o hero tem
+ * ar de plano filmado sem pesar no LCP nem na largura de banda do deploy — e
+ * `prefers-reduced-motion` desliga tudo, ficando um still bem composto.
+ * ------------------------------------------------------------------ */
+
+.hero {
+  /* variáveis do parallax, escritas pelo onPointerMove do componente */
+  --hero-x: 0;
+  --hero-y: 0;
+
+  /* Altura do plano: o mínimo do segundo valor de clamp() garante que o hero
+     enche o ecrã sem nunca colapsar (mobile curto) nem crescer sem fim
+     (monitores altos). Tríplice declaração de propósito: o `vh` fica como
+     fallback para browsers sem `svh` (a última declaração suportada ganha) —
+     `svh` (small viewport) é o valor correto em mobile, porque não oscila
+     quando a barra de URL do Safari/Chrome aparece e desaparece ao scroll. */
+  min-height: 38rem;
+  min-height: clamp(38rem, 88vh, 56rem);
+  min-height: clamp(38rem, 88svh, 56rem);
+}
+
+.hero-plane {
+  transform: translate3d(
+    calc(var(--hero-x) * -14px),
+    calc(var(--hero-y) * -10px),
+    0
+  );
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+}
+
+@keyframes hero-ken-burns {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.13) translate3d(-1.5%, -1.2%, 0);
+  }
+}
+
+.hero-poster {
+  transform-origin: 62% 45%;
+  animation: hero-ken-burns 34s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Scrim lateral: garante contraste AA sobre o título mesmo em cartazes claros. */
+.hero-scrim {
+  background:
+    linear-gradient(
+      100deg,
+      rgba(8, 26, 31, 0.95) 0%,
+      rgba(8, 26, 31, 0.86) 32%,
+      rgba(8, 26, 31, 0.56) 62%,
+      rgba(8, 26, 31, 0.26) 100%
+    ),
+    radial-gradient(
+      120% 90% at 100% 0%,
+      rgba(232, 117, 47, 0.2),
+      transparent 55%
+    );
+}
+
+.hero-vignette {
+  background: radial-gradient(
+    78% 68% at 50% 42%,
+    transparent 42%,
+    rgba(4, 16, 20, 0.55) 100%
+  );
+  box-shadow: inset 0 0 clamp(80px, 14vw, 240px) rgba(4, 16, 20, 0.85);
+}
+
+@keyframes hero-sweep {
+  0% {
+    transform: translateX(-140%) skewX(-12deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.55;
+  }
+  45% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(240%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+
+/* Varrimento de luz — o "sol" a passar pela cena, uma vez por ciclo. */
+.hero-sweep::after {
+  content: "";
+  position: absolute;
+  top: -15%;
+  bottom: -15%;
+  left: -30%;
+  width: 30%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 240, 214, 0.13) 45%,
+    rgba(255, 240, 214, 0.22) 52%,
+    transparent
+  );
+  filter: blur(8px);
+  transform: skewX(-12deg);
+  animation: hero-sweep 14s ease-in-out infinite;
+}
+
+/* Grão de película: ruído SVG (sem pedido de rede) deslocado em passos. */
+@keyframes hero-grain {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(-2%, 1.5%, 0);
+  }
+  50% {
+    transform: translate3d(1.5%, -2%, 0);
+  }
+  75% {
+    transform: translate3d(-1%, -1%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.hero-grain {
+  opacity: 0.16;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: hero-grain 1.4s steps(4, end) infinite;
+}
+
+/* Entrada em cascata: cada bloco sobe 1,5vw e aparece com 90ms de intervalo. */
+@keyframes hero-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1.5rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-rise {
+  animation: hero-rise 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: calc(var(--hero-i, 0) * 90ms);
+}
+
+@keyframes hero-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(200, 20, 47, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(200, 20, 47, 0);
+  }
+}
+
+.hero-pulse {
+  animation: hero-pulse 2.6s ease-out infinite;
+}
+
+/* Colagem de capas: em <lg é apenas a grelha; a partir de lg os itens ganham
+   deslocamento vertical, inclinação e flutuação lenta. Os --hero-* vêm inline
+   do componente, um por capa. */
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(var(--hero-offset, 0)) rotate(var(--tilt, 0deg));
+  }
+  50% {
+    transform: translateY(
+        calc(var(--hero-offset, 0rem) - 1rem)
+      )
+      rotate(calc(var(--tilt, 0deg) * 0.5));
+  }
+}
+
+.hero-collage-item {
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (min-width: 1024px) {
+  .hero-collage-item {
+    transform: translateY(var(--hero-offset, 0)) rotate(var(--tilt, 0deg));
+    animation: hero-float 11s ease-in-out infinite;
+    animation-delay: var(--hero-delay, 0s);
+  }
+}
+
+/* Carrilhão do indicador de scroll. */
+@keyframes hero-scroll-rail {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(180%);
+    opacity: 0;
+  }
+}
+
+.hero-scroll-rail::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 55%;
+  background: linear-gradient(to bottom, transparent, var(--accent));
+  animation: hero-scroll-rail 2.4s ease-in-out infinite;
+}
+
+/* Respeitar o sistema operativo do utilizador é parte do design, não um extra. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-plane {
+    transition: none;
+    transform: none;
+  }
+  .hero-poster,
+  .hero-grain,
+  .hero-pulse,
+  .hero-collage-item,
+  .hero-scroll-rail::after,
+  .hero-rise {
+    animation: none !important;
+  }
+  .hero-rise {
+    opacity: 1;
+    transform: none;
+  }
+  .hero-sweep::after {
+    display: none;
+  }
+  .animate-marquee {
+    animation: none;
+  }
 }

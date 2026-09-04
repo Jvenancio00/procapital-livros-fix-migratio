@@ -21,6 +21,20 @@ if (!fs.existsSync(clientDir)) {
   process.exit(0);
 }
 
+// Em produção (Vercel/CI com base de dados real) NÃO patchamos nada. Se o
+// `prisma generate` falhar lá, é melhor o arranque rebentar com um erro claro
+// do que o `lib/prisma.ts` cair silenciosamente no mock em memória e servir
+// dados de exemplo como se viessem da BD. Para forçar o patch localmente mesmo
+// com DATABASE_URL definida: FORCE_PRISMA_PATCH=1.
+const dbUrl = (process.env.DATABASE_URL || "").trim();
+const hasRealDb = /^postgres(ql)?:\/\//.test(dbUrl) && !dbUrl.includes("utilizador:password@host");
+if (hasRealDb && process.env.FORCE_PRISMA_PATCH !== "1") {
+  console.log(
+    "[patch-prisma] DATABASE_URL real detetada — skip (o client tem de vir do `prisma generate`; este erro não deve ser escondido pelo mock)"
+  );
+  process.exit(0);
+}
+
 const enumDefinitions = `
 // --- Patch E2B: enums para execução sem prisma generate (fix migratio livros) ---
 var Role = { ADMIN: "ADMIN", CUSTOMER: "CUSTOMER" };

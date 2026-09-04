@@ -60,7 +60,12 @@ export async function getBestsellers(options: {
     where: { id: { in: grouped.map((g) => g.bookId) } },
     select: { id: true, slug: true, title: true },
   });
-  const bookById = new Map(books.map((b) => [b.id, b]));
+  // Tipos explícitos: `prisma` é `any` (fallback em memória), por isso o Map
+  // seria `Map<any, {}>` e `bookById.get(...).slug` não compilava.
+  const bookById = new Map<
+    string,
+    { id: string; slug: string; title: string }
+  >(books.map((b: { id: string; slug: string; title: string }) => [b.id, b]));
 
   return grouped
     .filter((g) => bookById.has(g.bookId))

@@ -2,12 +2,18 @@
   "name": "procapital-livros",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
-    "build": "prisma migrate deploy || echo \"⚠️  Migrate skipped (DATABASE_URL ausente ou sem BD — usando mock em memória)\"; next build",
-    "start": "next start -H 0.0.0.0 -p 3000",
+    "prebuild": "prisma generate || echo \"⚠️  prisma generate indisponível (binários bloqueados?) — next.config.ts desliga o type-check e o app corre com o mock em memória\"",
+    "build": "next build",
+    "build:with-db": "prisma migrate deploy && next build",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint",
-    "postinstall": "prisma generate || echo \"⚠️  prisma generate falhou (binários bloqueados) — usando mock em memória, OK para dev\"; node scripts/patch-prisma.js || true",
+    "postinstall": "prisma generate || echo \"⚠️  prisma generate falhou (binários bloqueados) — a usar mock em memória, OK para dev\"; node scripts/patch-prisma.js || true",
+    "start": "next start -H 0.0.0.0 -p 3000",
     "seed": "tsx prisma/seed.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev --name correcoes-livros",
@@ -18,6 +24,8 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
     "@prisma/client": "^6",
     "bcryptjs": "^2.4.3",
     "docx": "^8.5.0",

@@ -36,6 +36,16 @@ export const fr: Dictionary = {
     ctaClientArea: "Espace Client",
     highlightsLabel: "Sélection de la semaine",
     deliveryNote: "Livraison au Mozambique · Angola · Portugal · Brésil",
+    stats: [
+      { value: "50+", label: "Maisons partenaires" },
+      { value: "1000+", label: "Titres au catalogue" },
+      { value: "4", label: "Pays desservis" }
+    ],
+    scroll: "Explorer",
+    playFilm: "Lire le film",
+    pauseFilm: "Mettre le film en pause",
+    posterAlt:
+      "Intérieur d'une librairie à l'heure dorée : étagères en bois pleines de livres, rayons de soleil et lecteurs qui choisissent un titre.",
   },
   search: {
     placeholder: "Rechercher par titre, auteur ou catégorie...",
