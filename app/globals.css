@@ -64,6 +64,16 @@ body {
   /* variáveis do parallax, escritas pelo onPointerMove do componente */
   --hero-x: 0;
   --hero-y: 0;
+
+  /* Altura do plano: o mínimo do segundo valor de clamp() garante que o hero
+     enche o ecrã sem nunca colapsar (mobile curto) nem crescer sem fim
+     (monitores altos). Tríplice declaração de propósito: o `vh` fica como
+     fallback para browsers sem `svh` (a última declaração suportada ganha) —
+     `svh` (small viewport) é o valor correto em mobile, porque não oscila
+     quando a barra de URL do Safari/Chrome aparece e desaparece ao scroll. */
+  min-height: 38rem;
+  min-height: clamp(38rem, 88vh, 56rem);
+  min-height: clamp(38rem, 88svh, 56rem);
 }
 
 .hero-plane {

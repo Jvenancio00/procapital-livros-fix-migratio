@@ -14,18 +14,33 @@ export const revalidate = 60;
 export default async function EventosPage() {
   const agora = new Date();
 
-  const [proximos, passados] = await Promise.all([
-    prisma.evento.findMany({
-      where: { dataInicio: { gte: agora } },
-      orderBy: { dataInicio: "asc" },
-      include: { _count: { select: { inscricoes: { where: { estado: "CONFIRMADA" } } } } },
-    }),
-    prisma.evento.findMany({
-      where: { dataInicio: { lt: agora } },
-      orderBy: { dataInicio: "desc" },
-      take: 6,
-    }),
-  ]);
+  // Com BD real mas sem `prisma migrate deploy` (tabela Evento ainda não
+  // existe), o findMany rebentava aqui e a página toda virava 500. O resto do
+  // site já tem esta mesma estratégia em `app/page.tsx`: tenta a BD, e se não
+  // houver, renderiza o estado vazio — o `<EMPTY STATE>` de "Ainda não há
+  // eventos agendados" é desenhado para exatamente isto.
+  // Sem `any` explícito: o tipo derivado acompanha o `prisma` real quando o
+  // client é gerado, e continua a compilar com o fallback em memória (que é
+  // `any`) — ver lib/prisma.ts.
+  type EventoRow = Awaited<ReturnType<typeof prisma.evento.findMany>>;
+  let proximos: EventoRow = [];
+  let passados: EventoRow = [];
+  try {
+    [proximos, passados] = await Promise.all([
+      prisma.evento.findMany({
+        where: { dataInicio: { gte: agora } },
+        orderBy: { dataInicio: "asc" },
+        include: { _count: { select: { inscricoes: { where: { estado: "CONFIRMADA" } } } } },
+      }),
+      prisma.evento.findMany({
+        where: { dataInicio: { lt: agora } },
+        orderBy: { dataInicio: "desc" },
+        take: 6,
+      }),
+    ]);
+  } catch {
+    // Sem ligação à base de dados — mantém a página de pé com a lista vazia.
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">

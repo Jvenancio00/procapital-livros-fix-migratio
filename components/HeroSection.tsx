@@ -75,7 +75,7 @@ export default function HeroSection() {
       onPointerMove={onPointerMove}
       onPointerLeave={resetParallax}
       aria-label={dict.hero.title}
-      className="hero relative isolate overflow-hidden bg-ink text-cream"
+      className="hero relative isolate flex overflow-hidden bg-ink text-cream"
       style={{
         backgroundImage: `url(${HERO_POSTER_LQIP})`,
         backgroundSize: "cover",
@@ -116,7 +116,7 @@ export default function HeroSection() {
       />
 
       {/* 5 — conteúdo */}
-      <div className="relative mx-auto flex min-h-[clamp(38rem,88vh,56rem)] max-w-6xl flex-col justify-center px-5 pb-32 pt-14 sm:px-8 sm:pt-16 lg:pb-36">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-col justify-center px-5 pb-32 pt-14 sm:px-8 sm:pt-16 lg:pb-36">
         <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-10">
           <div>
             <div
