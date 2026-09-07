@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { EstadoConvenio } from "@prisma/client";
+import { EstadoConvenio } from "@/lib/enums";
 
 // Corrige "Falta área exclusiva" / painel administrativo da secção
 // Convénios: permite à equipa comercial mudar o estado de um pedido

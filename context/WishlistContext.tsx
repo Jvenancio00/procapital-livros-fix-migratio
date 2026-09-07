@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  startTransition,
   useContext,
   useEffect,
   useState,
@@ -30,27 +31,45 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<Record<string, WishlistEntry>>({});
   const [hydrated, setHydrated] = useState(false);
 
+  // O localStorage só existe no browser, por isso a leitura tem de ficar
+  // num efeito (o servidor renderiza sempre a lista vazia). Fazemos uma
+  // única atualização de estado com o resultado já normalizado, em vez de
+  // vários setState encadeados.
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- hidratação única dos favoritos a partir do localStorage
+    function readStoredEntries(): Record<string, WishlistEntry> {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) return {};
+        const parsed: unknown = JSON.parse(stored);
+
+        // Formato antigo (apenas uma lista de slugs) — migra sem preço de
+        // referência, para que o alerta de descida de preço só comece a
+        // contar a partir de agora.
         if (Array.isArray(parsed)) {
-          // formato antigo (só slugs) -> migra sem preço de referência
           const migrated: Record<string, WishlistEntry> = {};
           for (const slug of parsed) {
-            migrated[slug] = { addedAt: new Date().toISOString(), priceKZAtSave: 0 };
+            migrated[String(slug)] = {
+              addedAt: new Date().toISOString(),
+              priceKZAtSave: 0,
+            };
           }
-          setEntries(migrated);
-        } else {
-          setEntries(parsed);
+          return migrated;
         }
+
+        if (parsed && typeof parsed === "object") {
+          return parsed as Record<string, WishlistEntry>;
+        }
+      } catch {
+        // sem favoritos guardados ou armazenamento indisponível
       }
-    } catch {
-      // sem favoritos guardados
+      return {};
     }
-    setHydrated(true);
+
+    const stored = readStoredEntries();
+    startTransition(() => {
+      setEntries(stored);
+      setHydrated(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -65,7 +84,8 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const toggle = (slug: string) => {
     setEntries((prev) => {
       if (prev[slug]) {
-        const { [slug]: _removed, ...rest } = prev;
+        const rest = { ...prev };
+        delete rest[slug];
         return rest;
       }
       const book = BOOKS.find((b) => b.slug === slug);

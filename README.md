@@ -2,7 +2,7 @@
 
 Site institucional e catálogo de livros da **Pro Capital** — distribuidora sediada em Moçambique com atuação na CPLP (Moçambique, Angola, Portugal, Brasil). Este repositório é o **fix da migração de livros** a partir de `Jvenancio00/pro-capital` (`procapital-livros-corrigido_1.zip`).
 
-> **Estado:** ✅ **A executar** — `npm run dev` em `0.0.0.0:3000` com mock em memória (sem BD), todas as rotas principais a responder 200. `npm run build` passa (43 páginas).
+> **Estado:** ✅ **A executar** — `npm run dev` em `0.0.0.0:3000` com mock em memória (sem BD), todas as rotas principais a responder 200. `npm run build` passa, com **`tsc --noEmit` e `eslint` sem qualquer erro ou aviso**.
 
 ---
 
@@ -168,3 +168,46 @@ O `seed` é idempotente (`upsert` por `slug`), pode ser corrido várias vezes.
 ---
 
 *Branch desta sessão:* `arena/01a06bb9-procapital-livros-fix-migratio` (a partir de `a0a3a5a`). Todo o trabalho está nesta branch.
+
+
+---
+
+## 🔧 Segunda passagem — erros de compilação e apresentação pública
+
+### Erros corrigidos
+
+**1. `@prisma/client` deixou de ser fonte de tipos da aplicação**
+32 erros de TypeScript vinham de `import { Role, ContactReason, ... } from "@prisma/client"`: esses enums só existem depois de um `prisma generate` bem-sucedido, que falha sem acesso a `binaries.prisma.sh`. Criados:
+
+* `lib/enums.ts` — os 10 enums do `schema.prisma` como objetos `as const` (valores idênticos; o Postgres rejeitaria qualquer divergência na escrita).
+* `lib/types.ts` — tipos de leitura das entidades usadas pela UI (`EventoView`, `BookWithPrices`, `CategoryWithBooks`, `LibraryItemView`, `ReviewView`…), satisfeitos tanto pelo Prisma real como pelo mock.
+
+Todos os `implicit any` em callbacks (`.map`, `.filter`, `.reduce`) passaram a ser tipados a partir daqui.
+
+**2. `typescript: { ignoreBuildErrors: true }` removido do `next.config.ts`**
+Já não é preciso: o build volta a verificar tipos a sério, por isso um erro real deixa de passar despercebido.
+
+**3. `eslint` passou de 79 erros para 0**
+
+* `components/CatalogGrid.tsx` — a página deixou de ser sincronizada por dois `useEffect` com `setState` (renders em cascata) e passa a ser **derivada** durante a renderização.
+* `hooks/useClientAuth.tsx` — mesma correção; `loading`/`session` são agora derivados do estado do NextAuth.
+* `context/WishlistContext.tsx` — hidratação do `localStorage` numa única atualização de estado.
+* `app/eventos/[slug]/page.tsx` — `<a href="/eventos">` → `<Link>` (perdia a navegação client-side).
+* `lib/prisma.ts` — `require()` → `import`; o `no-explicit-any` fica desligado só neste ficheiro (é o adaptador que imita a API genérica do Prisma), com justificação no cabeçalho.
+
+**4. Fontes do site estavam desativadas**
+`app/layout.tsx` definia `const fraunces = { variable: "" }`, pelo que `--font-fraunces` ficava vazio e **todo o site caía em Times New Roman**. Agora as fontes são carregadas por `<link>` no `<head>` (sem fetch no build) e `globals.css` define uma pilha de fallback do sistema — o texto nunca fica sem estilo, com ou sem rede.
+
+### Apresentação ao público
+
+* **Partilha em redes sociais** — `openGraph` + `twitter:card` com imagem, título e descrição. Antes, partilhar o site no WhatsApp ou Facebook mostrava apenas o link cru.
+* **Dados estruturados `Organization`** (JSON-LD) com morada, email e países servidos, para o Google mostrar corretamente a ficha da empresa.
+* **`title.template`** — as páginas internas herdam o sufixo `| Pro Capital`.
+* **Favicon e `theme-color`** a partir do logótipo e da cor institucional.
+* **`app/not-found.tsx`** — 404 com a marca e atalhos úteis, em vez do ecrã genérico do Next.
+* **`app/error.tsx`** — fronteira de erro com opção de tentar novamente e referência do erro para o suporte.
+* **`app/loading.tsx`** — esqueleto de carregamento em vez de ecrã em branco.
+* **Newsletter passou a funcionar** — o formulário não tinha `action` nem `onSubmit`, o email era descartado. Agora: modelo `NewsletterSubscriber` + migração `20260907000000_newsletter_subscriber` + `POST /api/newsletter` (validação, idempotente por email) + `components/NewsletterForm.tsx` com estados de envio, erro e confirmação.
+* **Hero mais legível** — mais espaço vertical, título maior e imagem de fundo via `next/image` com `priority` (melhora o LCP).
+* **Contactos do rodapé clicáveis** (`tel:` / `mailto:`).
+* **Link "Saltar para o conteúdo"** para navegação por teclado e leitores de ecrã.

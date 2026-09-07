@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-require-imports -- script Node CommonJS executado pelo npm postinstall, fora do bundle da app */
 /**
  * Patch pós-install para @prisma/client em sandboxes sem rede (E2B).
  * - O `prisma generate` falha quando binaries.prisma.sh está bloqueado,

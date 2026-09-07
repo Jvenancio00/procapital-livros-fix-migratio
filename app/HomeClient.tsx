@@ -11,6 +11,7 @@ import CategoryGrid from "@/components/CategoryGrid";
 import AudienceSection from "@/components/AudienceSection";
 import TrustBar from "@/components/TrustBar";
 import Testimonials from "@/components/Testimonials";
+import NewsletterForm from "@/components/NewsletterForm";
 import { BOOKS } from "@/data/books";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -232,20 +233,7 @@ export default function HomeClient({
                 {dict.home.newsletter.description}
               </p>
             </div>
-            <form className="flex w-full max-w-sm shrink-0 items-center gap-2 sm:w-auto">
-              <input
-                type="email"
-                required
-                placeholder={dict.home.newsletter.placeholder}
-                className="w-full min-w-0 rounded-full border border-cream/20 bg-cream/5 px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:border-brand focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="shrink-0 rounded-full bg-cream px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-cream/90"
-              >
-                {dict.home.newsletter.button}
-              </button>
-            </form>
+            <NewsletterForm source="homepage" />
           </div>
         </div>
       </section>

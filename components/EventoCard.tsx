@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CalendarDays, MapPin } from "lucide-react";
-import type { Evento } from "@prisma/client";
+import type { EventoView as Evento } from "@/lib/types";
 
 const TIPO_LABEL: Record<string, string> = {
   LANCAMENTO: "Lançamento",

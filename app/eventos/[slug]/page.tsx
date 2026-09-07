@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { cache } from "react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CalendarDays, MapPin, BookMarked } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -117,7 +118,11 @@ export default async function EventoDetailPage({
         {jaPassou ? (
           <p className="text-sm text-foreground/60">
             Este evento já terminou. Consulte os próximos eventos na página
-            de <a href="/eventos" className="text-brand underline">Eventos</a>.
+            de{" "}
+            <Link href="/eventos" className="text-brand underline">
+              Eventos
+            </Link>
+            .
           </p>
         ) : (
           <>
