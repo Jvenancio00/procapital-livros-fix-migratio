@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { CategoryWithBooks } from "@/lib/types";
 
 /**
  * Categorias hierárquicas geridas na base de dados (Prisma), em vez do
@@ -18,12 +19,21 @@ export interface CategoryNode {
 }
 
 export async function getCategoryTree(): Promise<CategoryNode[]> {
-  const categories = await prisma.category.findMany({
+  type CategoryRow = {
+    id: string;
+    slug: string;
+    name: string;
+    description: string | null;
+    faq: unknown;
+    parentId: string | null;
+  };
+
+  const categories: CategoryRow[] = await prisma.category.findMany({
     orderBy: { name: "asc" },
   });
 
   const byId = new Map<string, CategoryNode>(
-    categories.map((c) => [
+    categories.map((c: CategoryRow) => [
       c.id,
       {
         id: c.id,
@@ -48,7 +58,9 @@ export async function getCategoryTree(): Promise<CategoryNode[]> {
   return roots;
 }
 
-export async function getCategoryBySlug(slug: string) {
+export async function getCategoryBySlug(
+  slug: string
+): Promise<CategoryWithBooks | null> {
   return prisma.category.findUnique({
     where: { slug },
     include: {
@@ -65,6 +77,8 @@ export async function getCategoryBySlug(slug: string) {
 // Todos os slugs de categoria — usado no sitemap.ts para gerar
 // /categoria/[slug] automaticamente (corrige "Problema 4 – SEO perdido").
 export async function getAllCategorySlugs(): Promise<string[]> {
-  const categories = await prisma.category.findMany({ select: { slug: true } });
-  return categories.map((c) => c.slug);
+  const categories: { slug: string }[] = await prisma.category.findMany({
+    select: { slug: true },
+  });
+  return categories.map((c: { slug: string }) => c.slug);
 }

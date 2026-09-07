@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { BOOKS } from "@/data/books";
 import BookCover from "@/components/BookCover";
@@ -51,28 +52,32 @@ export default function HeroSection() {
         playsInline
         preload="auto"
       />
-      <img
+      <Image
         src={HERO_POSTER_URL}
         alt="Livraria profissional com prateleiras de livros"
-        className="absolute inset-0 -z-20 h-full w-full object-cover"
+        fill
+        // É a maior imagem acima da dobra: carregar com prioridade melhora o LCP.
+        priority
+        sizes="100vw"
+        className="-z-20 object-cover"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/80 to-ink/50" />
 
-      <div className="relative z-10 mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
-        <div className="grid gap-8 sm:grid-cols-[1.3fr_1fr] sm:items-center">
+      <div className="relative z-10 mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-24">
+        <div className="grid gap-10 sm:grid-cols-[1.3fr_1fr] sm:items-center">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand/15 px-3.5 py-1.5 mb-4">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" />
-              <span className="text-[10px] font-medium uppercase tracking-wide text-cream">
+              <span className="text-[11px] font-medium uppercase tracking-wide text-cream">
                 {dict.hero.badge}
               </span>
             </div>
 
-            <h1 className="font-serif text-2xl font-bold leading-tight text-white sm:text-3xl lg:text-4xl">
+            <h1 className="font-serif text-3xl font-bold leading-[1.15] text-white sm:text-4xl lg:text-5xl">
               {dict.hero.title}
             </h1>
 
-            <p className="mt-3 max-w-md text-sm text-cream/85 sm:text-base">
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-cream/85 sm:text-lg">
               {dict.hero.subtitle}
             </p>
 
@@ -92,7 +97,7 @@ export default function HeroSection() {
               </Link>
             </div>
 
-            <p className="mt-4 text-[10px] font-medium uppercase tracking-wide text-cream/50">
+            <p className="mt-5 text-[11px] font-medium uppercase tracking-wide text-cream/55">
               {dict.hero.deliveryNote}
             </p>
           </div>

@@ -20,6 +20,7 @@ export interface Book {
   reviewCount?: number;
   pages?: number;
   year?: number;
+  coverUrl?: string; // Capa própria alojada por nós; sem ela, BookCover procura por ISBN
   free?: boolean; // Só deve ser true para obras com direitos confirmados para distribuição gratuita
   downloadUrl?: string; // Necessário quando free=true
 }

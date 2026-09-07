@@ -438,3 +438,19 @@ model ContactRequest {
 
   @@index([reason, createdAt])
 }
+
+// Subscrições da newsletter da homepage. Antes o formulário existia mas
+// não submetia nada — o email do visitante era simplesmente descartado.
+model NewsletterSubscriber {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  // Origem da subscrição (ex.: "homepage", "rodape") — permite perceber
+  // que zonas do site convertem melhor.
+  source       String?
+  confirmed    Boolean   @default(false)
+  unsubscribed Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([createdAt])
+}

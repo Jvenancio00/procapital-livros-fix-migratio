@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { TipoInstituicao } from "@prisma/client";
+import { TipoInstituicao } from "@/lib/enums";
 
 export async function POST(request: Request) {
   const body = await request.json();

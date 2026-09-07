@@ -22,36 +22,44 @@ export interface ClientSession {
  */
 export function useClientAuth() {
   const { data: nextAuthSession, status } = useSession();
-  const [session, setSession] = useState<ClientSession | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [profile, setProfile] = useState<ClientSession | null>(null);
+  // "idle" antes de haver sessão, "loading" durante o pedido ao perfil.
+  const [profileState, setProfileState] = useState<"idle" | "loading" | "done">(
+    "idle"
+  );
 
   useEffect(() => {
-    if (status === "loading") return;
-
-    if (status === "unauthenticated") {
-      setSession(null);
-      setLoading(false);
-      return;
-    }
+    // Enquanto o NextAuth não decidir, ou se não houver sessão, não há
+    // nada a ir buscar — o estado derivado abaixo trata desses casos sem
+    // chamadas a setState durante o efeito (evita renders em cascata).
+    if (status !== "authenticated") return;
 
     let cancelled = false;
-    fetch("/api/cliente/perfil")
+    const request = fetch("/api/cliente/perfil")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!cancelled) setSession(data);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+      .catch(() => null);
+
+    request.then((data: ClientSession | null) => {
+      if (cancelled) return;
+      setProfile(data);
+      setProfileState("done");
+    });
 
     return () => {
       cancelled = true;
     };
   }, [status, nextAuthSession]);
 
+  // Derivado da sessão NextAuth: sem sessão não há perfil, e só deixamos
+  // de estar "a carregar" quando o pedido ao perfil termina.
+  const session = status === "authenticated" ? profile : null;
+  const loading =
+    status === "loading" ||
+    (status === "authenticated" && profileState !== "done");
+
   const logout = () => {
-    setSession(null);
+    setProfile(null);
+    setProfileState("idle");
     signOut({ callbackUrl: "/loja/entrar" });
   };
 

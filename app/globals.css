@@ -13,6 +13,13 @@
   --cream: #fdfaf3;
   --cream-deep: #f4ecd9;
   --line: #e7dcc4;
+
+  /* Pilhas de fontes com fallback do sistema: se o CSS da Google Fonts não
+     carregar (offline, bloqueio de rede), o site continua com uma serifa e
+     uma sem-serifa decentes em vez de Times New Roman. */
+  --font-fraunces: "Fraunces", ui-serif, Georgia, "Times New Roman", serif;
+  --font-inter: "Inter", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 @theme inline {
@@ -35,7 +42,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter);
 }
 
 @keyframes marquee {

@@ -5,6 +5,7 @@ import { BookOpen, Mail, MapPin, Phone } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import BookCard from "@/components/BookCard";
 import type { Book as StaticBook } from "@/data/books";
+import type { BookWithPrices } from "@/lib/types";
 
 // Corrige "Editoras – não há página de perfil por editora nem ligação
 // automática aos livros que publica": os livros agora ligam-se à editora
@@ -15,7 +16,20 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
-async function getEditora(slug: string) {
+type EditoraComLivros = {
+  id: string;
+  slug: string;
+  name: string;
+  country: string | null;
+  logo: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  website: string | null;
+  books: BookWithPrices[];
+};
+
+async function getEditora(slug: string): Promise<EditoraComLivros | null> {
   return prisma.editora.findUnique({
     where: { slug },
     include: { books: { include: { prices: true }, take: 40 } },
@@ -75,7 +89,7 @@ export default async function EditoraPage({ params }: Props) {
       </h2>
 
       <div className="mt-6 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-4">
-        {editora.books.map((book, index) => (
+        {editora.books.map((book: BookWithPrices, index: number) => (
           <BookCard
             key={book.slug}
             index={index}

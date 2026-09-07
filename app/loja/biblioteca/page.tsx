@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Download, BookOpen } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { LibraryItemView } from "@/lib/types";
 
 export default async function BibliotecaPage() {
   const session = await auth();
@@ -18,7 +19,7 @@ export default async function BibliotecaPage() {
     },
   });
 
-  const items = user?.library ?? [];
+  const items: LibraryItemView[] = user?.library ?? [];
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">

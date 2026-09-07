@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const PRESENCA = [
   { country: "Moçambique", city: "Maputo (sede)", top: 64.4, left: 59.1 },
   { country: "Angola", city: "Luanda", top: 54.9, left: 53.7 },
@@ -8,10 +10,12 @@ const PRESENCA = [
 export default function PresenceMap() {
   return (
     <div className="relative mx-auto w-full max-w-4xl">
-      <img
+      <Image
         src="/world-map.svg"
         alt="Mapa com a presença da Pro Capital em Moçambique, Angola, Portugal e Brasil"
-        className="w-full"
+        width={1200}
+        height={620}
+        className="h-auto w-full"
       />
       {PRESENCA.map((p) => (
         <div

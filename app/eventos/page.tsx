@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CalendarDays } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import EventoCard from "@/components/EventoCard";
+import type { EventoComVagas, EventoView } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Eventos | Pro Capital",
@@ -14,7 +15,7 @@ export const revalidate = 60;
 export default async function EventosPage() {
   const agora = new Date();
 
-  const [proximos, passados] = await Promise.all([
+  const [proximos, passados]: [EventoComVagas[], EventoView[]] = await Promise.all([
     prisma.evento.findMany({
       where: { dataInicio: { gte: agora } },
       orderBy: { dataInicio: "asc" },
@@ -53,7 +54,7 @@ export default async function EventosPage() {
         </div>
       ) : (
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {proximos.map((evento) => (
+          {proximos.map((evento: EventoComVagas) => (
             <EventoCard
               key={evento.id}
               evento={evento}
@@ -73,7 +74,7 @@ export default async function EventosPage() {
             Eventos anteriores
           </h2>
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 opacity-70">
-            {passados.map((evento) => (
+            {passados.map((evento: EventoView) => (
               <EventoCard key={evento.id} evento={evento} vagasRestantes={null} />
             ))}
           </div>
