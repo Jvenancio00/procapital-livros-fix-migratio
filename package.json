@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 3000",
-    "prebuild": "prisma generate || echo \"⚠️  prisma generate indisponível (binários bloqueados?) — next.config.ts desliga o type-check e o app corre com o mock em memória\"",
+    "prebuild": "prisma generate || echo \"⚠️  prisma generate indisponível — os tipos da app vêm de lib/enums.ts e lib/types.ts, por isso o build continua a verificar tipos; sem DATABASE_URL o app corre com o mock em memória\"",
     "build": "next build",
     "build:with-db": "prisma migrate deploy && next build",
     "typecheck": "tsc --noEmit",
