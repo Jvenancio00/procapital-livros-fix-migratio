@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { ContactReason } from "@prisma/client";
+import { ContactReason } from "@/lib/enums";
 
 // Corrige a secção "Fale Connosco": antes, o formulário só abria o cliente
 // de email do visitante (mailto:), sem nenhum registo no lado do servidor

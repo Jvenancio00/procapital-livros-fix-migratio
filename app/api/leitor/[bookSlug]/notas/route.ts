@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { NoteKind } from "@prisma/client";
+import { NoteKind } from "@/lib/enums";
 
 // Marcadores e notas do leitor — corrige "Problema 3 – Leitor próprio" da
 // secção Livro Digital (o relatório pedia marcadores, notas e pesquisa;

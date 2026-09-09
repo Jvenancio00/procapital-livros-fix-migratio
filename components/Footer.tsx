@@ -61,11 +61,17 @@ export default function Footer() {
             </li>
             <li className="flex items-start gap-2">
               <Phone size={16} className="mt-0.5 shrink-0" />
-              <span>+258 84 000 0000</span>
+              {/* Ligações tel:/mailto: — num telemóvel, tocar no número
+                  passa a iniciar a chamada em vez de exigir copiar à mão. */}
+              <a href="tel:+258840000000" className="hover:text-cream">
+                +258 84 000 0000
+              </a>
             </li>
             <li className="flex items-start gap-2">
               <Mail size={16} className="mt-0.5 shrink-0" />
-              <span>geral@procapital.co.mz</span>
+              <a href="mailto:geral@procapital.co.mz" className="hover:text-cream">
+                geral@procapital.co.mz
+              </a>
             </li>
           </ul>
         </div>

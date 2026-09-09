@@ -9,7 +9,18 @@
  *    `data/books.ts`, `data/editoras.ts` e `prisma/seed.ts`, permitindo que a
  *    homepage e o catálogo funcionem sem DB (fallback já previsto em app/page.tsx).
  *  - Se houver DB válida, usa o cliente real.
+ *
+ * Nota sobre `any`: este ficheiro é um adaptador que tem de aceitar
+ * exatamente a mesma forma de argumentos que o Prisma Client aceita
+ * (`where`, `include`, `select`, `orderBy`, ...). Reproduzir esses tipos
+ * genéricos à mão seria copiar milhares de linhas do client gerado, por
+ * isso a regra `no-explicit-any` está desligada apenas aqui, na fronteira
+ * com a biblioteca. O resto da aplicação continua tipado através de
+ * `lib/types.ts`.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { BOOKS } from "@/data/books";
+import { EDITORAS } from "@/data/editoras";
 
 // Tipos frouxos para o mock — evita dependência do client gerado quando ele falha
 type MockDelegate = Record<string, (...args: any[]) => Promise<any>>;
@@ -17,10 +28,6 @@ type MockDelegate = Record<string, (...args: any[]) => Promise<any>>;
 let prismaInstance: any;
 
 function createMockPrisma() {
-  // Dados estáticos importados de forma lazy para não quebrar se os ficheiros mudarem
-  const { BOOKS } = require("@/data/books") as typeof import("@/data/books");
-  const { EDITORAS } = require("@/data/editoras") as typeof import("@/data/editoras");
-
   // Categorias — espelho de prisma/seed.ts CATEGORY_TREE, mas com IDs estáveis (slug)
   const CATEGORY_TREE = [
     { slug: "escolar", name: "Escolar", description: "Manuais escolares alinhados aos currículos nacionais, do ensino primário ao superior.", faq: [{ pergunta: "Os manuais seguem o currículo oficial?", resposta: "Sim, os títulos desta categoria seguem o currículo nacional do respetivo país e ano letivo." }] as any[], children: [{ slug: "ensino-primario", name: "Ensino Primário" }, { slug: "ensino-secundario", name: "Ensino Secundário" }, { slug: "ensino-superior", name: "Ensino Superior" }] },
@@ -225,7 +232,7 @@ function createMockPrisma() {
         if (args?.where?.slug) return booksDb.filter((b) => b.slug === args.where.slug);
         return booksDb;
       },
-      findUnique: async ({ where, include }: any) => {
+      findUnique: async ({ where }: any) => {
         if (!where) return null;
         const book = where.slug ? bookBySlug.get(where.slug) ?? null : where.id ? bookById.get(where.id) ?? null : null;
         if (!book) return null;
@@ -240,7 +247,7 @@ function createMockPrisma() {
 
     price: makeDelegate({
       findMany: async () => booksDb.flatMap((b) => b.prices),
-      upsert: async ({ where, create }: any) => create,
+      upsert: async ({ create }: any) => create,
     }),
 
     order: makeDelegate({}),
@@ -250,11 +257,8 @@ function createMockPrisma() {
     }),
 
     review: makeDelegate({
-      findMany: async ({ where }: any) => {
-        // Retorna vazio — sem reviews mockados
-        return [];
-      },
-      upsert: async ({ where, create, update }: any) => ({ id: `review-${Date.now()}`, ...create, ...update }),
+      findMany: async () => [],
+      upsert: async ({ create, update }: any) => ({ id: `review-${Date.now()}`, ...create, ...update }),
     }),
 
     favorite: makeDelegate({}),
@@ -300,7 +304,7 @@ function createMockPrisma() {
         result = result.map((e: any) => ({ ...e, _count: e._count ?? { inscricoes: 0 } }));
         return result;
       },
-      findUnique: async ({ where, include }: any) => {
+      findUnique: async ({ where }: any) => {
         if (!where?.slug && !where?.id) return null;
         const ev: any = eventoBySlug.get(where.slug) ?? eventosDb.find((e: any) => e.id === where.id) ?? null;
         if (!ev) return null;
@@ -310,7 +314,7 @@ function createMockPrisma() {
     }),
 
     inscricao: makeDelegate({
-      findUnique: async ({ where }: any) => null,
+      findUnique: async () => null,
       create: async ({ data }: any) => ({ id: `insc-${Date.now()}`, checkinCode: `chk-${Date.now()}`, createdAt: new Date(), estado: "CONFIRMADA", checkedInAt: null, ...data }),
       update: async ({ where, data }: any) => ({ id: where?.id ?? where?.checkinCode ?? "mock", ...data }),
     }),
@@ -330,6 +334,19 @@ function createMockPrisma() {
         if (!where?.slug) return null;
         return blogBySlug.get(where.slug) ?? null;
       },
+    }),
+
+    newsletterSubscriber: makeDelegate({
+      upsert: async ({ where, create }: any) => ({
+        id: `news-${Date.now()}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        confirmed: false,
+        unsubscribed: false,
+        ...create,
+        ...where,
+      }),
+      findMany: async () => [],
     }),
 
     contactRequest: makeDelegate({

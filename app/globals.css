@@ -13,6 +13,14 @@
   --cream: #fdfaf3;
   --cream-deep: #f4ecd9;
   --line: #e7dcc4;
+
+  /* `--font-fraunces` e `--font-inter` NÃO se definem aqui: vêm da classe que
+     `next/font/local` aplica em <html> (app/layout.tsx) e já trazem o fallback
+     do sistema ("Georgia, Times New Roman" / "system-ui, Arial") com métricas
+     ajustadas por `adjustFontFallback`. Declará-las em `:root` tinha o mesmo
+     especificidade e viria depois na cascata — a classe do font-loader era
+     anulada e o site caía silenciosamente em Georgia no primeiro CSS que
+     apanhasse o nome certo por insensibilidade a maiúsculas. */
 }
 
 @theme inline {
@@ -35,7 +43,9 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), system-ui, Arial, Helvetica, sans-serif;
+  /* `--font-inter` vem de `next/font/local` no layout raiz e já inclui a pilha
+     de fallback (system-ui, Arial) — não é preciso repeti-la aqui. */
+  font-family: var(--font-inter);
 }
 
 @keyframes marquee {
