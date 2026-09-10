@@ -15,18 +15,32 @@ export const revalidate = 60;
 export default async function EventosPage() {
   const agora = new Date();
 
-  const [proximos, passados]: [EventoComVagas[], EventoView[]] = await Promise.all([
-    prisma.evento.findMany({
-      where: { dataInicio: { gte: agora } },
-      orderBy: { dataInicio: "asc" },
-      include: { _count: { select: { inscricoes: { where: { estado: "CONFIRMADA" } } } } },
-    }),
-    prisma.evento.findMany({
-      where: { dataInicio: { lt: agora } },
-      orderBy: { dataInicio: "desc" },
-      take: 6,
-    }),
-  ]);
+  // Dois problemas, duas correções:
+  //  1. sem `prisma migrate deploy` (tabela Evento em falta), o `findMany`
+  //     rebentava aqui e a página inteira virava 500 — o mesmo padrão de
+  //     `app/page.tsx` resolve: tenta a BD, e se não houver, deixa a lista
+  //     vazia renderizar o estado desenhado para isso ("Ainda não há eventos
+  //     agendados").
+  //  2. os tipos vêm de `lib/types.ts` (`EventoComVagas`/`EventoView`), por
+  //     isso o `.map()` abaixo deixa de depender de inferência do Prisma.
+  let proximos: EventoComVagas[] = [];
+  let passados: EventoView[] = [];
+  try {
+    [proximos, passados] = await Promise.all([
+      prisma.evento.findMany({
+        where: { dataInicio: { gte: agora } },
+        orderBy: { dataInicio: "asc" },
+        include: { _count: { select: { inscricoes: { where: { estado: "CONFIRMADA" } } } } },
+      }),
+      prisma.evento.findMany({
+        where: { dataInicio: { lt: agora } },
+        orderBy: { dataInicio: "desc" },
+        take: 6,
+      }),
+    ]);
+  } catch {
+    // Sem ligação à base de dados — mantém a página de pé com a lista vazia.
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,11 +10,44 @@ import { LanguageProvider } from "@/context/LanguageContext";
 import AuthProvider from "@/components/AuthProvider";
 import { SITE_URL } from "@/lib/site";
 
-// As fontes são carregadas pelo browser através de <link> (ver <head> abaixo)
-// em vez de `next/font/google`, que faz fetch a fonts.googleapis.com durante o
-// build e por isso rebenta em ambientes sem rede (sandboxes, CI offline).
-// Se a rede falhar, `globals.css` define uma pilha de fallback com fontes do
-// sistema, por isso o texto nunca fica sem estilo.
+// Fontes: self-hosted via `next/font/local`, com os .woff2 em `app/fonts`.
+//
+// Duas abordagens já tentadas e ambas rejeitadas, e por motivos diferentes:
+//  - `next/font/google` faz fetch a fonts.googleapis.com *durante o build* →
+//    rebenta em CI/sandbox sem acesso a esse host ("Failed to fetch `Fraunces`").
+//  - carregar a folha de estilos da Google com um <link> no <head> resolve o
+//    build, mas passa o problema para o utilizador: um pedido externo por
+//    visita, bloqueado por ad-blocker/CSP, com FOUT e LCP a depender de um
+//    terceiro. E o mock antigo (`{ variable: "" }`) deixava o site em Arial.
+//
+// O self-hosting não tem nenhum dos dois problemas: zero pedidos externos no
+// build *e* em runtime, `<link rel="preload">` gerado pelo Next, e `size-adjust`
+// para não haver layout shift quando o webfont entra. Subconjuntos latin +
+// latin-ext (cobre acentos de PT/EN/ES/FR), pesos variáveis 100–900.
+const fraunces = localFont({
+  variable: "--font-fraunces",
+  display: "swap",
+  fallback: ["Georgia", "Times New Roman"],
+  // O `size-adjust` do Next é calculado contra uma métrica de referência: para
+  // uma serifada de texto, "Times New Roman" aproxima-se muito mais do Georgia
+  // (o fallback real) do que o Arial por omissão — evita o salto de tamanho nos
+  // títulos do hero quando o webfont entra.
+  adjustFontFallback: "Times New Roman",
+  src: [
+    { path: "./fonts/fraunces-latin-wght.woff2", weight: "100 900", style: "normal" },
+    { path: "./fonts/fraunces-latin-ext-wght.woff2", weight: "100 900", style: "normal" },
+  ],
+});
+
+const inter = localFont({
+  variable: "--font-inter",
+  display: "swap",
+  fallback: ["system-ui", "Arial"],
+  src: [
+    { path: "./fonts/inter-latin-wght.woff2", weight: "100 900", style: "normal" },
+    { path: "./fonts/inter-latin-ext-wght.woff2", weight: "100 900", style: "normal" },
+  ],
+});
 
 const SITE_DESCRIPTION =
   "Pro Capital é uma distribuidora de livros sediada em Moçambique, com atuação em Moçambique, Angola, Portugal, Brasil e demais países da CPLP, ao serviço de livrarias, escolas e do público em geral.";
@@ -41,6 +75,9 @@ export const metadata: Metadata = {
   alternates: { canonical: SITE_URL },
   // Sem estas etiquetas, uma partilha no WhatsApp ou no Facebook mostrava
   // apenas o link cru — o que é péssimo para um site virado ao público.
+  // As dimensões batem certo com `app/opengraph-image.jpg` (1200×630), gerado
+  // a partir do cartaz do hero; apontar para /hero-poster.jpg diria ao Facebook
+  // que é 1200×630 quando o ficheiro é 1600×900.
   openGraph: {
     type: "website",
     siteName: "Pro Capital",
@@ -50,10 +87,10 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: "/hero-poster.jpg",
+        url: "/opengraph-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Catálogo de livros distribuídos pela Pro Capital",
+        alt: "Livraria da Pro Capital ao fim da tarde, com estantes cheias de livros",
       },
     ],
   },
@@ -61,7 +98,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Pro Capital | Distribuidora de Livros",
     description: SITE_DESCRIPTION,
-    images: ["/hero-poster.jpg"],
+    images: ["/opengraph-image.jpg"],
   },
   icons: {
     icon: "/procapital/logo.jpg",
@@ -70,7 +107,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-// Barra de endereço/tema do browser em telemóvel a condizer com o site.
+// Em Next 16, `themeColor`/viewport saíram de `metadata` para `viewport`.
+// O tom é o `--ink` da marca porque é sobre o banner (fundo escuro) que a
+// barra de endereço do telemóvel aparece em primeiro lugar.
 export const viewport: Viewport = {
   themeColor: "#123a44",
   width: "device-width",
@@ -102,23 +141,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-MZ" className="h-full antialiased">
+    <html
+      lang="pt-MZ"
+      className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font --
-            no App Router este <head> pertence ao layout raiz, por isso a
-            folha de estilos é aplicada a todas as páginas (o aviso da regra
-            refere-se ao Pages Router). Não usamos next/font/google porque
-            faz fetch na altura do build e falha sem rede. */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

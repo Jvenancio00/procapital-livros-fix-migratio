@@ -43,6 +43,15 @@ export interface Dictionary {
     ctaClientArea: string;
     highlightsLabel: string;
     deliveryNote: string;
+    /** Três indicadores por baixo do subtítulo: valor grande + rótulo pequeno. */
+    stats: { value: string; label: string }[];
+    /** Rótulo do indicador de scroll no fundo do banner cinematográfico. */
+    scroll: string;
+    /** Controlo da camada de vídeo; só aparece com NEXT_PUBLIC_HERO_VIDEO_URL. */
+    playFilm: string;
+    pauseFilm: string;
+    /** Alternativo do cartaz: aqui a imagem é conteúdo (LCP), não decoração. */
+    posterAlt: string;
   };
   search: {
     placeholder: string;

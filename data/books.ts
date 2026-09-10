@@ -15,12 +15,17 @@ export interface Book {
   featured?: boolean;
   bestseller?: boolean;
   isbn?: string; // ISBN-13 real, usado para procurar a capa na Open Library Covers API
+  /**
+   * Capa explícita (por exemplo, arte da editora). Quando não vem, `BookCover`
+   * resolve a capa pela Open Library/Google Books através do ISBN; o seed
+   * grava este campo em `Book.coverUrl` para o backoffice ter um valor real.
+   */
+  coverUrl?: string;
   description?: string;
   rating?: number; // Avaliação média (1-5) — placeholder até existirem avaliações reais de utilizadores
   reviewCount?: number;
   pages?: number;
   year?: number;
-  coverUrl?: string; // Capa própria alojada por nós; sem ela, BookCover procura por ISBN
   free?: boolean; // Só deve ser true para obras com direitos confirmados para distribuição gratuita
   downloadUrl?: string; // Necessário quando free=true
 }

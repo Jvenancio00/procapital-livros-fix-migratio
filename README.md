@@ -4,6 +4,8 @@ Site institucional e catálogo de livros da **Pro Capital** — distribuidora se
 
 > **Estado:** ✅ **A executar** — `npm run dev` em `0.0.0.0:3000` com mock em memória (sem BD), todas as rotas principais a responder 200. `npm run build` passa, com **`tsc --noEmit` e `eslint` sem qualquer erro ou aviso**.
 
+> **Este README descreve a união de dois ramos:** a *segunda passagem* (tipos próprios em `lib/enums.ts`/`lib/types.ts`, SEO, `loading`/`error`/`not-found`, newsletter a funcionar) e o **banner cinematográfico + hardening do build na Vercel**. Onde os dois divergiram, ficou a solução melhor em cada ponto — está assinalado com ⚔️.
+
 ---
 
 ## 🎯 Problema original — “livros / migração”
@@ -195,8 +197,14 @@ Já não é preciso: o build volta a verificar tipos a sério, por isso um erro 
 * `app/eventos/[slug]/page.tsx` — `<a href="/eventos">` → `<Link>` (perdia a navegação client-side).
 * `lib/prisma.ts` — `require()` → `import`; o `no-explicit-any` fica desligado só neste ficheiro (é o adaptador que imita a API genérica do Prisma), com justificação no cabeçalho.
 
-**4. Fontes do site estavam desativadas**
-`app/layout.tsx` definia `const fraunces = { variable: "" }`, pelo que `--font-fraunces` ficava vazio e **todo o site caía em Times New Roman**. Agora as fontes são carregadas por `<link>` no `<head>` (sem fetch no build) e `globals.css` define uma pilha de fallback do sistema — o texto nunca fica sem estilo, com ou sem rede.
+**4. Fontes do site estavam desativadas** ⚔️
+`app/layout.tsx` definia `const fraunces = { variable: "" }`, pelo que `--font-fraunces` ficava vazio e **todo o site caía em Times New Roman**.
+
+Duas correções possíveis, e a escolha importa:
+* `<link>` à Google Fonts no `<head>` — resolve o build, mas passa o problema para o utilizador: um pedido externo por visita, sujeito a ad-blocker/CSP, com FOUT e o LCP do hero a depender de um terceiro.
+* **self-hosting com `next/font/local`** (o que ficou) — `Fraunces` e `Inter` variáveis em `app/fonts/*.woff2`, zero pedidos externos no build *e* em runtime, `<link rel="preload">` gerado pelo Next e `adjustFontFallback: "Times New Roman"` para não haver salto de métricas nos títulos.
+
+`globals.css` mantém a pilha de fallback do sistema em `:root`, por segurança.
 
 ### Apresentação ao público
 
@@ -208,6 +216,71 @@ Já não é preciso: o build volta a verificar tipos a sério, por isso um erro 
 * **`app/error.tsx`** — fronteira de erro com opção de tentar novamente e referência do erro para o suporte.
 * **`app/loading.tsx`** — esqueleto de carregamento em vez de ecrã em branco.
 * **Newsletter passou a funcionar** — o formulário não tinha `action` nem `onSubmit`, o email era descartado. Agora: modelo `NewsletterSubscriber` + migração `20260907000000_newsletter_subscriber` + `POST /api/newsletter` (validação, idempotente por email) + `components/NewsletterForm.tsx` com estados de envio, erro e confirmação.
-* **Hero mais legível** — mais espaço vertical, título maior e imagem de fundo via `next/image` com `priority` (melhora o LCP).
+* **Hero mais legível** — mais espaço vertical e título maior. O fundo ficou no `<picture>` do ramo do banner (WebP+JPEG com `fetchPriority="high"`), deliberadamente **sem** `next/image`: evita depender do `sharp` em `next start` auto-alojado e dá controlo exato sobre o blur-up/LQIP. Ver a secção do banner.
 * **Contactos do rodapé clicáveis** (`tel:` / `mailto:`).
 * **Link "Saltar para o conteúdo"** para navegação por teclado e leitores de ecrã.
+
+
+---
+
+## 🎬 Banner cinematográfico (hero)
+
+`components/HeroSection.tsx`, camada a camada, de trás para a frente:
+
+| # | Camada | Como | Porquê |
+|---|---|---|---|
+| 1 | LQIP | cartaz reduzido a 24×14 e desfoçado, em `data:` URI (~0,5 KB), no `background-image` do contentor | a mancha de cor existe no **primeiro frame** — sem bloco preto nem salto de layout |
+| 2 | Cartaz | `<picture>` WebP → JPEG (`public/hero-poster.webp`/`.jpg`, 1600×900 sRGB progressivo), `width`/`height` explícitos, `fetchPriority="high"` | LCP medido **584 ms** sobre o próprio cartaz; WebP é −47% de bytes |
+| 3 | Vídeo | `HeroFilmLayer`, **opcional** por `NEXT_PUBLIC_HERO_VIDEO_URL`: `preload="none"`, fade em `canplay`, pausa fora do viewport, botão ▶/⏸ | um MP4 em autoplay custa LCP ao utilizador e bandwidth ao deploy |
+| 4 | Luz | Ken Burns (34 s) + varrimento de luz (14 s) + grão de película (`feTurbulence` em `steps`) + scrim lateral e vinheta | é o que faz um fundo parecer um **fotograma** — 100% GPU, zero bytes de rede |
+| 5 | Conteúdo | selo pulsante, `h1` em Fraunces `clamp()`, 3 indicadores (`<dl>`), colagem das capas em destaque, nota de alcance, indicador `EXPLORAR` | copy toda em `dict.hero.*` — nada de texto no componente |
+
+* **`prefers-reduced-motion` desliga tudo** (`useSyncExternalStore`, sem `setState` em effect): o banner continua composto e legível, porque `hero-rise` usa `fill-mode: both` com estado base `opacity: 1`.
+* **`min-height` em `svh`** com `vh` de fallback: `vh` em mobile é a viewport *grande*, e o hero ficava mais alto do que o ecrã quando a barra de URL recolhia.
+* Colagem em **grid com offsets/tilt por item**, não `position:absolute` — com absolute as capas saíam da coluna e as legendas ficavam por cima da capa vizinha.
+* O MP4 antigo do repo (`public/hero-video.mp4`, 2,5 MB) **saiu**: era uma animação gerada a partir do screenshot do mockup (mesmas dimensões exatas, 1918×770), com texto de design dentro do vídeo. Para ligar um filme real: `NEXT_PUBLIC_HERO_VIDEO_URL`.
+
+Texto: `lib/i18n/types.ts → hero` e os 6 dicionários (`badge`, `title`, `subtitle`, `ctaCatalog`, `ctaClientArea`, `highlightsLabel`, `deliveryNote`, `stats[]`, `scroll`, `playFilm`, `pauseFilm`, `posterAlt`).
+
+Trocar o cartaz: substituir `public/hero-poster.jpg` e regenerar WebP/LQIP, **ou** apontar `NEXT_PUBLIC_HERO_POSTER_URL` para a CDN.
+
+```bash
+convert novo-cartaz.jpg -resize 1600x900^ -gravity center -extent 1600x900 \
+  -colorspace sRGB -strip -interlace Plane -quality 80 public/hero-poster.jpg
+convert novo-cartaz.jpg -resize 1600x900^ -gravity center -extent 1600x900 \
+  -strip -quality 76 -define webp:method=6 public/hero-poster.webp
+```
+
+---
+
+## ▲ Deploy na Vercel
+
+O `build` deixou de ser um passo de *release* disfarçado, e o resto do pipeline foi alinhado com o que a Vercel faz:
+
+```jsonc
+// package.json
+"engines": { "node": ">=20.9.0" },                 // Next 16 exige 20.9+; torna o runtime explícito
+"prebuild": "prisma generate || echo …",           // tipos do client antes do build, sem rebentar sem BD
+"build": "next build",                              // ← sem `prisma migrate deploy` no build
+"build:with-db": "prisma migrate deploy && next build",  // se quiseres migrações no deploy, é isto
+"typecheck": "tsc --noEmit"
+```
+
+* **Porque é que `migrate deploy` saiu do build:** com `DATABASE_URL` num pool Neon frio, o build esperava pela BD até ao timeout da Vercel, ou apanhava `P1001` a meio — é exatamente o "build que parte na Vercel". Migrações são passo de release (`npm run db:deploy`).
+* **`vercel.json`**: `framework: "nextjs"` (o preset que faltava quando o deploy ficava "Ready" com 404 em todo o site) + `buildCommand`/`installCommand` (`npm ci`, que falha cedo se o `package-lock.json` sair de sincronia — outro clássico).
+* **`scripts/patch-prisma.js` não patcha com `DATABASE_URL` real**: se o `generate` falhar num deploy, o erro aparece, em vez de a app servir silenciosamente o mock em memória como se fosse a BD — o cenário de perda de dados mais perigoso deste repo.
+* **`X-Frame-Options: ALLOWALL` e `allowedDevOrigins` só em desenvolvimento.** Antes eram enviados sempre, o que desligava a proteção contra clickjacking no site publicado.
+* **`Cache-Control` explícito** para `public/hero-poster.jpg|webp`: de `/public`, em produção, o default é `must-revalidate` — cada visita voltava à origem.
+* **`lib/auth.ts` com `trustHost`**: atrás de proxy de plataforma (previews `*.vercel.app`), a Auth.js v5 rejeitava o host e `/api/auth/session` devolvia 500 `UntrustedHost`. Desliga-se com `AUTH_TRUST_HOST=false` + `AUTH_URL`.
+* **Type-check imposto** (sem `ignoreBuildErrors`): a segunda passagem resolveu a causa real com `lib/enums.ts`/`lib/types.ts` em vez de ignorar os sintomas.
+
+Variáveis a definir no projeto (Settings → Environment Variables):
+
+| Variável | Quando | Nota |
+|---|---|---|
+| `DATABASE_URL` | com BD | `postgresql://…` (Neon **pooled**, `-pooler`). Sem ela a app corre com o mock em memória |
+| `AUTH_SECRET` | sempre | sem isto `/api/auth/*` devolve `MissingSecret` (500) |
+| `NEXT_PUBLIC_HERO_POSTER_URL` | opcional | CDN do cartaz; `public/hero-poster.jpg` é o default |
+| `NEXT_PUBLIC_HERO_VIDEO_URL` | opcional | liga a camada de vídeo do banner |
+
+Verificado com build de produção (`next build` + `next start`) e Chrome headless a 1440/1920/390 px, com `prefers-reduced-motion` ligado e desligado: LCP 584 ms, overflow horizontal 0, `document.fonts.status = loaded`, Fraunces/Inter a resolverem para as fontes do repo.

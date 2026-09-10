@@ -7,6 +7,11 @@ export function LogoMark({ size = 36 }: { size?: number }) {
         src="/procapital/logo.jpg"
         alt="Pro Capital"
         fill
+        // Sem `sizes` num `fill`, o browser assume 100vw e escolhe uma
+        // candidate do srcset dezenas de vezes maior do que os 36px reais
+        // (o Next avisa disto no dev log). Com o logo fixo, o URL correto é
+        // determinístico: 2×36 = 72 CSS px cobre retina.
+        sizes="36px"
         className="object-contain"
         priority
       />

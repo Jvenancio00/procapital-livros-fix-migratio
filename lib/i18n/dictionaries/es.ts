@@ -36,6 +36,16 @@ export const es: Dictionary = {
     ctaClientArea: "Área de Cliente",
     highlightsLabel: "Destacados de la semana",
     deliveryNote: "Entregamos en Mozambique · Angola · Portugal · Brasil",
+    stats: [
+      { value: "50+", label: "Editoriales asociadas" },
+      { value: "1000+", label: "Títulos en catálogo" },
+      { value: "4", label: "Países atendidos" }
+    ],
+    scroll: "Explorar",
+    playFilm: "Ver la película",
+    pauseFilm: "Pausar la película",
+    posterAlt:
+      "Interior de una librería al atardecer: estanterías de madera llenas de libros, rayos de sol y personas eligiendo títulos.",
   },
   search: {
     placeholder: "Buscar por título, autor o categoría...",

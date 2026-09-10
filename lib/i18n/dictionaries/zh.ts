@@ -35,6 +35,16 @@ export const zh: Dictionary = {
     ctaClientArea: "客户专区",
     highlightsLabel: "本周精选",
     deliveryNote: "配送至 莫桑比克 · 安哥拉 · 葡萄牙 · 巴西",
+    stats: [
+      { value: "50+", label: "合作出版社" },
+      { value: "1000+", label: "在架书目" },
+      { value: "4", label: "服务国家" }
+    ],
+    scroll: "向下浏览",
+    playFilm: "播放影片",
+    pauseFilm: "暂停影片",
+    posterAlt:
+      "黄昏时分的书店内景：木质书架摆满图书，阳光斜射，读者正在挑选书籍。",
   },
   search: {
     placeholder: "按书名、作者或分类搜索...",
