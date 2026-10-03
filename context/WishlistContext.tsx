@@ -2,7 +2,6 @@
 
 import {
   createContext,
-  startTransition,
   useContext,
   useEffect,
   useState,
@@ -31,45 +30,27 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const [entries, setEntries] = useState<Record<string, WishlistEntry>>({});
   const [hydrated, setHydrated] = useState(false);
 
-  // O localStorage só existe no browser, por isso a leitura tem de ficar
-  // num efeito (o servidor renderiza sempre a lista vazia). Fazemos uma
-  // única atualização de estado com o resultado já normalizado, em vez de
-  // vários setState encadeados.
   useEffect(() => {
-    function readStoredEntries(): Record<string, WishlistEntry> {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) return {};
-        const parsed: unknown = JSON.parse(stored);
-
-        // Formato antigo (apenas uma lista de slugs) — migra sem preço de
-        // referência, para que o alerta de descida de preço só comece a
-        // contar a partir de agora.
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
+          // formato antigo (só slugs) -> migra sem preço de referência
           const migrated: Record<string, WishlistEntry> = {};
           for (const slug of parsed) {
-            migrated[String(slug)] = {
-              addedAt: new Date().toISOString(),
-              priceKZAtSave: 0,
-            };
+            migrated[slug] = { addedAt: new Date().toISOString(), priceKZAtSave: 0 };
           }
-          return migrated;
+          // eslint-disable-next-line react-hooks/set-state-in-effect -- hidratação única dos favoritos a partir do localStorage
+          setEntries(migrated);
+        } else {
+          setEntries(parsed);
         }
-
-        if (parsed && typeof parsed === "object") {
-          return parsed as Record<string, WishlistEntry>;
-        }
-      } catch {
-        // sem favoritos guardados ou armazenamento indisponível
       }
-      return {};
+    } catch {
+      // sem favoritos guardados
     }
-
-    const stored = readStoredEntries();
-    startTransition(() => {
-      setEntries(stored);
-      setHydrated(true);
-    });
+    setHydrated(true);
   }, []);
 
   useEffect(() => {

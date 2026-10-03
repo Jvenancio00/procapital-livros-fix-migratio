@@ -4,14 +4,16 @@ import Link from "next/link";
 import { ArrowRight, Handshake, Megaphone, Package, Truck } from "lucide-react";
 import BookCard from "@/components/BookCard";
 import PartnerMarquee from "@/components/PartnerMarquee";
+import PartnersGrid from "@/components/PartnersGrid";
 import PresenceMap from "@/components/PresenceMap";
 import HeroSection from "@/components/HeroSection";
+import Metrics from "@/components/Metrics";
 import SearchBar from "@/components/SearchBar";
 import CategoryGrid from "@/components/CategoryGrid";
 import AudienceSection from "@/components/AudienceSection";
 import TrustBar from "@/components/TrustBar";
 import Testimonials from "@/components/Testimonials";
-import NewsletterForm from "@/components/NewsletterForm";
+import InvestorsSection from "@/components/InvestorsSection";
 import { BOOKS } from "@/data/books";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -29,6 +31,8 @@ export default function HomeClient({
   return (
     <div>
       <HeroSection />
+
+      <Metrics />
 
       <section className="border-b border-line bg-cream">
         <div className="mx-auto max-w-6xl px-5 py-6 sm:px-8">
@@ -143,24 +147,43 @@ export default function HomeClient({
           {dict.home.whatWeDo.description}
         </p>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2">
+        <div className="mt-10 grid gap-5 sm:grid-cols-3">
           {dict.home.whatWeDo.items.map(({ title, description }, index) => {
             const Icon = FUNCOES_ICONS[index];
+            const isFirst = index === 0;
             return (
               <div
                 key={title}
-                className="flex gap-4 rounded-2xl border border-line bg-cream p-6 transition-colors hover:border-brand/30"
+                className={`rounded-2xl border p-7 transition-colors ${
+                  isFirst
+                    ? "border-ink bg-ink text-cream sm:col-span-3"
+                    : "border-line bg-cream hover:border-brand/30"
+                }`}
               >
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
-                  <Icon size={20} />
-                </span>
-                <div>
-                  <h3 className="font-serif text-base font-semibold text-ink">
-                    {title}
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-foreground/70">
-                    {description}
-                  </p>
+                <div className={isFirst ? "flex items-start gap-6 sm:items-center" : ""}>
+                  <span
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${
+                      isFirst ? "bg-cream/10 text-cream" : "bg-accent/15 text-accent"
+                    }`}
+                  >
+                    <Icon size={20} />
+                  </span>
+                  <div className={isFirst ? "mt-0" : "mt-4"}>
+                    <h3
+                      className={`font-serif ${
+                        isFirst ? "text-xl font-semibold text-cream" : "text-base font-semibold text-ink"
+                      }`}
+                    >
+                      {title}
+                    </h3>
+                    <p
+                      className={`mt-2 leading-relaxed ${
+                        isFirst ? "max-w-lg text-sm text-cream/70" : "text-sm text-foreground/70"
+                      }`}
+                    >
+                      {description}
+                    </p>
+                  </div>
                 </div>
               </div>
             );
@@ -168,7 +191,9 @@ export default function HomeClient({
         </div>
       </section>
 
-      <section className="border-t border-line bg-cream-deep/60">
+      <PartnersGrid />
+
+      <section id="expansao" className="scroll-mt-24 border-t border-line bg-cream-deep/60">
         <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
           <span className="block text-center text-xs font-semibold uppercase tracking-widest text-brand">
             {dict.home.presence.eyebrow}
@@ -179,6 +204,22 @@ export default function HomeClient({
           <p className="mx-auto mt-3 max-w-2xl text-center text-foreground/70">
             {dict.home.presence.description}
           </p>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/contactos"
+              className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-brand-dark"
+            >
+              {dict.home.presence.ctaPartnership}
+              <ArrowRight size={15} />
+            </Link>
+            <Link
+              href="/contactos"
+              className="inline-flex items-center gap-2 rounded-full border border-line px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:border-brand/40"
+            >
+              {dict.home.presence.ctaTeam}
+            </Link>
+          </div>
 
           <div className="mt-10">
             <PresenceMap />
@@ -201,6 +242,8 @@ export default function HomeClient({
           </div>
         </div>
       </section>
+
+      <InvestorsSection />
 
       <Testimonials />
 
@@ -233,7 +276,20 @@ export default function HomeClient({
                 {dict.home.newsletter.description}
               </p>
             </div>
-            <NewsletterForm source="homepage" />
+            <form className="flex w-full max-w-sm shrink-0 items-center gap-2 sm:w-auto">
+              <input
+                type="email"
+                required
+                placeholder={dict.home.newsletter.placeholder}
+                className="w-full min-w-0 rounded-full border border-cream/20 bg-cream/5 px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:border-brand focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="shrink-0 rounded-full bg-cream px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-cream/90"
+              >
+                {dict.home.newsletter.button}
+              </button>
+            </form>
           </div>
         </div>
       </section>

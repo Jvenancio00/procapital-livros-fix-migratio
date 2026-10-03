@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { CalendarDays } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import EventoCard from "@/components/EventoCard";
-import type { EventoComVagas, EventoView } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Eventos | Pro Capital",
@@ -15,32 +14,18 @@ export const revalidate = 60;
 export default async function EventosPage() {
   const agora = new Date();
 
-  // Dois problemas, duas correções:
-  //  1. sem `prisma migrate deploy` (tabela Evento em falta), o `findMany`
-  //     rebentava aqui e a página inteira virava 500 — o mesmo padrão de
-  //     `app/page.tsx` resolve: tenta a BD, e se não houver, deixa a lista
-  //     vazia renderizar o estado desenhado para isso ("Ainda não há eventos
-  //     agendados").
-  //  2. os tipos vêm de `lib/types.ts` (`EventoComVagas`/`EventoView`), por
-  //     isso o `.map()` abaixo deixa de depender de inferência do Prisma.
-  let proximos: EventoComVagas[] = [];
-  let passados: EventoView[] = [];
-  try {
-    [proximos, passados] = await Promise.all([
-      prisma.evento.findMany({
-        where: { dataInicio: { gte: agora } },
-        orderBy: { dataInicio: "asc" },
-        include: { _count: { select: { inscricoes: { where: { estado: "CONFIRMADA" } } } } },
-      }),
-      prisma.evento.findMany({
-        where: { dataInicio: { lt: agora } },
-        orderBy: { dataInicio: "desc" },
-        take: 6,
-      }),
-    ]);
-  } catch {
-    // Sem ligação à base de dados — mantém a página de pé com a lista vazia.
-  }
+  const [proximos, passados] = await Promise.all([
+    prisma.evento.findMany({
+      where: { dataInicio: { gte: agora } },
+      orderBy: { dataInicio: "asc" },
+      include: { _count: { select: { inscricoes: { where: { estado: "CONFIRMADA" } } } } },
+    }),
+    prisma.evento.findMany({
+      where: { dataInicio: { lt: agora } },
+      orderBy: { dataInicio: "desc" },
+      take: 6,
+    }),
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
@@ -68,7 +53,7 @@ export default async function EventosPage() {
         </div>
       ) : (
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {proximos.map((evento: EventoComVagas) => (
+          {proximos.map((evento) => (
             <EventoCard
               key={evento.id}
               evento={evento}
@@ -88,7 +73,7 @@ export default async function EventosPage() {
             Eventos anteriores
           </h2>
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 opacity-70">
-            {passados.map((evento: EventoView) => (
+            {passados.map((evento) => (
               <EventoCard key={evento.id} evento={evento} vagasRestantes={null} />
             ))}
           </div>

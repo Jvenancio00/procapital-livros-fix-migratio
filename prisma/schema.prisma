@@ -1,8 +1,10 @@
 // Esquema da base de dados da Pro Capital — livraria digital
-// Depois de teres a "connection string", corre:
-//   npx prisma migrate dev --name correcoes-relatorio
-//   npx prisma generate
-//   npx tsx prisma/seed.ts
+// Depois de teres a "connection string" (Neon ou Vercel Postgres) no .env,
+// corre tudo de uma vez com:
+//   npm run db:setup
+// (equivale a "prisma migrate dev" + "tsx prisma/seed.ts", que cria as
+// tabelas e semeia categorias, livros, editoras, blog, eventos e o
+// administrador definido em ADMIN_BOOTSTRAP_EMAIL/ADMIN_BOOTSTRAP_PASSWORD)
 
 generator client {
   provider = "prisma-client-js"
@@ -425,6 +427,15 @@ enum ContactReason {
   SUPORTE_TECNICO
   COMERCIAL
   OUTRO
+  // Reformulação institucional (secção "Contacto"): motivos alinhados com o
+  // formulário corporativo — mantêm-se os valores antigos para não invalidar
+  // registos já gravados (ADD VALUE nunca remove os anteriores).
+  EDITORA
+  LIVRARIA
+  ESCOLA
+  PARCEIRO_COMERCIAL
+  INVESTIMENTO
+  LEITOR
 }
 
 model ContactRequest {
@@ -432,25 +443,10 @@ model ContactRequest {
   name      String
   email     String
   phone     String?
+  company   String? // Empresa/Instituição — opcional, pedido no formulário institucional
   reason    ContactReason
   message   String
   createdAt DateTime      @default(now())
 
   @@index([reason, createdAt])
-}
-
-// Subscrições da newsletter da homepage. Antes o formulário existia mas
-// não submetia nada — o email do visitante era simplesmente descartado.
-model NewsletterSubscriber {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  // Origem da subscrição (ex.: "homepage", "rodape") — permite perceber
-  // que zonas do site convertem melhor.
-  source       String?
-  confirmed    Boolean   @default(false)
-  unsubscribed Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  @@index([createdAt])
 }

@@ -22,44 +22,36 @@ export interface ClientSession {
  */
 export function useClientAuth() {
   const { data: nextAuthSession, status } = useSession();
-  const [profile, setProfile] = useState<ClientSession | null>(null);
-  // "idle" antes de haver sessão, "loading" durante o pedido ao perfil.
-  const [profileState, setProfileState] = useState<"idle" | "loading" | "done">(
-    "idle"
-  );
+  const [session, setSession] = useState<ClientSession | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Enquanto o NextAuth não decidir, ou se não houver sessão, não há
-    // nada a ir buscar — o estado derivado abaixo trata desses casos sem
-    // chamadas a setState durante o efeito (evita renders em cascata).
-    if (status !== "authenticated") return;
+    if (status === "loading") return;
+
+    if (status === "unauthenticated") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sincroniza com o estado de sessão do NextAuth (sistema externo)
+      setSession(null);
+      setLoading(false);
+      return;
+    }
 
     let cancelled = false;
-    const request = fetch("/api/cliente/perfil")
+    fetch("/api/cliente/perfil")
       .then((res) => (res.ok ? res.json() : null))
-      .catch(() => null);
-
-    request.then((data: ClientSession | null) => {
-      if (cancelled) return;
-      setProfile(data);
-      setProfileState("done");
-    });
+      .then((data) => {
+        if (!cancelled) setSession(data);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
 
     return () => {
       cancelled = true;
     };
   }, [status, nextAuthSession]);
 
-  // Derivado da sessão NextAuth: sem sessão não há perfil, e só deixamos
-  // de estar "a carregar" quando o pedido ao perfil termina.
-  const session = status === "authenticated" ? profile : null;
-  const loading =
-    status === "loading" ||
-    (status === "authenticated" && profileState !== "done");
-
   const logout = () => {
-    setProfile(null);
-    setProfileState("idle");
+    setSession(null);
     signOut({ callbackUrl: "/loja/entrar" });
   };
 

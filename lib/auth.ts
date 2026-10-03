@@ -13,14 +13,6 @@ import { verifyTotpToken } from "@/lib/totp";
 const LEGACY_ADMIN_EMAILS = ["jdvenancio.7@gmail.com"];
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // O host só é conhecido em runtime (Vercel produção/preview com
-  // *.vercel.app, proxy de preview em sandbox, reverse proxy self-hosted).
-  // Sem isto, a Auth.js v5 rejeita o pedido e `/api/auth/session` devolve 500
-  // — a barra de navegação fica sem estado de sessão. `trustHost` é a forma
-  // recomendada quando a app corre sempre atrás de um proxy de plataforma; para
-  // ambiente fechado (domínio próprio único) define antes AUTH_URL e passa
-  // AUTH_TRUST_HOST=false.
-  trustHost: process.env.AUTH_TRUST_HOST !== "false",
   session: { strategy: "jwt" },
   pages: {
     signIn: "/loja/entrar",
@@ -34,7 +26,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         totpToken: { label: "Código de autenticação", type: "text" },
       },
       async authorize(credentials, request) {
-        const email = credentials?.email as string | undefined;
+        const rawEmail = credentials?.email as string | undefined;
+        const email = rawEmail?.trim().toLowerCase();
         const password = credentials?.password as string | undefined;
         const totpToken = credentials?.totpToken as string | undefined;
         if (!email || !password) return null;

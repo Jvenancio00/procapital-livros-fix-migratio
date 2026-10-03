@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { EstadoInscricao } from "@/lib/enums";
+import { EstadoInscricao } from "@prisma/client";
 import QRCode from "qrcode";
 
 export async function POST(
@@ -38,7 +38,7 @@ export async function POST(
     );
   }
 
-  const inscricao = await prisma.$transaction(async (tx: typeof prisma) => {
+  const inscricao = await prisma.$transaction(async (tx) => {
     let estado: EstadoInscricao = "CONFIRMADA";
 
     if (evento.capacidade != null) {

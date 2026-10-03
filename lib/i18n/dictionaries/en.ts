@@ -19,33 +19,43 @@ export const en: Dictionary = {
     logout: "Log out",
     login: "Log in",
     clientArea: "Client Area",
-    contactUs: "Contact Us",
+    contactUs: "Talk to Pro Capital",
     favorites: "Favorites",
     cart: "Cart",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     language: "Language",
     currency: "Currency",
+    solutions: "Solutions",
+    expansion: "Expansion",
   },
   hero: {
-    badge: "Certified Distributor · CPLP",
-    title: "We bring the right books to those who seek them.",
+    badge: "EDITORIAL DISTRIBUTION • CPLP",
+    title: "We're building the next generation of publishing distribution in the CPLP.",
     subtitle:
-      "A diverse catalog, delivery across the CPLP and official partnerships with publishers.",
-    ctaCatalog: "View Catalog",
+      "We connect publishers, bookstores, schools and readers through a distribution network built to grow across Mozambique, Angola, Portugal, Brazil and other CPLP markets.",
+    ctaCatalog: "Explore Catalog",
     ctaClientArea: "Client Area",
+    ctaAbout: "About Pro Capital",
+    ctaPartnership: "Partnership Opportunities",
     highlightsLabel: "This week's highlights",
     deliveryNote: "Delivering to Mozambique · Angola · Portugal · Brazil",
-    stats: [
-      { value: "50+", label: "Partner publishers" },
+    flowLabels: {
+      publishers: "Publishers",
+      procapital: "Pro Capital",
+      network: "Bookstores / Schools",
+      readers: "Readers",
+    },
+  },
+  metrics: {
+    eyebrow: "Pro Capital in numbers",
+    title: "A network built to grow",
+    items: [
+      { value: "10", label: "Publishing partners" },
       { value: "1000+", label: "Titles in catalog" },
-      { value: "4", label: "Countries served" }
+      { value: "4", label: "Core markets" },
+      { value: "CPLP", label: "Expansion network" },
     ],
-    scroll: "Explore",
-    playFilm: "Play the film",
-    pauseFilm: "Pause the film",
-    posterAlt:
-      "Bookshop interior at golden hour: wooden shelves full of books, shafts of sunlight and people browsing titles.",
   },
   search: {
     placeholder: "Search by title, author or category...",
@@ -74,10 +84,11 @@ export const en: Dictionary = {
   },
   footer: {
     tagline:
-      "A book distributor serving bookstores, schools and readers in Mozambique and across the CPLP countries.",
+      "Publishing distribution for a more connected CPLP market.",
     navigationTitle: "Navigation",
     contactsTitle: "Contact",
     rights: "All rights reserved.",
+    marketsTitle: "Markets",
   },
   trustBar: {
     items: [
@@ -100,23 +111,30 @@ export const en: Dictionary = {
     ],
   },
   partnerMarquee: {
-    trustText: "Trusted by more than 50 publishers in 4 countries",
+    trustText: "Trusted by publishers expanding across the CPLP",
+  },
+  partners: {
+    eyebrow: "Partner network",
+    title: "Publishing partners",
+    description: "We work with publishers in Mozambique and across CPLP countries, with a network built to grow.",
+    becomeTitle: "Want to become a partner?",
+    ctaBecome: "Become our publishing partner",
   },
   audience: {
-    title: "At the service of readers",
-    description: "We tailor our services to each segment, ensuring efficient and personalized solutions.",
+    title: "More than books. A distribution solution.",
+    description: "We work with bookstores, schools and publishers to expand access to books across the CPLP.",
     items: [
       {
         title: "Bookstores",
-        description: "An extensive catalog and trade terms designed for resellers nationwide.",
+        description: "Expand your catalog with access to a diverse publishing network.",
       },
       {
         title: "Schools",
-        description: "Textbooks and teaching materials, supplied to fit the school calendar.",
+        description: "Supply of textbooks, books and support materials tailored to educational needs.",
       },
       {
-        title: "General public",
-        description: "Direct support for readers looking for specific titles or reading recommendations.",
+        title: "Publishers",
+        description: "Expand the reach of your titles through a specialized distribution network.",
       },
     ],
   },
@@ -163,31 +181,33 @@ export const en: Dictionary = {
     },
     whatWeDo: {
       eyebrow: "Why choose us",
-      title: "What we do",
-      description: "We are the link between publishers and readers — we take care of every step of book distribution, from the warehouse to the reader's door.",
+      title: "A platform connecting the publishing market.",
+      description: "We link publishers to readers — with a structure built to scale across the CPLP.",
       items: [
         {
-          title: "Stock management",
-          description: "We keep titles available and organized, so the right book is never missing at the right time.",
+          title: "01 · Distribution",
+          description: "A structure focused on connecting publishers and points of sale.",
         },
         {
-          title: "Distribution across the CPLP",
-          description: "Delivery to bookstores and schools in Mozambique, with reach into Angola, Portugal, Brazil and other CPLP countries.",
+          title: "02 · Market",
+          description: "Presence and expansion potential across CPLP markets.",
         },
         {
-          title: "Trade negotiation",
-          description: "Clear and fair terms for resellers, schools and publishing partners.",
+          title: "03 · Catalog",
+          description: "A diverse selection of titles and categories.",
         },
         {
-          title: "Catalog promotion",
-          description: "We promote the releases and catalogs of the publishers we represent to our partners.",
+          title: "04 · Partnerships",
+          description: "Strategic relationships with publishers, bookstores and institutions.",
         },
       ],
     },
     presence: {
-      eyebrow: "International reach",
-      title: "One distributor, four countries",
-      description: "Headquartered in Mozambique, with regular operations for bookstores, schools and publishers in Angola, Portugal, Brazil and other CPLP countries.",
+      eyebrow: "CPLP Expansion",
+      title: "A growth opportunity in a connected market.",
+      description: "Pro Capital sits at the intersection of content, education, trade and distribution — creating opportunities to expand access to the publishing market across CPLP countries.",
+      ctaPartnership: "Explore partnership opportunities",
+      ctaTeam: "Talk to our team",
       countries: [
         {
           country: "Mozambique",
@@ -206,6 +226,16 @@ export const en: Dictionary = {
           note: "Brasília",
         },
       ],
+    },
+    investors: {
+      eyebrow: "For investors and institutional partners",
+      title: "Built to grow.",
+      items: [
+        { title: "Market", description: "Growth potential in publishing distribution." },
+        { title: "Scale", description: "Room to expand catalog, partners and markets." },
+        { title: "Ecosystem", description: "Connecting publishers, distributors, bookstores, schools and readers." },
+      ],
+      cta: "Request an institutional presentation",
     },
     ctaBottom: {
       title: "Let's talk about your next book order?",

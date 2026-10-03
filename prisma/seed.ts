@@ -1,5 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-import { Role } from "../lib/enums";
+import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { BOOKS } from "../data/books";
 import { EDITORAS } from "../data/editoras";
@@ -124,7 +123,6 @@ async function seedBooks(categoryIdByName: Map<string, string>, editoraIdByName:
         categoryId,
         description: book.description,
         isbn: book.isbn,
-        coverUrl: book.coverUrl,
         pdfUrl: book.downloadUrl,
         pages: book.pages,
         year: book.year,
@@ -140,7 +138,6 @@ async function seedBooks(categoryIdByName: Map<string, string>, editoraIdByName:
         categoryId,
         description: book.description,
         isbn: book.isbn,
-        coverUrl: book.coverUrl,
         pdfUrl: book.downloadUrl,
         pages: book.pages,
         year: book.year,

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Store, GraduationCap, Users } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Store, GraduationCap, Building2 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const AUDIENCE_META = [
@@ -9,16 +10,19 @@ const AUDIENCE_META = [
     icon: Store,
     image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=700&h=700&fit=crop",
     gradient: "from-wine to-brand",
+    href: "/contactos",
   },
   {
     icon: GraduationCap,
     image: "https://images.unsplash.com/photo-1427504494785-cdda5f45fb4d?w=700&h=700&fit=crop",
     gradient: "from-brand to-orange",
+    href: "/contactos",
   },
   {
-    icon: Users,
+    icon: Building2,
     image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=700&h=700&fit=crop",
     gradient: "from-orange to-accent",
+    href: "/contactos",
   },
 ];
 
@@ -48,7 +52,7 @@ export default function AudienceSection() {
   const { dict } = useLanguage();
 
   return (
-    <section className="py-16 sm:py-24 bg-gradient-to-b from-cream via-white to-cream">
+    <section id="solucoes" className="scroll-mt-24 py-16 sm:py-24 bg-gradient-to-b from-cream via-white to-cream">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="mb-12">
           <h2 className="font-serif text-3xl sm:text-4xl font-bold text-ink mb-4">
@@ -61,11 +65,12 @@ export default function AudienceSection() {
 
         <div className="grid md:grid-cols-3 gap-8">
           {dict.audience.items.map((audience, index) => {
-            const { icon: Icon, image, gradient } = AUDIENCE_META[index];
+            const { icon: Icon, image, gradient, href } = AUDIENCE_META[index];
             return (
-              <div
+              <Link
                 key={audience.title}
-                className="group relative overflow-hidden rounded-2xl h-96 sm:h-[450px] flex flex-col justify-end cursor-pointer"
+                href={href}
+                className="group relative overflow-hidden rounded-2xl h-96 sm:h-[450px] flex flex-col justify-end"
               >
                 {/* Imagem de fundo — se falhar a carregar, cai automaticamente para um gradiente da marca (nunca fica em branco) */}
                 <AudienceImage image={image} gradient={gradient} />
@@ -87,11 +92,14 @@ export default function AudienceSection() {
                   <p className="text-cream/90 leading-relaxed">
                     {audience.description}
                   </p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-cream/90 transition-colors group-hover:text-white">
+                    <ArrowRight size={15} />
+                  </span>
                 </div>
 
                 {/* Hover accent */}
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-brand via-accent to-transparent transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-              </div>
+              </Link>
             );
           })}
         </div>

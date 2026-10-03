@@ -3,7 +3,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
-  const { name, email, password } = await request.json();
+  const { name, email: rawEmail, password } = await request.json();
+  const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : rawEmail;
 
   if (!email || !password || password.length < 8) {
     return NextResponse.json(

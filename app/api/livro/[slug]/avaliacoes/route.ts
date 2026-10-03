@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import type { ReviewView } from "@/lib/types";
 
 // Corrige o placeholder "rating"/"reviewCount" da secção Livro (o próprio
 // código dizia "placeholder até existirem avaliações reais"): passa a
@@ -15,7 +14,7 @@ export async function GET(
   const book = await prisma.book.findUnique({ where: { slug } });
   if (!book) return NextResponse.json({ average: null, count: 0, reviews: [] });
 
-  const reviews: ReviewView[] = await prisma.review.findMany({
+  const reviews = await prisma.review.findMany({
     where: { bookId: book.id },
     include: { user: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
@@ -23,12 +22,12 @@ export async function GET(
   });
 
   const average =
-    reviews.length > 0 ? reviews.reduce((sum: number, r: ReviewView) => sum + r.rating, 0) / reviews.length : null;
+    reviews.length > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length : null;
 
   return NextResponse.json({
     average,
     count: reviews.length,
-    reviews: reviews.map((r: ReviewView) => ({
+    reviews: reviews.map((r) => ({
       id: r.id,
       rating: r.rating,
       comment: r.comment,

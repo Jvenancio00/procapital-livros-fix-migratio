@@ -41,17 +41,23 @@ export default function CatalogGrid({ books }: { books: Book[] }) {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
 
-  // A página efetiva é derivada, não sincronizada por efeitos: se o filtro
-  // atual tiver menos páginas do que a guardada (ou se a pesquisa mudou),
-  // mostramos a última página válida em vez de um ecrã vazio. Fazer isto
-  // durante a renderização evita o render em cascata que um useEffect com
-  // setState provocaria.
-  const currentPage = Math.min(page, totalPages);
+  // Volta à página 1 sempre que a categoria ou a pesquisa mudam — evita
+  // ficar numa página vazia depois de filtrar. Ajustado durante o render
+  // (em vez de um useEffect) para não disparar um re-render em cascata.
+  const [prevFilters, setPrevFilters] = useState({ active, query });
+  if (prevFilters.active !== active || prevFilters.query !== query) {
+    setPrevFilters({ active, query });
+    if (page !== 1) setPage(1);
+  }
+
+  // Se o filtro atual tiver menos páginas do que a página guardada, usa a
+  // versão "segura" já ajustada em vez de guardar mais um estado derivado.
+  const safePage = Math.min(page, totalPages);
 
   const paginated = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
+    const start = (safePage - 1) * PAGE_SIZE;
     return filtered.slice(start, start + PAGE_SIZE);
-  }, [filtered, currentPage]);
+  }, [filtered, safePage]);
 
   return (
     <div>
@@ -63,10 +69,7 @@ export default function CatalogGrid({ books }: { books: Book[] }) {
         <input
           type="text"
           value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-            setPage(1);
-          }}
+          onChange={(event) => setQuery(event.target.value)}
           placeholder={dict.search.placeholder}
           className="w-full rounded-full border border-line bg-cream py-2.5 pl-10 pr-4 text-sm text-ink placeholder:text-foreground/40 focus:border-brand/40 focus:outline-none"
         />
@@ -77,10 +80,7 @@ export default function CatalogGrid({ books }: { books: Book[] }) {
           <button
             key={category}
             type="button"
-            onClick={() => {
-              setActive(category);
-              setPage(1);
-            }}
+            onClick={() => setActive(category)}
             className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
               active === category
                 ? "border-brand bg-brand text-cream"
@@ -108,8 +108,8 @@ export default function CatalogGrid({ books }: { books: Book[] }) {
             <div className="mt-10 flex items-center justify-center gap-4">
               <button
                 type="button"
-                onClick={() => setPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={safePage === 1}
                 aria-label={dict.catalog.previous}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-brand/40 disabled:cursor-not-allowed disabled:opacity-35"
               >
@@ -117,13 +117,13 @@ export default function CatalogGrid({ books }: { books: Book[] }) {
               </button>
               <span className="text-sm text-foreground/60">
                 {dict.catalog.pageOf
-                  .replace("{page}", String(currentPage))
+                  .replace("{page}", String(safePage))
                   .replace("{total}", String(totalPages))}
               </span>
               <button
                 type="button"
-                onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
                 aria-label={dict.catalog.next}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-line text-ink transition-colors hover:border-brand/40 disabled:cursor-not-allowed disabled:opacity-35"
               >

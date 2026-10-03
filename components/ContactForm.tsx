@@ -3,20 +3,22 @@
 import { useState, type FormEvent } from "react";
 import { Send } from "lucide-react";
 
-// Corrige "Problema 2 – Não qualifica o contacto": cada motivo segue
-// agora um valor guardado (ContactReason), em vez de tudo cair no mesmo
-// "Tipo" solto que só servia para compor o assunto do email.
+// Reformulação institucional: motivos alinhados com o público-alvo da
+// Pro Capital (editoras, livrarias, escolas, parceiros comerciais,
+// investidores e leitores), cada um já com o seu ContactReason próprio
+// (os valores antigos continuam válidos no enum, apenas deixaram de
+// aparecer no formulário, para não invalidar contactos já gravados).
 const MOTIVOS = [
-  { label: "Quero publicar um livro", value: "PUBLICAR" },
-  { label: "Quero comprar livros", value: "COMPRAR" },
-  { label: "Quero ser parceiro", value: "PARCERIA" },
-  { label: "Quero apoio técnico", value: "SUPORTE_TECNICO" },
-  { label: "Informação comercial", value: "COMERCIAL" },
-  { label: "Outro assunto", value: "OUTRO" },
+  { label: "Sou uma editora", value: "EDITORA" },
+  { label: "Sou uma livraria", value: "LIVRARIA" },
+  { label: "Represento uma escola", value: "ESCOLA" },
+  { label: "Sou parceiro comercial", value: "PARCEIRO_COMERCIAL" },
+  { label: "Interesse em investimento/parceria", value: "INVESTIMENTO" },
+  { label: "Sou leitor", value: "LEITOR" },
 ] as const;
 
 export default function ContactForm() {
-  const [motivo, setMotivo] = useState<(typeof MOTIVOS)[number]["value"]>("COMPRAR");
+  const [motivo, setMotivo] = useState<(typeof MOTIVOS)[number]["value"]>("LEITOR");
   const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -26,13 +28,15 @@ export default function ContactForm() {
     const formData = new FormData(event.currentTarget);
     const name = formData.get("nome");
     const email = formData.get("email");
+    const phone = formData.get("telefone");
+    const company = formData.get("empresa");
     const message = formData.get("mensagem");
 
     try {
       const res = await fetch("/api/contactos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message, reason: motivo }),
+        body: JSON.stringify({ name, email, phone, company, message, reason: motivo }),
       });
       if (!res.ok) throw new Error("Falha ao gravar o contacto.");
       setStatus("sent");
@@ -41,7 +45,9 @@ export default function ContactForm() {
       // mailto continua a funcionar como plano B, tal como acontecia antes.
       window.location.href = `mailto:geral@procapital.co.mz?subject=${encodeURIComponent(
         `Contacto do site — ${motivo}`
-      )}&body=${encodeURIComponent(`Nome: ${name}\nEmail: ${email}\n\n${message}`)}`;
+      )}&body=${encodeURIComponent(
+        `Nome: ${name}\nEmpresa/Instituição: ${company || "-"}\nEmail: ${email}\nTelefone: ${phone || "-"}\n\n${message}`
+      )}`;
       setStatus("error");
     }
   }
@@ -83,6 +89,16 @@ export default function ContactForm() {
         </label>
 
         <label className="block text-sm font-medium text-foreground/80">
+          Empresa/Instituição
+          <input
+            name="empresa"
+            type="text"
+            className="mt-2 w-full rounded-xl border border-line bg-cream px-4 py-3 text-sm text-foreground outline-none ring-brand/30 focus:ring-2"
+            placeholder="Opcional"
+          />
+        </label>
+
+        <label className="block text-sm font-medium text-foreground/80">
           Email
           <input
             required
@@ -90,6 +106,16 @@ export default function ContactForm() {
             type="email"
             className="mt-2 w-full rounded-xl border border-line bg-cream px-4 py-3 text-sm text-foreground outline-none ring-brand/30 focus:ring-2"
             placeholder="oseu@email.com"
+          />
+        </label>
+
+        <label className="block text-sm font-medium text-foreground/80">
+          Telefone
+          <input
+            name="telefone"
+            type="tel"
+            className="mt-2 w-full rounded-xl border border-line bg-cream px-4 py-3 text-sm text-foreground outline-none ring-brand/30 focus:ring-2"
+            placeholder="Opcional"
           />
         </label>
       </div>

@@ -22,8 +22,9 @@ export default function Header() {
     { href: "/", label: dict.nav.home },
     { href: "/catalogo", label: dict.nav.catalog },
     { href: "/editoras", label: dict.nav.publishers },
+    { href: "/#solucoes", label: dict.nav.solutions },
     { href: "/sobre", label: dict.nav.about },
-    { href: "/blog", label: dict.nav.blog },
+    { href: "/#expansao", label: dict.nav.expansion },
     { href: "/contactos", label: dict.nav.contacts },
   ];
 

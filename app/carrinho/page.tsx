@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Minus, Plus, Trash2, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Minus, Plus, Trash2, ArrowRight, Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useCart } from "@/context/CartContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { formatMoney, getPriceInCurrency } from "@/lib/currency";
@@ -10,8 +13,12 @@ import BookCover from "@/components/BookCover";
 import BookCard from "@/components/BookCard";
 
 export default function CarrinhoPage() {
-  const { items, setQuantity, removeItem } = useCart();
+  const { items, setQuantity, removeItem, clear } = useCart();
   const { currency } = useCurrency();
+  const { status } = useSession();
+  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (items.length === 0) {
     return (
@@ -43,6 +50,43 @@ export default function CarrinhoPage() {
   }, 0);
   const subtotal = subtotalSemDesconto - desconto;
   const sugestoes = crossSellSuggestions(items);
+
+  const handleCheckout = async () => {
+    setError(null);
+
+    if (status !== "authenticated") {
+      router.push("/loja/entrar?callbackUrl=/carrinho");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currency,
+          items: items.map((item) => ({
+            slug: item.book.slug,
+            quantity: item.quantity,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error ?? "Não foi possível finalizar a compra.");
+        setSubmitting(false);
+        return;
+      }
+
+      clear();
+      router.push(`/loja/encomendas/${data.id}`);
+    } catch {
+      setError("Ocorreu um erro de ligação. Tenta novamente.");
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
@@ -150,13 +194,33 @@ export default function CarrinhoPage() {
             <span>{formatMoney(subtotal, currency)}</span>
           </div>
 
-          <Link
-            href="/contactos"
-            className="mt-6 flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-brand-dark"
+          {error && (
+            <p className="mt-4 text-sm text-brand">{error}</p>
+          )}
+
+          <button
+            type="button"
+            onClick={handleCheckout}
+            disabled={submitting}
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-brand-dark disabled:opacity-60"
           >
-            Finalizar Compra
-            <ArrowRight size={16} />
-          </Link>
+            {submitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                A processar...
+              </>
+            ) : (
+              <>
+                Finalizar Compra
+                <ArrowRight size={16} />
+              </>
+            )}
+          </button>
+          {status !== "authenticated" && (
+            <p className="mt-2 text-center text-xs text-foreground/50">
+              Vais precisar de iniciar sessão para concluir.
+            </p>
+          )}
         </div>
       </div>
 

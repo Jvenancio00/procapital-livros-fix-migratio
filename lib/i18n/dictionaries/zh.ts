@@ -19,32 +19,42 @@ export const zh: Dictionary = {
     logout: "退出登录",
     login: "登录",
     clientArea: "客户专区",
-    contactUs: "联系我们",
+    contactUs: "联系 Pro Capital",
     favorites: "收藏夹",
     cart: "购物车",
     openMenu: "打开菜单",
     closeMenu: "关闭菜单",
     language: "语言",
     currency: "货币",
+    solutions: "解决方案",
+    expansion: "扩张",
   },
   hero: {
-    badge: "认证经销商 · 葡语国家共同体",
-    title: "把合适的书，带给寻找它的人。",
-    subtitle: "多元化的图书目录，覆盖葡语国家共同体的配送服务，以及与各大出版社的官方合作。",
-    ctaCatalog: "查看图书目录",
+    badge: "出版分销 • 葡语国家共同体",
+    title: "我们正在打造葡语国家共同体出版分销的新一代网络。",
+    subtitle: "我们通过一个面向莫桑比克、安哥拉、葡萄牙、巴西及其他葡语国家共同体市场持续扩张的分销网络，连接出版社、书店、学校与读者。",
+    ctaCatalog: "浏览图书目录",
     ctaClientArea: "客户专区",
+    ctaAbout: "了解 Pro Capital",
+    ctaPartnership: "合作机会",
     highlightsLabel: "本周精选",
     deliveryNote: "配送至 莫桑比克 · 安哥拉 · 葡萄牙 · 巴西",
-    stats: [
-      { value: "50+", label: "合作出版社" },
-      { value: "1000+", label: "在架书目" },
-      { value: "4", label: "服务国家" }
+    flowLabels: {
+      publishers: "出版社",
+      procapital: "Pro Capital",
+      network: "书店与学校",
+      readers: "读者",
+    },
+  },
+  metrics: {
+    eyebrow: "数据中的 Pro Capital",
+    title: "一个为增长而生的网络",
+    items: [
+      { value: "10", label: "出版合作伙伴" },
+      { value: "1000+", label: "目录书目" },
+      { value: "4", label: "核心市场" },
+      { value: "CPLP", label: "扩张网络" },
     ],
-    scroll: "向下浏览",
-    playFilm: "播放影片",
-    pauseFilm: "暂停影片",
-    posterAlt:
-      "黄昏时分的书店内景：木质书架摆满图书，阳光斜射，读者正在挑选书籍。",
   },
   search: {
     placeholder: "按书名、作者或分类搜索...",
@@ -72,10 +82,11 @@ export const zh: Dictionary = {
     pageOf: "第 {page} 页，共 {total} 页",
   },
   footer: {
-    tagline: "一家服务于莫桑比克及葡语国家共同体书店、学校和读者的图书经销商。",
+    tagline: "为更紧密联结的葡语国家共同体市场提供出版分销服务。",
     navigationTitle: "导航",
     contactsTitle: "联系方式",
     rights: "版权所有，保留一切权利。",
+    marketsTitle: "市场",
   },
   trustBar: {
     items: [
@@ -98,23 +109,30 @@ export const zh: Dictionary = {
     ],
   },
   partnerMarquee: {
-    trustText: "4个国家50多家出版社的信赖之选",
+    trustText: "深受在葡语国家共同体不断扩张的出版社信赖",
+  },
+  partners: {
+    eyebrow: "合作伙伴网络",
+    title: "合作出版社",
+    description: "我们与莫桑比克及葡语国家共同体各国的出版社合作，打造持续增长的网络。",
+    becomeTitle: "想成为合作伙伴？",
+    ctaBecome: "成为我们的出版合作伙伴",
   },
   audience: {
-    title: "为读者服务",
-    description: "我们为每个细分市场量身定制服务，确保高效且个性化的解决方案。",
+    title: "不止于书。一套分销解决方案。",
+    description: "我们与书店、学校和出版社合作，扩大整个葡语国家共同体的图书获取渠道。",
     items: [
       {
         title: "书店",
-        description: "面向全国经销商的丰富目录和优惠的商业条件。",
+        description: "借助多元化的出版网络扩展您的图书目录。",
       },
       {
         title: "学校",
-        description: "教材及教学辅助材料，供应节奏配合学校日历。",
+        description: "提供符合教学需求的教材、图书及辅助材料。",
       },
       {
-        title: "大众读者",
-        description: "为寻找特定书目或阅读推荐的读者提供直接支持。",
+        title: "出版社",
+        description: "通过专业的分销网络扩大您书目的覆盖面。",
       },
     ],
   },
@@ -161,31 +179,33 @@ export const zh: Dictionary = {
     },
     whatWeDo: {
       eyebrow: "为什么选择我们",
-      title: "我们的服务",
-      description: "我们是出版社与读者之间的纽带——从仓库到读者手中，我们负责图书分销的每一个环节。",
+      title: "连接出版市场的平台。",
+      description: "我们连接出版社与读者——以一套为在整个葡语国家共同体扩展而设计的架构。",
       items: [
         {
-          title: "库存管理",
-          description: "我们维持书目的可用性和条理性，确保合适的书在合适的时间不会缺货。",
+          title: "01 · 分销",
+          description: "专注于连接出版社与销售网点的架构。",
         },
         {
-          title: "葡语国家共同体分销",
-          description: "配送至莫桑比克的书店和学校，业务遍及安哥拉、葡萄牙、巴西及其他葡语国家共同体国家。",
+          title: "02 · 市场",
+          description: "在葡语国家共同体市场的布局与扩张潜力。",
         },
         {
-          title: "商务洽谈",
-          description: "为经销商、学校和出版合作伙伴提供清晰公平的条件。",
+          title: "03 · 目录",
+          description: "多元化的书目与分类选择。",
         },
         {
-          title: "目录推广",
-          description: "我们向合作伙伴推广我们所代理出版社的新书和目录。",
+          title: "04 · 合作",
+          description: "与出版社、书店及机构的战略关系。",
         },
       ],
     },
     presence: {
-      eyebrow: "国际版图",
-      title: "一家经销商，四个国家",
-      description: "总部位于莫桑比克，为安哥拉、葡萄牙、巴西及其他葡语国家共同体国家的书店、学校和出版社提供常态化服务。",
+      eyebrow: "葡语国家共同体扩张",
+      title: "一个互联市场中的增长机遇。",
+      description: "Pro Capital 定位于内容、教育、商业与分销的交汇点，为扩大葡语国家共同体各国出版市场的准入创造机会。",
+      ctaPartnership: "了解合作机会",
+      ctaTeam: "联系我们的团队",
       countries: [
         {
           country: "莫桑比克",
@@ -204,6 +224,16 @@ export const zh: Dictionary = {
           note: "巴西利亚",
         },
       ],
+    },
+    investors: {
+      eyebrow: "致投资者及机构合作伙伴",
+      title: "为增长而设计。",
+      items: [
+        { title: "市场", description: "出版分销的增长潜力。" },
+        { title: "规模", description: "扩大目录、合作伙伴与市场的空间。" },
+        { title: "生态系统", description: "连接出版社、分销商、书店、学校与读者。" },
+      ],
+      cta: "申请机构介绍",
     },
     ctaBottom: {
       title: "聊聊您的下一份图书订单？",

@@ -44,13 +44,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const [categorySlugs, editoras, posts] = await Promise.all([
       getAllCategorySlugs(),
-      prisma.editora.findMany({ select: { slug: true } }) as Promise<
-        { slug: string }[]
-      >,
+      prisma.editora.findMany({ select: { slug: true } }),
       prisma.blogPost.findMany({
         where: { published: true },
         select: { slug: true, updatedAt: true },
-      }) as Promise<{ slug: string; updatedAt: Date }[]>,
+      }),
     ]);
 
     categoryEntries = categorySlugs.map((slug) => ({

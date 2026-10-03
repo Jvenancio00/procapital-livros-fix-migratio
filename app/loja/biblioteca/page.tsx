@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Download, BookOpen } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import type { LibraryItemView } from "@/lib/types";
 
 export default async function BibliotecaPage() {
   const session = await auth();
@@ -19,16 +18,24 @@ export default async function BibliotecaPage() {
     },
   });
 
-  const items: LibraryItemView[] = user?.library ?? [];
+  const items = user?.library ?? [];
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
       <h1 className="font-serif text-2xl font-semibold text-ink sm:text-3xl">
         Minha Biblioteca
       </h1>
-      <p className="mt-2 text-foreground/60">
-        Todos os livros que compraste ou obtiveste gratuitamente.
-      </p>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-foreground/60">
+          Todos os livros que compraste ou obtiveste gratuitamente.
+        </p>
+        <Link
+          href="/loja/encomendas"
+          className="text-sm font-medium text-brand hover:underline"
+        >
+          Ver as minhas encomendas →
+        </Link>
+      </div>
 
       {items.length === 0 ? (
         <div className="mt-10 rounded-2xl border border-line bg-cream-deep/60 p-10 text-center">

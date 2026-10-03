@@ -21,29 +21,56 @@ export default function BookReviews({ slug }: { slug: string }) {
   const [comment, setComment] = useState("");
   const [sending, setSending] = useState(false);
 
-  const load = () => {
-    fetch(`/api/livro/${slug}/avaliacoes`)
-      .then((r) => r.json())
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch(`/api/livro/${slug}/avaliacoes`, { signal: controller.signal })
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
+        if (!data) return;
         setAverage(data.average);
         setCount(data.count);
         setReviews(data.reviews);
+      })
+      .catch((err) => {
+        // AbortError acontece quando o utilizador navega para outra página
+        // antes do pedido terminar — não é um erro real, ignora-se.
+        if (err?.name !== "AbortError") {
+          console.error("Falha ao carregar avaliações:", err);
+        }
       });
-  };
 
-  useEffect(load, [slug]);
+    return () => controller.abort();
+  }, [slug]);
+
+  const load = () => {
+    fetch(`/api/livro/${slug}/avaliacoes`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return;
+        setAverage(data.average);
+        setCount(data.count);
+        setReviews(data.reviews);
+      })
+      .catch((err) => console.error("Falha ao carregar avaliações:", err));
+  };
 
   const submit = async () => {
     setSending(true);
-    const res = await fetch(`/api/livro/${slug}/avaliacoes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rating, comment }),
-    });
-    setSending(false);
-    if (res.ok) {
-      setComment("");
-      load();
+    try {
+      const res = await fetch(`/api/livro/${slug}/avaliacoes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating, comment }),
+      });
+      if (res.ok) {
+        setComment("");
+        load();
+      }
+    } catch (err) {
+      console.error("Falha ao enviar avaliação:", err);
+    } finally {
+      setSending(false);
     }
   };
 

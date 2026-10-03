@@ -28,9 +28,23 @@ export const EDITORAS: Editora[] = [
     address: "Rua Gil Vicente n.º 79, Bairro da Coop",
   },
   {
+    slug: "fundacao-fernando-leite-couto",
+    name: "Fundação Fernando Leite Couto (FFLC)",
+    country: "Moçambique",
+  },
+  {
+    slug: "plural-editores",
+    name: "Plural Editores",
+    country: "Moçambique",
+  },
+  {
     slug: "editora-das-letras",
     name: "Editora das Letras",
     country: "Angola",
+    phone: "+244 935 996 748",
+    email: "geral@editoradasletras.com",
+    address: "Rua Kwamme Nkruma n.º 252, Maianga, Luanda",
+    website: "https://www.editoradasletras.com",
   },
   {
     slug: "editora-moderna",
@@ -70,11 +84,6 @@ export const EDITORAS: Editora[] = [
   {
     slug: "nzila",
     name: "Nzila",
-    country: "Moçambique",
-  },
-  {
-    slug: "plural-editores",
-    name: "Plural Editores",
     country: "Moçambique",
   },
   {

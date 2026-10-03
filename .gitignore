@@ -1,49 +1,31 @@
-# Dependencies
-node_modules
-.pnp
-.pnp.js
+# Dependências
+/node_modules
 
-# Testing
-coverage
+# Build do Next.js
+/.next/
+/out/
 
-# Next.js
-.next
-out
-build
-dist
+# Variáveis de ambiente — NUNCA enviar para o GitHub (passwords, chaves reais)
+.env
+.env*.local
 
-# Misc
-.DS_Store
-*.pem
+# Prisma
+/prisma/dev.db
 
-# Debug
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Local env
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Ficheiros do sistema/editor
+.DS_Store
+*.pem
+.vscode/*
+!.vscode/extensions.json
 
 # Vercel
 .vercel
 
-# Prisma
-.prisma
-
-# IDE
-.idea
-.vscode
-*.swp
-*.swo
-
-# OS
-Thumbs.db
-
-# Logs
-logs
-*.log
-tsconfig.tsbuildinfo
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts

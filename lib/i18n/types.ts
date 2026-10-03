@@ -34,6 +34,8 @@ export interface Dictionary {
     closeMenu: string;
     language: string;
     currency: string;
+    solutions: string;
+    expansion: string;
   };
   hero: {
     badge: string;
@@ -41,17 +43,22 @@ export interface Dictionary {
     subtitle: string;
     ctaCatalog: string;
     ctaClientArea: string;
+    ctaAbout: string;
+    ctaPartnership: string;
     highlightsLabel: string;
     deliveryNote: string;
-    /** Três indicadores por baixo do subtítulo: valor grande + rótulo pequeno. */
-    stats: { value: string; label: string }[];
-    /** Rótulo do indicador de scroll no fundo do banner cinematográfico. */
-    scroll: string;
-    /** Controlo da camada de vídeo; só aparece com NEXT_PUBLIC_HERO_VIDEO_URL. */
-    playFilm: string;
-    pauseFilm: string;
-    /** Alternativo do cartaz: aqui a imagem é conteúdo (LCP), não decoração. */
-    posterAlt: string;
+    flowLabels: {
+      publishers: string;
+      procapital: string;
+      network: string;
+      readers: string;
+    };
+  };
+  /** Secção institucional de métricas ("10 parceiros", "1000+ títulos", ...), logo abaixo do Hero */
+  metrics: {
+    eyebrow: string;
+    title: string;
+    items: { value: string; label: string }[];
   };
   search: {
     placeholder: string;
@@ -79,12 +86,21 @@ export interface Dictionary {
     navigationTitle: string;
     contactsTitle: string;
     rights: string;
+    marketsTitle: string;
   };
   trustBar: {
     items: { title: string; description: string }[];
   };
   partnerMarquee: {
     trustText: string;
+  };
+  /** Grelha "Editoras parceiras", com CTA para novas editoras se candidatarem */
+  partners: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    becomeTitle: string;
+    ctaBecome: string;
   };
   audience: {
     title: string;
@@ -126,7 +142,16 @@ export interface Dictionary {
       eyebrow: string;
       title: string;
       description: string;
+      ctaPartnership: string;
+      ctaTeam: string;
       countries: { country: string; note: string }[];
+    };
+    /** Secção institucional discreta dirigida a investidores/parceiros institucionais */
+    investors: {
+      eyebrow: string;
+      title: string;
+      items: { title: string; description: string }[];
+      cta: string;
     };
     ctaBottom: {
       title: string;

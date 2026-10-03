@@ -19,33 +19,43 @@ export const fr: Dictionary = {
     logout: "Déconnexion",
     login: "Connexion",
     clientArea: "Espace Client",
-    contactUs: "Nous contacter",
+    contactUs: "Parler à Pro Capital",
     favorites: "Favoris",
     cart: "Panier",
     openMenu: "Ouvrir le menu",
     closeMenu: "Fermer le menu",
     language: "Langue",
     currency: "Devise",
+    solutions: "Solutions",
+    expansion: "Expansion",
   },
   hero: {
-    badge: "Distributeur certifié · CPLP",
-    title: "Nous apportons les bons livres à ceux qui les cherchent.",
+    badge: "DISTRIBUTION ÉDITORIALE • CPLP",
+    title: "Nous construisons la prochaine génération de la distribution éditoriale dans la CPLP.",
     subtitle:
-      "Un catalogue varié, une livraison dans toute la CPLP et des partenariats officiels avec les éditeurs.",
-    ctaCatalog: "Voir le Catalogue",
+      "Nous connectons éditeurs, librairies, écoles et lecteurs grâce à un réseau de distribution conçu pour se développer au Mozambique, en Angola, au Portugal, au Brésil et dans d'autres marchés de la CPLP.",
+    ctaCatalog: "Explorer le catalogue",
     ctaClientArea: "Espace Client",
+    ctaAbout: "Découvrir Pro Capital",
+    ctaPartnership: "Opportunités de partenariat",
     highlightsLabel: "Sélection de la semaine",
     deliveryNote: "Livraison au Mozambique · Angola · Portugal · Brésil",
-    stats: [
-      { value: "50+", label: "Maisons partenaires" },
+    flowLabels: {
+      publishers: "Éditeurs",
+      procapital: "Pro Capital",
+      network: "Librairies / Écoles",
+      readers: "Lecteurs",
+    },
+  },
+  metrics: {
+    eyebrow: "Pro Capital en chiffres",
+    title: "Un réseau conçu pour grandir",
+    items: [
+      { value: "10", label: "Partenaires éditoriaux" },
       { value: "1000+", label: "Titres au catalogue" },
-      { value: "4", label: "Pays desservis" }
+      { value: "4", label: "Marchés principaux" },
+      { value: "CPLP", label: "Réseau d'expansion" },
     ],
-    scroll: "Explorer",
-    playFilm: "Lire le film",
-    pauseFilm: "Mettre le film en pause",
-    posterAlt:
-      "Intérieur d'une librairie à l'heure dorée : étagères en bois pleines de livres, rayons de soleil et lecteurs qui choisissent un titre.",
   },
   search: {
     placeholder: "Rechercher par titre, auteur ou catégorie...",
@@ -74,10 +84,11 @@ export const fr: Dictionary = {
   },
   footer: {
     tagline:
-      "Distributeur de livres au service des librairies, des écoles et des lecteurs au Mozambique et dans les pays de la CPLP.",
+      "Distribution éditoriale pour un marché CPLP plus connecté.",
     navigationTitle: "Navigation",
     contactsTitle: "Contact",
     rights: "Tous droits réservés.",
+    marketsTitle: "Marchés",
   },
   trustBar: {
     items: [
@@ -100,23 +111,30 @@ export const fr: Dictionary = {
     ],
   },
   partnerMarquee: {
-    trustText: "La confiance de plus de 50 éditeurs dans 4 pays",
+    trustText: "La confiance d'éditeurs en expansion dans toute la CPLP",
+  },
+  partners: {
+    eyebrow: "Réseau de partenaires",
+    title: "Éditeurs partenaires",
+    description: "Nous travaillons avec des éditeurs au Mozambique et dans les pays de la CPLP, avec un réseau conçu pour grandir.",
+    becomeTitle: "Vous souhaitez devenir partenaire ?",
+    ctaBecome: "Devenez notre partenaire éditorial",
   },
   audience: {
-    title: "Au service des lecteurs",
-    description: "Nous adaptons nos services à chaque segment, en garantissant des solutions efficaces et personnalisées.",
+    title: "Plus que des livres. Une solution de distribution.",
+    description: "Nous travaillons avec les librairies, les écoles et les éditeurs pour élargir l'accès au livre dans toute la CPLP.",
     items: [
       {
         title: "Librairies",
-        description: "Catalogue étendu et conditions commerciales pensées pour les revendeurs dans tout le pays.",
+        description: "Élargissez votre catalogue grâce à l'accès à un réseau éditorial diversifié.",
       },
       {
         title: "Écoles",
-        description: "Manuels et matériel pédagogique, avec un approvisionnement adapté au calendrier scolaire.",
+        description: "Fourniture de manuels, de livres et de matériel pédagogique adaptés aux besoins éducatifs.",
       },
       {
-        title: "Grand public",
-        description: "Accompagnement direct des lecteurs à la recherche de titres spécifiques ou de recommandations de lecture.",
+        title: "Éditeurs",
+        description: "Développez la présence de vos titres grâce à un réseau de distribution spécialisé.",
       },
     ],
   },
@@ -163,31 +181,33 @@ export const fr: Dictionary = {
     },
     whatWeDo: {
       eyebrow: "Pourquoi nous choisir",
-      title: "Ce que nous faisons",
-      description: "Nous sommes le lien entre les éditeurs et les lecteurs — nous prenons en charge chaque étape de la distribution du livre, de l'entrepôt jusqu'à la porte du lecteur.",
+      title: "Une plateforme pour connecter le marché de l'édition.",
+      description: "Nous relions ceux qui publient à ceux qui lisent — avec une structure pensée pour évoluer dans toute la CPLP.",
       items: [
         {
-          title: "Gestion des stocks",
-          description: "Nous assurons la disponibilité et l'organisation des titres, pour que le bon livre soit toujours là au bon moment.",
+          title: "01 · Distribution",
+          description: "Une structure orientée vers la mise en relation des éditeurs et des points de vente.",
         },
         {
-          title: "Distribution dans la CPLP",
-          description: "Livraison aux librairies et écoles du Mozambique, avec une portée en Angola, au Portugal, au Brésil et dans les autres pays de la CPLP.",
+          title: "02 · Marché",
+          description: "Présence et potentiel d'expansion sur les marchés de la CPLP.",
         },
         {
-          title: "Négociation commerciale",
-          description: "Conditions claires et justes pour les revendeurs, les écoles et les partenaires éditoriaux.",
+          title: "03 · Catalogue",
+          description: "Une sélection diversifiée de titres et de catégories.",
         },
         {
-          title: "Promotion des catalogues",
-          description: "Nous faisons connaître les nouveautés et catalogues des éditeurs que nous représentons auprès de nos partenaires.",
+          title: "04 · Partenariats",
+          description: "Des relations stratégiques avec les éditeurs, les librairies et les institutions.",
         },
       ],
     },
     presence: {
-      eyebrow: "Portée internationale",
-      title: "Un distributeur, quatre pays",
-      description: "Siège au Mozambique, avec une activité régulière pour les librairies, les écoles et les éditeurs en Angola, au Portugal, au Brésil et dans les autres pays de la CPLP.",
+      eyebrow: "Expansion CPLP",
+      title: "Une opportunité de croissance dans un marché connecté.",
+      description: "Pro Capital se positionne à l'intersection du contenu, de l'éducation, du commerce et de la distribution, créant des opportunités pour élargir l'accès au marché de l'édition dans les pays de la CPLP.",
+      ctaPartnership: "Découvrir les opportunités de partenariat",
+      ctaTeam: "Parler à notre équipe",
       countries: [
         {
           country: "Mozambique",
@@ -206,6 +226,16 @@ export const fr: Dictionary = {
           note: "Brasília",
         },
       ],
+    },
+    investors: {
+      eyebrow: "Pour les investisseurs et partenaires institutionnels",
+      title: "Pensée pour grandir.",
+      items: [
+        { title: "Marché", description: "Potentiel de croissance de la distribution éditoriale." },
+        { title: "Échelle", description: "Possibilité d'élargir le catalogue, les partenaires et les marchés." },
+        { title: "Écosystème", description: "Connexion entre éditeurs, distributeurs, librairies, écoles et lecteurs." },
+      ],
+      cta: "Demander une présentation institutionnelle",
     },
     ctaBottom: {
       title: "Parlons de votre prochaine commande de livres ?",

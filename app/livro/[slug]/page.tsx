@@ -7,6 +7,8 @@ import BookCover from "@/components/BookCover";
 import BookPurchasePanel from "@/components/BookPurchasePanel";
 import BookReviews from "@/components/BookReviews";
 import { SITE_URL } from "@/lib/site";
+import { prisma } from "@/lib/prisma";
+import { getFrequentlyBoughtTogether } from "@/lib/cross-sell";
 
 export function generateStaticParams() {
   return BOOKS.map((book) => ({ slug: book.slug }));
@@ -30,6 +32,23 @@ export async function generateMetadata({
       book.description ??
       `${book.title}, de ${book.author}, disponível no catálogo da Pro Capital.`,
     alternates: { canonical: `/livro/${book.slug}` },
+    openGraph: {
+      title: book.title,
+      description:
+        book.description ?? `${book.title}, de ${book.author}.`,
+      url: `${SITE_URL}/livro/${book.slug}`,
+      siteName: "Pro Capital",
+      type: "book",
+      locale: "pt_MZ",
+      images: book.isbn
+        ? [`https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg?default=false`]
+        : undefined,
+    },
+    twitter: {
+      card: "summary",
+      title: book.title,
+      description: book.description ?? `${book.title}, de ${book.author}.`,
+    },
   };
 }
 
@@ -46,6 +65,41 @@ export default async function LivroPage({
   }
 
   const related = getRelatedBooks(book);
+
+  // "Compre também" real, calculado a partir de encomendas pagas — com
+  // recuo silencioso para sugestões da mesma categoria enquanto não há
+  // encomendas suficientes para gerar o padrão de compra conjunta.
+  let crossSell: { slug: string; title: string }[] = [];
+  let soldLast30Days = 0;
+  try {
+    const dbBook = await prisma.book.findUnique({
+      where: { slug: book.slug },
+      select: { id: true },
+    });
+    if (dbBook) {
+      const boughtTogether = await getFrequentlyBoughtTogether(dbBook.id);
+      crossSell = boughtTogether.map((b) => ({ slug: b.slug, title: b.title }));
+
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const sales = await prisma.orderItem.aggregate({
+        where: {
+          bookId: dbBook.id,
+          order: { status: "PAID", createdAt: { gte: since } },
+        },
+        _sum: { quantity: true },
+      });
+      soldLast30Days = sales._sum.quantity ?? 0;
+    }
+  } catch {
+    // Sem ligação à base de dados — mantém-se só o recuo por categoria
+  }
+  const relatedBooks =
+    crossSell.length > 0
+      ? crossSell
+          .map((c) => BOOKS.find((b) => b.slug === c.slug))
+          .filter((b): b is (typeof BOOKS)[number] => Boolean(b))
+      : related;
+  const relatedHeading = crossSell.length > 0 ? "Compre também" : `Também em ${book.category}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -143,6 +197,12 @@ export default async function LivroPage({
               </p>
             )}
 
+            {soldLast30Days >= 3 && (
+              <p className="mt-3 text-xs font-medium text-brand">
+                {soldLast30Days} vendidos nos últimos 30 dias
+              </p>
+            )}
+
             <BookPurchasePanel book={book} />
 
             <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-6 text-sm sm:max-w-md">
@@ -195,18 +255,18 @@ export default async function LivroPage({
         </div>
       </section>
 
-      {related.length > 0 && (
+      {relatedBooks.length > 0 && (
         <section className="border-t border-line bg-cream-deep/60">
           <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
             <span className="text-xs font-semibold uppercase tracking-widest text-brand">
               Continuar a explorar
             </span>
             <h2 className="mt-2 font-serif text-xl font-semibold text-ink sm:text-2xl">
-              Também em {book.category}
+              {relatedHeading}
             </h2>
 
             <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-4">
-              {related.map((relatedBook, index) => (
+              {relatedBooks.map((relatedBook, index) => (
                 <BookCard key={relatedBook.slug} book={relatedBook} index={index} />
               ))}
             </div>

@@ -17,11 +17,11 @@ export default function ContactosPage() {
             Contactos
           </span>
           <h1 className="mt-6 font-serif text-3xl font-semibold leading-tight text-ink sm:text-4xl">
-            Vamos falar sobre livros.
+            Vamos construir novas oportunidades juntos.
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/70 sm:text-lg">
-            Seja uma livraria, uma escola ou um leitor, a nossa equipa está
-            disponível para ajudar a encontrar os títulos certos.
+            Editoras, livrarias, escolas, parceiros comerciais, investidores
+            ou leitores — a nossa equipa está disponível para conversar.
           </p>
         </div>
       </section>

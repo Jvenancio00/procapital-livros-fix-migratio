@@ -40,10 +40,7 @@ export async function getBestsellers(options: {
   const { range = "30d", categoryId, limit = 8 } = options;
   const since = rangeToDate(range);
 
-  type Grouped = { bookId: string; _sum: { quantity: number | null } };
-  type BookRef = { id: string; slug: string; title: string };
-
-  const grouped: Grouped[] = await prisma.orderItem.groupBy({
+  const grouped = await prisma.orderItem.groupBy({
     by: ["bookId"],
     where: {
       order: {
@@ -59,18 +56,18 @@ export async function getBestsellers(options: {
 
   if (grouped.length === 0) return [];
 
-  const books: BookRef[] = await prisma.book.findMany({
+  const books = await prisma.book.findMany({
     where: { id: { in: grouped.map((g) => g.bookId) } },
     select: { id: true, slug: true, title: true },
   });
-  const bookById = new Map(books.map((b: BookRef) => [b.id, b] as const));
+  const bookById = new Map(books.map((b) => [b.id, b]));
 
   return grouped
-    .filter((g: Grouped) => bookById.has(g.bookId))
-    .map((g: Grouped) => ({
+    .filter((g) => bookById.has(g.bookId))
+    .map((g) => ({
       bookId: g.bookId,
       slug: bookById.get(g.bookId)!.slug,
       title: bookById.get(g.bookId)!.title,
-      unitsSold: g._sum?.quantity ?? 0,
+      unitsSold: g._sum.quantity ?? 0,
     }));
 }

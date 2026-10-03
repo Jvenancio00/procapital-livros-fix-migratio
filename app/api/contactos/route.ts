@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { ContactReason } from "@/lib/enums";
+import { ContactReason } from "@prisma/client";
 
 // Corrige a secção "Fale Connosco": antes, o formulário só abria o cliente
 // de email do visitante (mailto:), sem nenhum registo no lado do servidor
@@ -10,7 +10,7 @@ import { ContactReason } from "@/lib/enums";
 // chegam e de que tipo (Problema 4).
 export async function POST(request: Request) {
   const body = await request.json();
-  const { name, email, phone, reason, message } = body;
+  const { name, email, phone, company, reason, message } = body;
 
   if (!name || !email || !message || !reason) {
     return NextResponse.json({ error: "Campos obrigatórios em falta." }, { status: 400 });
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   }
 
   const request_ = await prisma.contactRequest.create({
-    data: { name, email, phone: phone || null, reason, message },
+    data: { name, email, phone: phone || null, company: company || null, reason, message },
   });
 
   return NextResponse.json({ id: request_.id });

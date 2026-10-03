@@ -22,18 +22,21 @@ export default function BookCover({
 }) {
   const gradient = COVER_GRADIENTS[index % COVER_GRADIENTS.length];
 
-  // Tenta a Open Library primeiro; se não existir capa lá, tenta a Google Books;
-  // se nenhuma tiver, mostra o ícone ilustrado — nunca uma capa errada.
+  // Prioridade: 1) capa real fornecida pela editora (asset local, sem dependência de
+  // rede); 2) Open Library por ISBN; 3) Google Books; 4) ícone ilustrado — nunca uma
+  // capa errada.
   const [src, setSrc] = useState<string | null>(
-    book.isbn
-      ? `https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg?default=false`
-      : null
+    book.coverUrl
+      ? book.coverUrl
+      : book.isbn
+        ? `https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg?default=false`
+        : null
   );
   const [triedGoogleBooks, setTriedGoogleBooks] = useState(false);
   const [failed, setFailed] = useState(false);
 
   const handleError = async () => {
-    if (!triedGoogleBooks && book.isbn) {
+    if (!triedGoogleBooks && !book.coverUrl && book.isbn) {
       setTriedGoogleBooks(true);
       try {
         const res = await fetch(

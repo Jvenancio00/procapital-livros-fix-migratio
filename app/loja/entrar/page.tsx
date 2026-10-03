@@ -6,6 +6,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { ArrowRight } from "lucide-react";
 
+export default function EntrarPage() {
+  return (
+    <Suspense fallback={null}>
+      <EntrarForm />
+    </Suspense>
+  );
+}
+
 function EntrarForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -89,13 +97,5 @@ function EntrarForm() {
         </Link>
       </p>
     </div>
-  );
-}
-
-export default function EntrarPage() {
-  return (
-    <Suspense fallback={<div className="mx-auto max-w-md px-5 py-16 text-center text-sm text-foreground/60">A carregar...</div>}>
-      <EntrarForm />
-    </Suspense>
   );
 }
