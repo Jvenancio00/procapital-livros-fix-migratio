@@ -450,3 +450,24 @@ model ContactRequest {
 
   @@index([reason, createdAt])
 }
+
+// ---------------------------------------------------------------------------
+// Newsletter — o formulário da homepage não submetia nada; passa a gravar a
+// subscrição em base de dados (idempotente por email, ver
+// app/api/newsletter/route.ts).
+//
+// Este model corresponde exatamente à tabela já criada pela migration
+// prisma/migrations/20260907000000_newsletter_subscriber/migration.sql —
+// não gera uma segunda tabela nem exige nova migração.
+// ---------------------------------------------------------------------------
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  source       String?
+  confirmed    Boolean  @default(false)
+  unsubscribed Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([createdAt])
+}
