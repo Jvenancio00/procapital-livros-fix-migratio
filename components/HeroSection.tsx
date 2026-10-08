@@ -16,15 +16,13 @@ import {
 } from "@/lib/hero";
 
 // Colagem de capas do cartaz. A ordem de preferência é explícita para o banner
-// não mostrar um bloco de texto no lugar de uma capa: primeiro os títulos com
-// capa local (asset em /public/covers, que vai sempre no deploy), depois os que
-// têm ISBN (capa remota via OpenLibrary/Google Books) e só no fim os que não têm
-// nenhuma das duas.
+// não mostrar um bloco de cor no lugar de uma capa: primeiro os títulos com
+// capa local (asset em /public/covers, que vai sempre no deploy) e só no fim
+// os que ainda não têm capa.
 const FEATURED_BOOKS = BOOKS.filter((book) => book.featured);
 const HERO_BOOKS = [
   ...FEATURED_BOOKS.filter((book) => book.coverUrl),
-  ...FEATURED_BOOKS.filter((book) => !book.coverUrl && book.isbn),
-  ...FEATURED_BOOKS.filter((book) => !book.coverUrl && !book.isbn),
+  ...FEATURED_BOOKS.filter((book) => !book.coverUrl),
 ].slice(0, 3);
 
 // O cartaz e o vídeo vivem em `lib/hero.ts`, que decide os URLs uma única vez

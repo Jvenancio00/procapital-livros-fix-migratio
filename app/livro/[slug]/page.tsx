@@ -40,9 +40,9 @@ export async function generateMetadata({
       siteName: "Pro Capital",
       type: "book",
       locale: "pt_MZ",
-      images: book.isbn
-        ? [`https://covers.openlibrary.org/b/isbn/${book.isbn}-L.jpg?default=false`]
-        : undefined,
+      // A capa local é a mesma que o site mostra; a pré-visualização nas redes
+      // sociais deixa de depender de um serviço externo poder responder.
+      images: book.coverUrl ? [`${SITE_URL}${book.coverUrl}`] : undefined,
     },
     twitter: {
       card: "summary",
