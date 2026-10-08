@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BookOpen, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
+import EditoraMark from "@/components/EditoraMark";
 import type { Editora } from "@/data/editoras";
 
 export default function EditoraCard({ editora }: { editora: Editora }) {
@@ -20,8 +21,8 @@ export default function EditoraCard({ editora }: { editora: Editora }) {
             className="max-h-10 w-auto object-contain"
           />
         ) : (
-          <span className="flex items-center gap-2 text-foreground/40">
-            <BookOpen size={18} className="shrink-0" />
+          <span className="flex items-center gap-2 text-foreground/70">
+            <EditoraMark name={editora.name} />
             <span className="text-sm font-medium leading-snug">{editora.name}</span>
           </span>
         )}

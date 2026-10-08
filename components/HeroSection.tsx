@@ -33,10 +33,19 @@ const HERO_BOOKS = [
 // NEXT_PUBLIC_HERO_VIDEO_URL definido não há camada de vídeo — o banner fica
 // só com a imagem, em vez de descarregar um MP4 de 2,5 MB em autoplay.
 
+// Cada capa do cartaz tem deslocamento vertical fixo (no link, para o hover
+// continuar a funcionar), inclinação e atraso próprios (no wrapper animado,
+// ver `.hero-float-item` em globals.css). Assim as três capas nunca flutuam em
+// sincronia e o conjunto parece uma colagem viva, não uma imagem parada.
 const COVER_POSITIONS = [
-  "-rotate-[5deg] translate-y-2",
-  "z-10 rotate-[1.5deg] -translate-y-3 sm:-translate-y-5",
-  "rotate-[5deg] translate-y-2",
+  "translate-y-2",
+  "z-10 -translate-y-3 sm:-translate-y-5",
+  "translate-y-2",
+];
+const COVER_FLOAT = [
+  { tilt: "-5deg", delay: "0s" },
+  { tilt: "1.5deg", delay: "1.4s" },
+  { tilt: "5deg", delay: "2.6s" },
 ];
 
 export default function HeroSection() {
@@ -112,8 +121,8 @@ export default function HeroSection() {
 
       <div className="absolute inset-0 z-[2] bg-gradient-to-b from-ink-dark/90 via-ink-dark/75 to-ink-dark/85 sm:bg-gradient-to-r sm:from-ink-dark/95 sm:via-ink-dark/80 sm:to-ink-dark/55" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16 lg:py-20">
-        <div className="grid items-center gap-10 lg:min-h-[34rem] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12">
+      <div className="relative z-10 mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-12 lg:py-12">
+        <div className="grid items-center gap-10 lg:min-h-[28rem] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12">
           <div className="max-w-2xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand/15 px-3.5 py-1.5">
               <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
@@ -168,13 +177,23 @@ export default function HeroSection() {
                   aria-label={`Ver ${book.title}`}
                   className={`group w-full max-w-[7.5rem] transition-transform duration-300 ease-out hover:z-20 hover:-translate-y-2 hover:rotate-0 hover:scale-[1.04] focus-visible:z-20 focus-visible:rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream sm:max-w-[9rem] lg:max-w-[10rem] ${COVER_POSITIONS[index]}`}
                 >
-                  <BookCover
-                    book={book}
-                    preload={index === 0}
-                    showCategory={false}
-                    sizes="(max-width: 639px) 28vw, (max-width: 1023px) 20vw, 15vw"
-                    className="rounded-lg shadow-2xl ring-1 ring-cream/20 sm:rounded-xl"
-                  />
+                  <div
+                    className="hero-float-item"
+                    style={
+                      {
+                        "--hero-tilt": COVER_FLOAT[index].tilt,
+                        "--hero-delay": COVER_FLOAT[index].delay,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <BookCover
+                      book={book}
+                      preload={index === 0}
+                      showCategory={false}
+                      sizes="(max-width: 639px) 28vw, (max-width: 1023px) 20vw, 15vw"
+                      className="rounded-lg shadow-2xl ring-1 ring-cream/20 sm:rounded-xl"
+                    />
+                  </div>
                 </Link>
               ))}
             </div>

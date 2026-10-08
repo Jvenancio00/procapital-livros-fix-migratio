@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { BookOpen, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import BookCard from "@/components/BookCard";
+import EditoraMark from "@/components/EditoraMark";
 import type { Book as StaticBook } from "@/data/books";
 
 // Corrige "Editoras – não há página de perfil por editora nem ligação
@@ -44,7 +45,7 @@ export default async function EditoraPage({ params }: Props) {
           {editora.logo ? (
             <Image src={editora.logo} alt={editora.name} width={120} height={48} className="max-h-12 w-auto object-contain" />
           ) : (
-            <BookOpen size={24} className="text-foreground/40" />
+            <EditoraMark name={editora.name} className="h-12 w-12 text-base" />
           )}
         </div>
         <div>

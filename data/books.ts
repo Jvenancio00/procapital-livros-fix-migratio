@@ -92,6 +92,7 @@ export const BOOKS: Book[] = [
     priceBRL: 52.9,
     featured: true,
     isbn: "9789722126342",
+    coverUrl: "/covers/terra-sonambula.jpg",
     rating: 4.7,
     reviewCount: 214,
     pages: 208,

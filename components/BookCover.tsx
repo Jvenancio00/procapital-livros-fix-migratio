@@ -31,6 +31,24 @@ type BookCoverProps = {
 
 type BookCoverContentProps = Omit<BookCoverProps, "index">;
 
+// Paleta da marca. Cada editora tem sempre a mesma cor (hash do nome), por isso
+// as capas em falta de uma editora formam um conjunto coerente no catálogo.
+const PLACEHOLDER_PALETTE = [
+  "linear-gradient(160deg, #7a1636 0%, #c8142f 100%)",
+  "linear-gradient(160deg, #123a44 0%, #0b262d 100%)",
+  "linear-gradient(160deg, #e8752f 0%, #c8142f 100%)",
+  "linear-gradient(160deg, #9c6b1f 0%, #d9a441 100%)",
+  "linear-gradient(160deg, #1f5b66 0%, #123a44 100%)",
+];
+
+function placeholderGradient(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  return PLACEHOLDER_PALETTE[hash % PLACEHOLDER_PALETTE.length];
+}
+
 function BookCoverContent({
   book,
   className = "",
@@ -111,15 +129,27 @@ function BookCoverContent({
           onError={handleImageError}
         />
       ) : (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-cream-deep px-4 py-5 text-center">
-          <BookOpen
-            size={28}
-            strokeWidth={1.4}
-            className="shrink-0 text-ink/35"
-            aria-hidden="true"
-          />
-          <span className="line-clamp-4 font-serif text-sm font-semibold leading-snug text-ink">
-            {book.title}
+        <div
+          className="absolute inset-0 z-10 flex flex-col justify-between px-4 py-5 text-center text-cream"
+          style={{ background: placeholderGradient(book.editora || book.title) }}
+        >
+          <span className="mx-auto h-px w-10 bg-cream/50" aria-hidden="true" />
+          <div className="flex flex-col items-center gap-2">
+            <BookOpen
+              size={22}
+              strokeWidth={1.4}
+              className="shrink-0 text-cream/70"
+              aria-hidden="true"
+            />
+            <span className="line-clamp-4 font-serif text-sm font-semibold leading-snug text-white">
+              {book.title}
+            </span>
+            <span className="line-clamp-2 text-[11px] leading-snug text-cream/80">
+              {book.author}
+            </span>
+          </div>
+          <span className="line-clamp-1 text-[9px] font-medium uppercase tracking-[0.18em] text-cream/65">
+            {book.editora}
           </span>
         </div>
       )}

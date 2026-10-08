@@ -88,3 +88,33 @@ body {
     display: none;
   }
 }
+
+/* Capas do banner principal: flutuação lenta e inclinação própria por capa.
+   --hero-tilt e --hero-delay vêm inline do HeroSection (um por capa). */
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--hero-tilt, 0deg));
+  }
+  50% {
+    transform: translateY(-0.6rem) rotate(calc(var(--hero-tilt, 0deg) * 0.5));
+  }
+}
+
+.hero-float-item {
+  animation: hero-float 9s ease-in-out infinite;
+  animation-delay: var(--hero-delay, 0s);
+  will-change: transform;
+}
+
+/* Ao passar o rato numa capa, ela fica parada para o hover ser legível. */
+.group:hover .hero-float-item {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float-item {
+    animation: none;
+    transform: rotate(var(--hero-tilt, 0deg));
+  }
+}
