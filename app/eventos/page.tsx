@@ -11,10 +11,14 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-export default async function EventosPage() {
-  const agora = new Date();
-
-  const [proximos, passados] = await Promise.all([
+/**
+ * Lê os eventos da base de dados. Está numa função à parte só para o tipo de
+ * retorno poder ser derivado (`Awaited<ReturnType<...>>`) — assim as listas
+ * continuam tipadas pela inferência do Prisma, sem `any` nem tipos duplicados
+ * à mão.
+ */
+async function carregarEventos(agora: Date) {
+  return Promise.all([
     prisma.evento.findMany({
       where: { dataInicio: { gte: agora } },
       orderBy: { dataInicio: "asc" },
@@ -26,6 +30,25 @@ export default async function EventosPage() {
       take: 6,
     }),
   ]);
+}
+
+export default async function EventosPage() {
+  const agora = new Date();
+
+  // Se a base de dados falhar (sem `DATABASE_URL` no ambiente de build, tabela
+  // `Evento` por migrar, Neon suspenso, etc.) o `findMany` rebentava aqui e a
+  // página inteira virava 500 — e, como a página é pré-renderizada, derrubava
+  // também o build da Vercel. O resto do site já usa esta estratégia
+  // (ver `app/page.tsx`): tenta a BD e, se não houver, deixa as listas vazias
+  // renderizar o estado vazio desenhado para isso ("Ainda não há eventos
+  // agendados").
+  let proximos: Awaited<ReturnType<typeof carregarEventos>>[0] = [];
+  let passados: Awaited<ReturnType<typeof carregarEventos>>[1] = [];
+  try {
+    [proximos, passados] = await carregarEventos(agora);
+  } catch {
+    // Sem ligação à base de dados — mantém a página de pé com as listas vazias.
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
