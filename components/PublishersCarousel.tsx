@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import EditoraMark from "@/components/EditoraMark";
 import type { Editora } from "@/data/editoras";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -56,12 +56,7 @@ export default function PublishersCarousel({
                         className="max-h-9 max-w-full object-contain"
                       />
                     ) : (
-                      <BookOpen
-                        size={18}
-                        strokeWidth={1.5}
-                        className="shrink-0 text-ink/40"
-                        aria-hidden="true"
-                      />
+                      <EditoraMark name={publisher.name} />
                     )}
                     <span className="line-clamp-1 max-w-full text-[11px] font-medium leading-tight text-ink/80">
                       {publisher.name}
