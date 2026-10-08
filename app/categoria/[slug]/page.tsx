@@ -4,7 +4,7 @@ import Link from "next/link";
 import BookCard from "@/components/BookCard";
 import { getCategoryBySlug } from "@/lib/categories";
 import { SITE_URL } from "@/lib/site";
-import type { Book as StaticBook } from "@/data/books";
+import { toCatalogBook } from "@/lib/book-view";
 
 // Página gerada automaticamente por categoria — corrige "Problema 4 – SEO
 // perdido": cada categoria passa a ter a sua própria página com metadata,
@@ -108,25 +108,7 @@ export default async function CategoryPage({ params }: Props) {
           <BookCard
             key={book.slug}
             index={index}
-            book={
-              {
-                slug: book.slug,
-                title: book.title,
-                author: book.author,
-                editora: book.editoraRef?.name ?? book.editora,
-                category: category.name as StaticBook["category"],
-                price: Number(book.prices.find((p) => p.currency === "MT")?.amount ?? 0),
-                priceKZ: Number(book.prices.find((p) => p.currency === "KZ")?.amount ?? 0),
-                priceEUR: Number(book.prices.find((p) => p.currency === "EUR")?.amount ?? 0),
-                priceBRL: Number(book.prices.find((p) => p.currency === "BRL")?.amount ?? 0),
-                coverUrl: book.coverUrl ?? undefined,
-                isbn: book.isbn ?? undefined,
-                description: book.description ?? undefined,
-                pages: book.pages ?? undefined,
-                year: book.year ?? undefined,
-                free: book.free,
-              } as StaticBook
-            }
+            book={toCatalogBook(book, category.name)}
           />
         ))}
       </div>

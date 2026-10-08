@@ -5,7 +5,7 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import BookCard from "@/components/BookCard";
 import EditoraMark from "@/components/EditoraMark";
-import type { Book as StaticBook } from "@/data/books";
+import { toCatalogBook } from "@/lib/book-view";
 
 // Corrige "Editoras – não há página de perfil por editora nem ligação
 // automática aos livros que publica": os livros agora ligam-se à editora
@@ -80,21 +80,7 @@ export default async function EditoraPage({ params }: Props) {
           <BookCard
             key={book.slug}
             index={index}
-            book={
-              {
-                slug: book.slug,
-                title: book.title,
-                author: book.author,
-                editora: editora.name,
-                category: "Não-ficção" as StaticBook["category"],
-                price: Number(book.prices.find((p) => p.currency === "MT")?.amount ?? 0),
-                priceKZ: Number(book.prices.find((p) => p.currency === "KZ")?.amount ?? 0),
-                priceEUR: Number(book.prices.find((p) => p.currency === "EUR")?.amount ?? 0),
-                priceBRL: Number(book.prices.find((p) => p.currency === "BRL")?.amount ?? 0),
-                coverUrl: book.coverUrl ?? undefined,
-                free: book.free,
-              } as StaticBook
-            }
+            book={toCatalogBook(book)}
           />
         ))}
       </div>

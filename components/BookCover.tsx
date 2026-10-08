@@ -2,23 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { BookOpen } from "lucide-react";
 import type { Book } from "@/data/books";
-
-type CoverSource = {
-  kind: "local" | "openLibrary" | "googleBooks";
-  url: string;
-};
-
-type GoogleBooksResponse = {
-  items?: {
-    volumeInfo?: {
-      imageLinks?: {
-        thumbnail?: string;
-      };
-    };
-  }[];
-};
+import { editoraInitials } from "@/components/EditoraMark";
 
 type BookCoverProps = {
   book: Book;
@@ -56,77 +41,32 @@ function BookCoverContent({
   preload = false,
   showCategory = true,
 }: BookCoverContentProps) {
+  // Só há um tipo de fonte de capa: o ficheiro local em /public/covers,
+  // normalizado a 3:4 por `scripts/build-covers.sh`. O catálogo não faz
+  // pedidos a serviços externos (Open Library, Google Books) para desenhar um
+  // cartão: além de depender de terceiros em cada visita, essas capas falham
+  // em muitos ISBN e deixavam o cartão preso no bloco de cor.
   const localSrc = book.coverUrl?.trim() || null;
-  const isbn = book.isbn?.trim() || null;
-  const openLibrarySrc = isbn
-    ? `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg?default=false`
-    : null;
+  const [failed, setFailed] = useState(false);
 
-  const [localFailed, setLocalFailed] = useState(false);
-  const [openLibraryFailed, setOpenLibraryFailed] = useState(false);
-  const [googleBooksSrc, setGoogleBooksSrc] = useState<string | null>(null);
-  const [googleBooksFailed, setGoogleBooksFailed] = useState(false);
-  const [googleBooksAttempted, setGoogleBooksAttempted] = useState(false);
-
-  // Prefer a real local cover, then known ISBN sources, and finally a neutral
-  // editorial placeholder. A missing remote cover never becomes a color block.
-  const source: CoverSource | null =
-    localSrc && !localFailed
-      ? { kind: "local", url: localSrc }
-      : openLibrarySrc && !openLibraryFailed
-        ? { kind: "openLibrary", url: openLibrarySrc }
-        : googleBooksSrc && !googleBooksFailed
-          ? { kind: "googleBooks", url: googleBooksSrc }
-          : null;
-
-  const handleImageError = () => {
-    if (!source) return;
-
-    if (source.kind === "local") {
-      setLocalFailed(true);
-      return;
-    }
-
-    if (source.kind === "openLibrary") {
-      setOpenLibraryFailed(true);
-      if (!isbn || googleBooksAttempted) return;
-
-      setGoogleBooksAttempted(true);
-      void fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`)
-        .then(async (response) => {
-          if (!response.ok) return null;
-          const data = (await response.json()) as GoogleBooksResponse;
-          return (data.items ?? [])
-            .map((item) => item.volumeInfo?.imageLinks?.thumbnail)
-            .find((thumbnail): thumbnail is string => Boolean(thumbnail));
-        })
-        .then((thumbnail) => {
-          if (thumbnail) {
-            setGoogleBooksSrc(thumbnail.replace(/^http:/i, "https:"));
-          }
-        })
-        .catch(() => {
-          // If the remote lookup is unavailable, the neutral placeholder is used.
-        });
-      return;
-    }
-
-    setGoogleBooksFailed(true);
-  };
+  const src = localSrc && !failed ? localSrc : null;
 
   return (
     <div
-      className={`relative flex aspect-[3/4] items-center justify-center overflow-hidden bg-cream-deep ${className}`}
+      // As capas normalizadas já trazem a moldura branca (3:4) gravada no
+      // ficheiro; o fundo é branco para essa moldura não contrastar com a
+      // página, e as fotografias que enchem o cartão ficam iguais às restantes.
+      className={`relative flex aspect-[3/4] items-center justify-center overflow-hidden bg-white ${className}`}
     >
-      {source ? (
+      {src ? (
         <Image
-          src={source.url}
+          src={src}
           alt={book.title}
           fill
           sizes={sizes}
           preload={preload}
           className="object-cover"
-          onError={handleImageError}
+          onError={() => setFailed(true)}
         />
       ) : (
         <div
@@ -135,12 +75,12 @@ function BookCoverContent({
         >
           <span className="mx-auto h-px w-10 bg-cream/50" aria-hidden="true" />
           <div className="flex flex-col items-center gap-2">
-            <BookOpen
-              size={22}
-              strokeWidth={1.4}
-              className="shrink-0 text-cream/70"
+            <span
               aria-hidden="true"
-            />
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-cream/30 font-serif text-xs font-semibold tracking-wide text-cream/85"
+            >
+              {editoraInitials(book.editora || book.title)}
+            </span>
             <span className="line-clamp-4 font-serif text-sm font-semibold leading-snug text-white">
               {book.title}
             </span>
@@ -164,7 +104,7 @@ function BookCoverContent({
 }
 
 export default function BookCover(props: BookCoverProps) {
-  // Reset image-failure state if this reusable component receives another book.
+  // Reset do estado de falha se este componente reutilizável receber outro livro.
   return (
     <BookCoverContent
       key={props.book.slug}
