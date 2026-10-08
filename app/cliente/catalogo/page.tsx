@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { BOOKS } from "@/data/books";
 import { useClientAuth } from "@/hooks/useClientAuth";
 import { ShoppingCart, LogOut } from "lucide-react";
+import BookCover from "@/components/BookCover";
 import type { Book } from "@/data/books";
 
 export default function ClientCatalogPage() {
@@ -92,7 +93,7 @@ export default function ClientCatalogPage() {
   return (
     <div className="min-h-screen bg-cream">
       {/* Header */}
-      <div className="bg-white border-b border-brand/10 sticky top-0 z-50">
+      <div className="sticky top-0 z-50 border-b border-line bg-cream/95 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-serif font-bold text-ink">{session.company}</h1>
@@ -161,8 +162,14 @@ export default function ClientCatalogPage() {
 
                 return (
                   <div key={book.slug} className="bg-white rounded-xl border border-cream p-6">
-                    {/* Capa placeholder */}
-                    <div className="w-full h-40 bg-gradient-to-br from-wine via-brand to-accent rounded-lg mb-4" />
+                    <div className="mb-4 flex justify-center">
+                      <BookCover
+                        book={book}
+                        showCategory={false}
+                        sizes="10rem"
+                        className="w-full max-w-[10rem] rounded-lg"
+                      />
+                    </div>
 
                     <h3 className="font-semibold text-ink mb-1">{book.title}</h3>
                     <p className="text-sm text-foreground/60 mb-4">{book.author}</p>

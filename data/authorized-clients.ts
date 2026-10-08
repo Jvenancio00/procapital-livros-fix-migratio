@@ -42,7 +42,7 @@ export const AUTHORIZED_CLIENTS: AuthorizedClient[] = [
   },
   {
     id: "pro-001",
-    email: "geral@procapital.co.mz",
+    email: "comercial@procapitalmz.com",
     company: "Pro Capital",
     type: "revendedor",
     discount: 25,

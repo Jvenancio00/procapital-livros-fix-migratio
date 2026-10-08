@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { ArrowRight, Handshake, Megaphone, Package, Truck } from "lucide-react";
 import BookCard from "@/components/BookCard";
-import PartnerMarquee from "@/components/PartnerMarquee";
+import PublishersCarousel from "@/components/PublishersCarousel";
+import { EDITORAS } from "@/data/editoras";
 import PartnersGrid from "@/components/PartnersGrid";
 import PresenceMap from "@/components/PresenceMap";
 import HeroSection from "@/components/HeroSection";
@@ -42,7 +43,7 @@ export default function HomeClient({
 
       <TrustBar />
 
-      <PartnerMarquee />
+      <PublishersCarousel publishers={EDITORAS} />
 
       <section
         id="mais-vendidos"

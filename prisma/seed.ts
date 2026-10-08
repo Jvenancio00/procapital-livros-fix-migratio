@@ -82,12 +82,14 @@ async function seedEditoras() {
     const created = await prisma.editora.upsert({
       where: { slug: e.slug },
       update: {
+        slug: e.slug,
         name: e.name,
         country: e.country,
         logo: e.logo,
         phone: e.phone,
         email: e.email,
         address: e.address,
+        website: e.website,
       },
       create: {
         slug: e.slug,
@@ -97,6 +99,7 @@ async function seedEditoras() {
         phone: e.phone,
         email: e.email,
         address: e.address,
+        website: e.website,
       },
     });
     idByName.set(e.name, created.id);

@@ -38,22 +38,36 @@ export default function ContactosPage() {
                   <MapPin size={18} />
                 </span>
                 <span className="pt-2">
-                  Rua Gil Vicente, n.º 79, R/C, Bairro Coop
+                  Rua Almeida Garrett, Bairro da Coop,
                   <br />
-                  Distrito de Kampfumo, Maputo, Moçambique
+                  n.º 366, Maputo, Moçambique
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
                   <Phone size={18} />
                 </span>
-                <span className="pt-2">+258 84 000 0000</span>
+                <span className="pt-2">
+                  <a
+                    href="tel:+258877046220"
+                    className="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
+                    +258 87 704 6220
+                  </a>
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
                   <Mail size={18} />
                 </span>
-                <span className="pt-2">geral@procapital.co.mz</span>
+                <span className="pt-2">
+                  <a
+                    href="mailto:comercial@procapitalmz.com"
+                    className="underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                  >
+                    comercial@procapitalmz.com
+                  </a>
+                </span>
               </li>
             </ul>
           </div>
@@ -64,7 +78,7 @@ export default function ContactosPage() {
             <div className="mt-10 overflow-hidden rounded-2xl border border-line">
               <iframe
                 title="Localização da Pro Capital em Maputo"
-                src="https://www.google.com/maps?q=Rua+Gil+Vicente+79+Bairro+Coop+Maputo+Mo%C3%A7ambique&output=embed"
+                src="https://www.google.com/maps?q=Rua+Almeida+Garrett+366+Bairro+da+Coop+Maputo+Mo%C3%A7ambique&output=embed"
                 width="100%"
                 height="300"
                 style={{ border: 0 }}

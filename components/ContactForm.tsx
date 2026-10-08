@@ -43,7 +43,7 @@ export default function ContactForm() {
     } catch {
       // Se a gravação falhar (ex.: sem base de dados configurada), o
       // mailto continua a funcionar como plano B, tal como acontecia antes.
-      window.location.href = `mailto:geral@procapital.co.mz?subject=${encodeURIComponent(
+      window.location.href = `mailto:comercial@procapitalmz.com?subject=${encodeURIComponent(
         `Contacto do site — ${motivo}`
       )}&body=${encodeURIComponent(
         `Nome: ${name}\nEmpresa/Instituição: ${company || "-"}\nEmail: ${email}\nTelefone: ${phone || "-"}\n\n${message}`
