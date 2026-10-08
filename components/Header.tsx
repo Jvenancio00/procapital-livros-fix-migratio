@@ -44,7 +44,7 @@ export default function Header() {
           <Logo />
         </Link>
 
-        <nav className="hidden items-center gap-8 sm:flex">
+        <nav className="hidden items-center gap-8 xl:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -125,14 +125,14 @@ export default function Header() {
         <button
           type="button"
           aria-label={open ? dict.nav.closeMenu : dict.nav.openMenu}
-          className="flex h-10 w-10 items-center justify-center rounded-full text-ink sm:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-ink xl:hidden"
           onClick={() => setOpen((v) => !v)}
         >
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
-      <div className="hidden border-t border-ink/10 bg-ink sm:block">
+      <div className="hidden border-t border-ink/10 bg-ink xl:block">
         <nav className="mx-auto flex max-w-6xl items-center gap-6 px-5 py-2.5 sm:px-8">
           {CATEGORY_LINKS.map((link) => (
             <Link
@@ -147,7 +147,7 @@ export default function Header() {
       </div>
 
       {open && (
-        <nav className="flex flex-col gap-1 border-t border-line bg-cream px-5 pb-5 sm:hidden">
+        <nav className="flex flex-col gap-1 border-t border-line bg-cream px-5 pb-5 xl:hidden">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}

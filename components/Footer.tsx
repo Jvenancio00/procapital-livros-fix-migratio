@@ -83,7 +83,7 @@ export default function Footer() {
               <Mail size={16} className="mt-0.5 shrink-0" />
               <a
                 href="mailto:comercial@procapitalmz.com"
-                className="underline-offset-4 hover:text-cream hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
+                className="min-w-0 break-all underline-offset-4 hover:text-cream hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
               >
                 comercial@procapitalmz.com
               </a>
