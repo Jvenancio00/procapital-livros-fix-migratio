@@ -65,18 +65,28 @@ export default function Footer() {
             <li className="flex items-start gap-2">
               <MapPin size={16} className="mt-0.5 shrink-0" />
               <span>
-                Rua Gil Vicente, n.º 79, R/C, Bairro Coop
+                Rua Almeida Garrett, Bairro da Coop,
                 <br />
-                Distrito de Kampfumo, Maputo, Moçambique
+                n.º 366, Maputo, Moçambique
               </span>
             </li>
             <li className="flex items-start gap-2">
               <Phone size={16} className="mt-0.5 shrink-0" />
-              <span>+258 84 000 0000</span>
+              <a
+                href="tel:+258877046220"
+                className="underline-offset-4 hover:text-cream hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
+              >
+                +258 87 704 6220
+              </a>
             </li>
             <li className="flex items-start gap-2">
               <Mail size={16} className="mt-0.5 shrink-0" />
-              <span>geral@procapital.co.mz</span>
+              <a
+                href="mailto:comercial@procapitalmz.com"
+                className="underline-offset-4 hover:text-cream hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
+              >
+                comercial@procapitalmz.com
+              </a>
             </li>
           </ul>
         </div>

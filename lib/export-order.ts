@@ -42,7 +42,7 @@ export function exportOrderPDF(
   doc.setFontSize(9);
   doc.text("Distribuidora de Livros", margin, yPosition);
   yPosition += 5;
-  doc.text("Rua Gil Vicente, nº 79, R/C, Bairro Coop", margin, yPosition);
+  doc.text("Rua Almeida Garrett, Bairro da Coop, n.º 366", margin, yPosition);
   yPosition += 5;
   doc.text("Maputo, Moçambique", margin, yPosition);
   yPosition += 5;
@@ -196,7 +196,7 @@ export async function exportOrderWord(
             children: [new TextRun({ text: "Pro Capital - Distribuidora de Livros", bold: true, size: 24 })],
           }),
           new Paragraph({
-            children: [new TextRun({ text: "Rua Gil Vicente, nº 79, R/C, Bairro Coop, Maputo", size: 20 })],
+            children: [new TextRun({ text: "Rua Almeida Garrett, Bairro da Coop, n.º 366, Maputo, Moçambique", size: 20 })],
           }),
           new Paragraph({
             children: [new TextRun({ text: "NUIT: 401430857", size: 20 })],
@@ -274,7 +274,7 @@ export function exportOrderExcel(
     [`Data: ${new Date().toLocaleDateString("pt-PT")}`],
     [],
     ["PRO CAPITAL - DISTRIBUIDORA DE LIVROS"],
-    ["Rua Gil Vicente, nº 79, R/C, Bairro Coop, Maputo"],
+    ["Rua Almeida Garrett, Bairro da Coop, n.º 366, Maputo, Moçambique"],
     ["NUIT: 401430857"],
     [],
     ["CLIENTE"],

@@ -112,7 +112,7 @@ export default function ClientOrderPage() {
   return (
     <div className="min-h-screen bg-cream">
       {/* Header */}
-      <div className="bg-white border-b border-brand/10 sticky top-0 z-50">
+      <div className="sticky top-0 z-50 border-b border-line bg-cream/95 backdrop-blur">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-4">
           <button
             onClick={() => router.push("/cliente/catalogo")}
