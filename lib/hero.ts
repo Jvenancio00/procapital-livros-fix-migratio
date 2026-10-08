@@ -21,7 +21,8 @@ function envUrl(value: string | undefined): string {
 
 /**
  * Cartaz do banner. Em produção com CDN usa-se o URL definido na variável;
- * senão, o ficheiro otimizado em `/public` (1600×900, sRGB, progressivo).
+ * senão, o JPEG em `/public` (~126 KB, 1920×770) serve de fallback do WebP
+ * (~75 KB, 1600×900) — ver `HERO_POSTER_WEBP_SRC`.
  */
 export const HERO_POSTER_SRC =
   envUrl(process.env.NEXT_PUBLIC_HERO_POSTER_URL) || "/hero-poster.jpg";
@@ -34,7 +35,12 @@ export const HERO_POSTER_SRC =
 export const HERO_POSTER_WEBP_SRC =
   HERO_POSTER_SRC === "/hero-poster.jpg" ? "/hero-poster.webp" : "";
 
-/** Dimensões intrínsecas do cartaz — evitam layout shift (CLS = 0 no LCP). */
+/**
+ * Dimensões intrínsecas do cartaz — evitam layout shift (CLS = 0 no LCP). São as
+ * do WebP, a fonte que os browsers escolhem quando ela existe (ver
+ * `HERO_POSTER_WEBP_SRC`); o JPEG de fallback tem 1920×770 e é recortado pelo
+ * `object-cover` do banner, por isso a diferença de proporção não muda o layout.
+ */
 export const HERO_POSTER_DIMENSIONS = { width: 1600, height: 900 } as const;
 
 /**
