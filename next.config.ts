@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/livro/livro-gratuito",
+        destination: "/livro-digital",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

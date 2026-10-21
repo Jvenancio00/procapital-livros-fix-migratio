@@ -12,6 +12,8 @@ interface AdminBookRow {
   editora: string;
   isbn: string | null;
   coverUrl: string | null;
+  pdfUrl: string | null;
+  free: boolean;
   active: boolean;
   featured: boolean;
   allowPreorder: boolean;
@@ -32,6 +34,8 @@ export default function AdminLivrosPage() {
   const [isbn, setIsbn] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [free, setFree] = useState(false);
   const [educationLevel, setEducationLevel] = useState("");
   const [schoolGrade, setSchoolGrade] = useState("");
   const [subject, setSubject] = useState("");
@@ -73,6 +77,8 @@ export default function AdminLivrosPage() {
         isbn,
         categoryId,
         coverUrl,
+        pdfUrl,
+        free,
         educationLevel: educationLevel || undefined,
         schoolGrade,
         subject,
@@ -91,12 +97,14 @@ export default function AdminLivrosPage() {
     setTitle("");
     setAuthor("");
     setIsbn("");
+    setPdfUrl("");
+    setFree(false);
     await load();
   }
 
   async function toggleFlag(
     book: AdminBookRow,
-    field: "active" | "featured" | "allowPreorder",
+    field: "active" | "featured" | "allowPreorder" | "free",
   ) {
     await fetch("/api/admin/livros", {
       method: "PATCH",
@@ -190,6 +198,24 @@ export default function AdminLivrosPage() {
             onChange={(e) => setCoverUrl(e.target.value)}
             className="rounded-xl border border-line bg-cream/40 px-3 py-2 text-xs"
           />
+
+          <input
+            type="text"
+            placeholder="URL PDF Digital (opcional, ex.: /pdfs/obra.pdf)"
+            value={pdfUrl}
+            onChange={(e) => setPdfUrl(e.target.value)}
+            className="rounded-xl border border-line bg-cream/40 px-3 py-2 text-xs"
+          />
+
+          <label className="flex items-center gap-2 rounded-xl border border-line bg-cream/40 px-3 py-2 text-xs font-medium text-ink">
+            <input
+              type="checkbox"
+              checked={free}
+              onChange={(e) => setFree(e.target.checked)}
+              className="rounded border-line text-brand"
+            />
+            <span>Acesso Digital Gratuito</span>
+          </label>
 
           <select
             value={educationLevel}
@@ -353,6 +379,17 @@ export default function AdminLivrosPage() {
                         }`}
                       >
                         Pré-enc.
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleFlag(b, "free")}
+                        className={`rounded-full px-2.5 py-1 font-semibold ${
+                          b.free
+                            ? "bg-violet-100 text-violet-900"
+                            : "bg-cream text-ink/65"
+                        }`}
+                      >
+                        Digital Gratuito
                       </button>
                     </td>
                   </tr>

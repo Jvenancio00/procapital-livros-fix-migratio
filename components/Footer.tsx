@@ -67,7 +67,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/livro/livro-gratuito" className="hover:text-white">
+                <Link href="/livro-digital" className="hover:text-white">
                   {dict.nav.digitalBook}
                 </Link>
               </li>

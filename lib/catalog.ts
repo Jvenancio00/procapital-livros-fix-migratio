@@ -169,7 +169,25 @@ export async function getAllCatalogBooks(options?: { includeInactive?: boolean }
 
 export async function getCatalogBookBySlug(slug: string): Promise<Book | undefined> {
   const all = await getAllCatalogBooks();
-  return all.find((b) => b.slug === slug);
+  const found = all.find((b) => b.slug === slug);
+  if (found) return found;
+
+  const staticBook = BOOKS.find((b) => b.slug === slug);
+  if (!staticBook) return undefined;
+
+  if (isDatabaseConfigured()) {
+    try {
+      const dbRow = await prisma.book.findUnique({
+        where: { slug },
+        select: { active: true },
+      });
+      if (dbRow && !dbRow.active) return undefined;
+    } catch {
+      // Se a BD estiver temporariamente indisponível, usa o catálogo estático
+    }
+  }
+
+  return staticBook;
 }
 
 export async function getAllPublishers(): Promise<(Editora & { id?: string; bookCount?: number })[]> {

@@ -3,13 +3,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import ReaderClient from "./ReaderClient";
 
-// Leitor integrado — corrige "Problema 3 – Leitor próprio" da secção
-// Livro Digital (marcadores, notas, modo escuro, fonte ajustável).
-// Continua a não ser DRM real: o PDF pode sempre ser guardado pelo
-// browser. A camada de licenciamento (Problema 4) fica no modelo
-// `License`, verificado aqui, mas sem impedir tecnicamente a cópia — isso
-// exigiria um serviço de DRM comercial (Adobe Content Server, Readium
-// LCP), que não foi ligado por depender de conta externa.
+export const dynamic = "force-dynamic";
+
 export default async function LeitorPage({
   params,
 }: {
@@ -18,23 +13,49 @@ export default async function LeitorPage({
   const { bookSlug } = await params;
   const session = await auth();
   if (!session?.user?.email) {
-    redirect(`/loja/entrar?callbackUrl=%2Floja%2Fleitor%2F${bookSlug}`);
+    redirect(`/loja/entrar?callbackUrl=%2Floja%2Fleitor%2F${encodeURIComponent(bookSlug)}`);
   }
 
-  const user = await prisma.user.findUnique({ where: { email: session.user.email! } });
-  const book = await prisma.book.findUnique({ where: { slug: bookSlug } });
+  let user: { id: string; email: string } | null = null;
+  let book: { id: string; slug: string; title: string; pdfUrl: string | null; free: boolean } | null = null;
+
+  try {
+    user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true, email: true },
+    });
+    book = await prisma.book.findUnique({
+      where: { slug: bookSlug },
+      select: { id: true, slug: true, title: true, pdfUrl: true, free: true },
+    });
+  } catch {
+    redirect("/loja/biblioteca");
+  }
+
   if (!user || !book) notFound();
 
-  const owns = await prisma.libraryItem.findUnique({
+  let owns = await prisma.libraryItem.findUnique({
     where: { userId_bookId: { userId: user.id, bookId: book.id } },
   });
+
+  // Se o livro tiver distribuição digital gratuita confirmada (book.free === true),
+  // regista automaticamente o acesso na Biblioteca Digital pessoal do leitor.
+  if (!owns && book.free) {
+    owns = await prisma.libraryItem.upsert({
+      where: { userId_bookId: { userId: user.id, bookId: book.id } },
+      update: {},
+      create: {
+        userId: user.id,
+        bookId: book.id,
+        source: "free-download",
+      },
+    });
+  }
+
   if (!owns) {
     redirect("/loja/biblioteca");
   }
 
-  // Licença: se existirem licenças emitidas para este livro/comprador,
-  // valida número de dispositivos e validade (sem bloquear quando não há
-  // nenhuma licença registada, para não partir o download gratuito).
   const license = await prisma.license.findFirst({
     where: { bookId: book.id, buyerEmail: user.email },
   });

@@ -14,14 +14,24 @@ export default async function BibliotecaPage() {
     redirect("/loja/entrar?callbackUrl=/loja/biblioteca");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: {
-      library: { include: { book: true }, orderBy: { acquiredAt: "desc" } },
-    },
-  });
+  let items: {
+    id: string;
+    source: string;
+    acquiredAt: Date;
+    book: { slug: string; title: string; author: string; pdfUrl: string | null };
+  }[] = [];
 
-  const items = user?.library ?? [];
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      include: {
+        library: { include: { book: true }, orderBy: { acquiredAt: "desc" } },
+      },
+    });
+    items = user?.library ?? [];
+  } catch {
+    items = [];
+  }
 
   return (
     <main>
@@ -29,6 +39,11 @@ export default async function BibliotecaPage() {
         eyebrow="Acervo Digital Pessoal"
         title="A Minha Biblioteca"
         description="Aceda aos títulos digitais adquiridos ou disponibilizados gratuitamente na sua conta Pro Capital."
+        breadcrumbs={[
+          { label: "Início", href: "/" },
+          { label: "Livro Digital", href: "/livro-digital" },
+          { label: "A Minha Biblioteca" },
+        ]}
       />
 
       <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
@@ -36,12 +51,20 @@ export default async function BibliotecaPage() {
           <p className="text-sm text-ink/65">
             {items.length} obra(s) registada(s) na sua biblioteca.
           </p>
-          <Link
-            href="/loja/encomendas"
-            className="text-xs font-semibold text-brand hover:underline"
-          >
-            Ver encomendas e faturas proforma →
-          </Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              href="/livro-digital"
+              className="text-xs font-semibold text-ink/75 hover:text-brand hover:underline"
+            >
+              Secção Livro Digital →
+            </Link>
+            <Link
+              href="/loja/encomendas"
+              className="text-xs font-semibold text-brand hover:underline"
+            >
+              Ver encomendas e faturas proforma →
+            </Link>
+          </div>
         </div>
 
         {items.length === 0 ? (
@@ -50,13 +73,21 @@ export default async function BibliotecaPage() {
             <p className="mt-4 text-sm text-ink/65">
               Ainda não existem livros digitais associados a esta conta.
             </p>
-            <Link
-              href="/catalogo"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
-            >
-              <span>Explorar catálogo</span>
-              <ArrowRight size={15} />
-            </Link>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link
+                href="/livro-digital"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-cream/60 px-6 py-3 text-xs font-semibold text-ink transition-colors hover:border-brand/40"
+              >
+                <span>Ver Secção Livro Digital</span>
+              </Link>
+              <Link
+                href="/catalogo"
+                className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
+              >
+                <span>Explorar catálogo</span>
+                <ArrowRight size={15} />
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="mt-6 space-y-3">
@@ -77,15 +108,15 @@ export default async function BibliotecaPage() {
                     · {new Date(item.acquiredAt).toLocaleDateString("pt-PT")}
                   </p>
                 </div>
-                {item.book.pdfUrl && (
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href={`/loja/leitor/${item.book.slug}`}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-xs font-semibold text-white hover:bg-brand-dark"
-                    >
-                      <BookOpen size={13} />
-                      <span>Ler agora</span>
-                    </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/loja/leitor/${item.book.slug}`}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-xs font-semibold text-white hover:bg-brand-dark"
+                  >
+                    <BookOpen size={13} />
+                    <span>Ler agora</span>
+                  </Link>
+                  {item.book.pdfUrl && (
                     <a
                       href={item.book.pdfUrl}
                       download
@@ -94,8 +125,8 @@ export default async function BibliotecaPage() {
                       <Download size={13} />
                       <span>Descarregar</span>
                     </a>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ))}
           </div>

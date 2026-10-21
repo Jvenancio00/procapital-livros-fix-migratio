@@ -99,8 +99,13 @@ export default function Header() {
 
           <div className="flex shrink-0 items-center gap-2.5">
             <Link
-              href="/livro/livro-gratuito"
-              className="hidden items-center gap-1.5 rounded-full border border-accent/40 bg-accent/15 px-3 py-1 font-medium text-amber-200 transition-colors hover:bg-accent/25 md:inline-flex"
+              href="/livro-digital"
+              aria-current={isActive("/livro-digital") ? "page" : undefined}
+              className={`hidden items-center gap-1.5 rounded-full border px-3 py-1 font-medium transition-colors md:inline-flex ${
+                isActive("/livro-digital")
+                  ? "border-accent bg-accent text-ink"
+                  : "border-accent/40 bg-accent/15 text-amber-200 hover:bg-accent/25"
+              }`}
             >
               <BookOpen size={12} aria-hidden="true" />
               <span>{dict.nav.digitalBook}</span>
@@ -226,6 +231,14 @@ export default function Header() {
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-2 border-t border-line pt-4">
+            <Link
+              href="/livro-digital"
+              onClick={() => setMenuOpen(false)}
+              className="col-span-2 inline-flex items-center justify-center gap-1.5 rounded-xl border border-brand/30 bg-brand/5 px-3 py-2.5 text-xs font-semibold text-brand"
+            >
+              <BookOpen size={14} aria-hidden="true" />
+              <span>{dict.nav.digitalBook}</span>
+            </Link>
             {utilityLinks.map((link) =>
               link.external ? (
                 <a
