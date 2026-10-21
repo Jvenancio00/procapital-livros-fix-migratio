@@ -1,26 +1,35 @@
 import HomeClient from "./HomeClient";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAllCatalogBooks, getAllPublishers } from "@/lib/catalog";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
+  const dbReady = isDatabaseConfigured();
+
   const [allViews, publishers, dbCategorias, dbEventos, dbBlogPosts] =
     await Promise.all([
       getAllCatalogBooks(),
       getAllPublishers(),
-      prisma.category.findMany({
-        orderBy: { name: "asc" },
-      }),
-      prisma.evento.findMany({
-        orderBy: { dataInicio: "asc" },
-        take: 4,
-      }),
-      prisma.blogPost.findMany({
-        where: { published: true },
-        orderBy: { publishedAt: "desc" },
-        take: 3,
-      }),
+      dbReady
+        ? prisma.category
+            .findMany({ orderBy: { name: "asc" } })
+            .catch(() => [])
+        : Promise.resolve([]),
+      dbReady
+        ? prisma.evento
+            .findMany({ orderBy: { dataInicio: "asc" }, take: 4 })
+            .catch(() => [])
+        : Promise.resolve([]),
+      dbReady
+        ? prisma.blogPost
+            .findMany({
+              where: { published: true },
+              orderBy: { publishedAt: "desc" },
+              take: 3,
+            })
+            .catch(() => [])
+        : Promise.resolve([]),
     ]);
 
   const featuredBooks = allViews.filter((b) => b.featured);

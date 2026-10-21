@@ -1,18 +1,19 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { verifyTotpToken } from "@/lib/totp";
 
-// A gestão de administradores deixou de depender só desta lista fixa no
-// código (corrige o mesmo problema estrutural apontado em "Categorias":
-// mudar quem é admin não devia exigir deploy). Passa a existir também um
-// email de arranque (bootstrap), usado apenas por prisma/seed.ts para
-// criar o primeiro admin — depois disso, a fonte de verdade é o campo
-// User.role na base de dados, que um admin já autenticado pode alterar.
 const LEGACY_ADMIN_EMAILS = ["jdvenancio.7@gmail.com"];
 
+const RESOLVED_AUTH_SECRET =
+  process.env.AUTH_SECRET?.trim() ||
+  process.env.NEXTAUTH_SECRET?.trim() ||
+  "procapital-institutional-session-fallback-key-2026-cplp";
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  secret: RESOLVED_AUTH_SECRET,
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: {
     signIn: "/loja/entrar",
@@ -26,47 +27,63 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         totpToken: { label: "Código de autenticação", type: "text" },
       },
       async authorize(credentials, request) {
-        const rawEmail = credentials?.email as string | undefined;
-        const email = rawEmail?.trim().toLowerCase();
-        const password = credentials?.password as string | undefined;
-        const totpToken = credentials?.totpToken as string | undefined;
-        if (!email || !password) return null;
+        if (!isDatabaseConfigured()) return null;
 
-        const ip = request?.headers?.get("x-forwarded-for") ?? undefined;
-        const userAgent = request?.headers?.get("user-agent") ?? undefined;
+        try {
+          const rawEmail = credentials?.email as string | undefined;
+          const email = rawEmail?.trim().toLowerCase();
+          const password = credentials?.password as string | undefined;
+          const totpToken = credentials?.totpToken as string | undefined;
+          if (!email || !password) return null;
 
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) return null;
+          const ip = request?.headers?.get("x-forwarded-for") ?? undefined;
+          const userAgent = request?.headers?.get("user-agent") ?? undefined;
 
-        const valid = await bcrypt.compare(password, user.passwordHash);
-        if (!valid) {
-          await prisma.loginEvent.create({
-            data: { userId: user.id, ip, userAgent, success: false },
-          }).catch(() => {});
-          return null;
-        }
+          const user = await prisma.user.findUnique({ where: { email } });
+          if (!user) return null;
 
-        // Corrige "Problema 2 – Segurança": quando o 2FA está ativado, a
-        // password sozinha já não chega.
-        if (user.totpEnabled) {
-          if (!totpToken || !user.totpSecret || !verifyTotpToken(user.totpSecret, totpToken)) {
-            await prisma.loginEvent.create({
-              data: { userId: user.id, ip, userAgent, success: false },
-            }).catch(() => {});
+          const valid = await bcrypt.compare(password, user.passwordHash);
+          if (!valid) {
+            await prisma.loginEvent
+              .create({
+                data: { userId: user.id, ip, userAgent, success: false },
+              })
+              .catch(() => {});
             return null;
           }
+
+          if (user.totpEnabled) {
+            if (
+              !totpToken ||
+              !user.totpSecret ||
+              !verifyTotpToken(user.totpSecret, totpToken)
+            ) {
+              await prisma.loginEvent
+                .create({
+                  data: { userId: user.id, ip, userAgent, success: false },
+                })
+                .catch(() => {});
+              return null;
+            }
+          }
+
+          await prisma.loginEvent
+            .create({
+              data: { userId: user.id, ip, userAgent, success: true },
+            })
+            .catch(() => {});
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: LEGACY_ADMIN_EMAILS.includes(user.email)
+              ? "ADMIN"
+              : user.role,
+          };
+        } catch {
+          return null;
         }
-
-        await prisma.loginEvent.create({
-          data: { userId: user.id, ip, userAgent, success: true },
-        }).catch(() => {});
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: LEGACY_ADMIN_EMAILS.includes(user.email) ? "ADMIN" : user.role,
-        };
       },
     }),
   ],
