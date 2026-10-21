@@ -2,30 +2,50 @@ export const CATEGORIES = ["Escolar", "Ficção", "Infantil", "Não-ficção"] a
 
 export type Category = (typeof CATEGORIES)[number];
 
+export type BookEducationLevel =
+  | "ENSINO_PRIMARIO"
+  | "ENSINO_SECUNDARIO"
+  | "TECNICO_PROFISSIONAL"
+  | "ENSINO_SUPERIOR"
+  | "GERAL";
+
 export interface Book {
+  id?: string;
   slug: string;
   title: string;
   author: string;
   editora: string;
   category: Category;
-  price: number; // Preço em Meticais (MT) — usado no fluxo B2B (Área de Cliente)
-  priceKZ: number; // Preço em Kwanzas (KZ) — usado na loja digital ao consumidor
-  priceEUR: number; // Preço em Euros — valor definido editorialmente, não calculado no cliente
-  priceBRL: number; // Preço em Reais — valor definido editorialmente, não calculado no cliente
+  price: number; // Preço comercial em Meticais (MT / MZN — Moçambique)
+  priceKZ: number; // Preço comercial em Kwanzas (KZ / AOA — Angola)
+  priceEUR: number; // Preço comercial em Euros (EUR — Portugal)
+  priceBRL: number; // Preço comercial em Reais (BRL — Brasil)
   featured?: boolean;
   bestseller?: boolean;
-  isbn?: string; // ISBN-13 real, usado para procurar a capa na Open Library Covers API
+  isbn?: string;
+  isbnNormalized?: string | null;
   description?: string;
-  rating?: number; // Avaliação média (1-5) — placeholder até existirem avaliações reais de utilizadores
+  rating?: number; // Preenchido apenas quando existirem avaliações reais na BD
   reviewCount?: number;
   pages?: number;
   year?: number;
-  free?: boolean; // Só deve ser true para obras com direitos confirmados para distribuição gratuita
-  downloadUrl?: string; // Necessário quando free=true
-  coverUrl?: string; // Capa real fornecida pela editora (asset local em /public/covers) — tem prioridade sobre a procura por ISBN
+  free?: boolean;
+  downloadUrl?: string;
+  coverUrl?: string;
+  educationLevel?: BookEducationLevel;
+  schoolGrade?: string;
+  subject?: string;
+  academicYear?: number;
+  countryOrigin?: string;
+  allowPreorder?: boolean;
+  allowQuote?: boolean;
+  active?: boolean;
+  // Dados reais de stock e disponibilidade comercial carregados da base de dados
+  stockByMarket?: Partial<Record<"AO" | "MZ" | "PT" | "BR", number>>;
+  activeMarkets?: ("AO" | "MZ" | "PT" | "BR")[];
 }
 
-// Catálogo com títulos, autores e editoras reais do espaço lusófono/CPLP.
+// Catálogo real da Pro Capital — capas, autores, editoras, ISBN e preços editoriais reais (sem dados ou avaliações fictícias).
 export const BOOKS: Book[] = [
   {
     slug: "matematica-8a-classe",
@@ -39,10 +59,14 @@ export const BOOKS: Book[] = [
     priceEUR: 6.0,
     priceBRL: 35.9,
     featured: true,
-    rating: 4.3,
-    reviewCount: 18,
     pages: 176,
     year: 2023,
+    educationLevel: "ENSINO_SECUNDARIO",
+    schoolGrade: "8ª Classe",
+    subject: "Matemática",
+    academicYear: 2026,
+    countryOrigin: "Moçambique",
+    allowQuote: true,
     description:
       "Manual escolar alinhado ao currículo nacional para a 8ª classe, com teoria, exemplos resolvidos e exercícios progressivos para consolidar os conteúdos de Matemática do ano letivo.",
   },
@@ -57,10 +81,14 @@ export const BOOKS: Book[] = [
     priceEUR: 5.9,
     priceBRL: 32.9,
     bestseller: true,
-    rating: 4.1,
-    reviewCount: 12,
     pages: 152,
     year: 2023,
+    educationLevel: "ENSINO_PRIMARIO",
+    schoolGrade: "6ª Classe",
+    subject: "Língua Portuguesa",
+    academicYear: 2026,
+    countryOrigin: "Moçambique",
+    allowQuote: true,
     description:
       "Manual oficial de Português para a 6ª classe, com textos, gramática e atividades de compreensão e escrita organizados de acordo com o programa curricular.",
   },
@@ -74,10 +102,14 @@ export const BOOKS: Book[] = [
     priceKZ: 5200,
     priceEUR: 4.9,
     priceBRL: 28.5,
-    rating: 4.0,
-    reviewCount: 7,
     pages: 96,
     year: 2023,
+    educationLevel: "ENSINO_PRIMARIO",
+    schoolGrade: "5ª Classe",
+    subject: "Ciências Naturais",
+    academicYear: 2026,
+    countryOrigin: "Moçambique",
+    allowQuote: true,
     description:
       "Caderno de exercícios complementar ao manual de Ciências Naturais, pensado para reforço e revisão dos conteúdos em sala de aula ou em casa.",
   },
@@ -94,10 +126,11 @@ export const BOOKS: Book[] = [
     featured: true,
     isbn: "9789722126342",
     coverUrl: "/covers/terra-sonambula.jpg",
-    rating: 4.7,
-    reviewCount: 214,
     pages: 208,
     year: 1992,
+    educationLevel: "ENSINO_SECUNDARIO",
+    subject: "Literatura Lusófona",
+    countryOrigin: "Moçambique",
     description:
       "Romance que entrelaça a caminhada de um velho e um menino por uma Moçambique devastada pela guerra civil com os cadernos de um viajante encontrados pelo caminho, misturando realismo e imaginário oral moçambicano.",
   },
@@ -114,10 +147,11 @@ export const BOOKS: Book[] = [
     bestseller: true,
     isbn: "9789722128186",
     coverUrl: "/covers/niketche-uma-historia-de-poligamia.jpg",
-    rating: 4.6,
-    reviewCount: 156,
     pages: 320,
     year: 2002,
+    educationLevel: "ENSINO_SUPERIOR",
+    subject: "Literatura Moçambicana",
+    countryOrigin: "Moçambique",
     description:
       "Narrado por uma mulher que descobre a poligamia do marido, o romance explora a solidariedade entre as várias esposas e os costumes em torno do casamento no sul de Moçambique.",
   },
@@ -133,10 +167,11 @@ export const BOOKS: Book[] = [
     priceBRL: 59.9,
     isbn: "9789722011167",
     coverUrl: "/covers/mayombe.jpg",
-    rating: 4.8,
-    reviewCount: 302,
     pages: 288,
     year: 1980,
+    educationLevel: "ENSINO_SECUNDARIO",
+    subject: "Literatura Angolana",
+    countryOrigin: "Angola",
     description:
       "Ambientado numa base guerrilheira na floresta do Mayombe durante a luta pela independência de Angola, o romance acompanha um grupo de combatentes e as suas tensões ideológicas e pessoais.",
   },
@@ -153,10 +188,12 @@ export const BOOKS: Book[] = [
     featured: true,
     isbn: "9789722116367",
     coverUrl: "/covers/ynari-a-menina-das-cinco-trancas.jpg",
-    rating: 4.5,
-    reviewCount: 63,
     pages: 32,
     year: 2004,
+    educationLevel: "ENSINO_PRIMARIO",
+    schoolGrade: "3ª Classe",
+    subject: "Leitura Infantil",
+    countryOrigin: "Angola",
     description:
       "Uma menina curiosa torna-se amiga de um gigante temido pela aldeia, numa história infantil sobre amizade, diferença e coragem de olhar para além do medo dos outros.",
   },
@@ -173,10 +210,12 @@ export const BOOKS: Book[] = [
     bestseller: true,
     isbn: "9789722114158",
     coverUrl: "/covers/o-gato-e-o-escuro.jpg",
-    rating: 4.4,
-    reviewCount: 41,
     pages: 32,
     year: 2001,
+    educationLevel: "ENSINO_PRIMARIO",
+    schoolGrade: "2ª Classe",
+    subject: "Leitura Infantil",
+    countryOrigin: "Moçambique",
     description:
       "Uma história ilustrada para os mais pequenos sobre um gato que se torna amigo da escuridão, ajudando as crianças a perder o medo da noite através da imaginação e do humor.",
   },
@@ -192,10 +231,12 @@ export const BOOKS: Book[] = [
     priceBRL: 34.9,
     isbn: "9789722124553",
     coverUrl: "/covers/a-bicicleta-que-tinha-bigodes.jpg",
-    rating: 4.3,
-    reviewCount: 29,
     pages: 96,
     year: 2003,
+    educationLevel: "ENSINO_PRIMARIO",
+    schoolGrade: "4ª Classe",
+    subject: "Leitura Infantil",
+    countryOrigin: "Angola",
     description:
       "Um menino sonha com uma bicicleta muito especial, prometida como prémio num concurso de rádio em Angola — um conto que mistura fantasia, humor e o quotidiano de uma infância sem luz elétrica.",
   },
@@ -212,10 +253,11 @@ export const BOOKS: Book[] = [
     featured: true,
     isbn: "9788577534180",
     coverUrl: "/covers/pedagogia-do-oprimido.jpg",
-    rating: 4.7,
-    reviewCount: 511,
     pages: 256,
     year: 1968,
+    educationLevel: "ENSINO_SUPERIOR",
+    subject: "Pedagogia e Educação",
+    countryOrigin: "Brasil",
     description:
       "Obra fundadora da pedagogia crítica, propõe uma educação dialógica e libertadora como alternativa ao modelo tradicional de ensino, com forte influência em todo o mundo lusófono.",
   },
@@ -231,10 +273,11 @@ export const BOOKS: Book[] = [
     priceEUR: 9.9,
     priceBRL: 57.9,
     bestseller: true,
-    rating: 4.6,
-    reviewCount: 87,
     pages: 251,
     year: 1975,
+    educationLevel: "ENSINO_SUPERIOR",
+    subject: "História Contemporânea",
+    countryOrigin: "Moçambique",
     description:
       "Escrito pelo fundador e primeiro presidente da FRELIMO, este relato histórico e político analisa as origens e o desenrolar da luta pela independência de Moçambique.",
   },
@@ -250,10 +293,11 @@ export const BOOKS: Book[] = [
     priceBRL: 68.9,
     isbn: "9786555200737",
     coverUrl: "/covers/longa-caminhada-ate-a-liberdade.jpg",
-    rating: 4.9,
-    reviewCount: 892,
     pages: 656,
     year: 1994,
+    educationLevel: "GERAL",
+    subject: "Biografia e História",
+    countryOrigin: "Brasil",
     description:
       "Autobiografia de Nelson Mandela, que percorre a sua infância, o ativismo contra o apartheid, os 27 anos de prisão e o caminho até se tornar o primeiro presidente eleito democraticamente na África do Sul.",
   },
@@ -268,6 +312,7 @@ export const BOOKS: Book[] = [
     priceKZ: 6400,
     priceEUR: 6.0,
     priceBRL: 35.16,
+    countryOrigin: "Angola",
     description:
       "Crónicas publicadas ao longo de décadas no Jornal de Angola, sobre o quotidiano e a memória angolana.",
   },
@@ -284,6 +329,9 @@ export const BOOKS: Book[] = [
     bestseller: true,
     priceEUR: 5.8,
     priceBRL: 33.52,
+    educationLevel: "ENSINO_SECUNDARIO",
+    subject: "Literatura Angolana",
+    countryOrigin: "Angola",
     description:
       "Romance clássico da literatura angolana, do autor vencedor do Prémio Camões, sobre a luta contra o colonialismo.",
   },
@@ -298,6 +346,7 @@ export const BOOKS: Book[] = [
     priceKZ: 8100,
     priceEUR: 7.6,
     priceBRL: 44.51,
+    countryOrigin: "Angola",
     description:
       "Obra do decano dos escritores angolanos, com pesquisa etnográfica e criação literária sobre a região de Luanda.",
   },
@@ -312,6 +361,7 @@ export const BOOKS: Book[] = [
     priceKZ: 5500,
     priceEUR: 5.2,
     priceBRL: 30.22,
+    countryOrigin: "Angola",
     description:
       "Fábulas do poeta e antigo Ministro da Educação e Cultura de Angola, uma das vozes fundadoras da literatura angolana moderna.",
   },
@@ -326,6 +376,7 @@ export const BOOKS: Book[] = [
     priceKZ: 5400,
     priceEUR: 5.1,
     priceBRL: 29.67,
+    countryOrigin: "Angola",
     description:
       "Poesia de Cristóvão Neto, com menção honrosa do Prémio Sonangol de Literatura.",
   },
@@ -340,6 +391,7 @@ export const BOOKS: Book[] = [
     priceKZ: 5700,
     priceEUR: 5.4,
     priceBRL: 31.32,
+    countryOrigin: "Angola",
     description:
       "Poemário vencedor do Prémio António Jacinto de Literatura, 1996 — a estreia literária do autor.",
   },
@@ -354,6 +406,7 @@ export const BOOKS: Book[] = [
     priceKZ: 5800,
     priceEUR: 5.5,
     priceBRL: 31.87,
+    countryOrigin: "Angola",
     description:
       "Coletânea de poesia de Antero Abreu, membro fundador da União dos Escritores Angolanos.",
   },
@@ -368,6 +421,7 @@ export const BOOKS: Book[] = [
     priceKZ: 4900,
     priceEUR: 4.6,
     priceBRL: 26.92,
+    countryOrigin: "Angola",
     description:
       "Poemário de estreia de João Tala, membro da União dos Escritores Angolanos, publicado pela primeira vez em 1997.",
   },
@@ -382,6 +436,7 @@ export const BOOKS: Book[] = [
     priceKZ: 5500,
     priceEUR: 5.2,
     priceBRL: 30.22,
+    countryOrigin: "Angola",
     description:
       "Trinta poemas escritos em Luanda entre 1977 e 1982, de um dos nomes maiores da poesia angolana moderna.",
   },
@@ -396,6 +451,7 @@ export const BOOKS: Book[] = [
     priceKZ: 4900,
     priceEUR: 4.6,
     priceBRL: 26.92,
+    countryOrigin: "Angola",
     description:
       "Narrativa sobre os acontecimentos de 4 de Fevereiro de 1961 em Angola, do poeta e antigo diretor do Jornal de Angola.",
   },
@@ -410,6 +466,7 @@ export const BOOKS: Book[] = [
     priceKZ: 6300,
     priceEUR: 5.9,
     priceBRL: 34.62,
+    countryOrigin: "Angola",
     description:
       "Obra com Menção Honrosa do Prémio Sonangol de Literatura, de um autor com percurso em teatro, cinema e diplomacia.",
   },
@@ -424,6 +481,7 @@ export const BOOKS: Book[] = [
     priceKZ: 5700,
     priceEUR: 5.4,
     priceBRL: 31.32,
+    countryOrigin: "Angola",
     description:
       "Vencedora do Prémio Sagrada Esperança, 1999, do escritor, cronista e antigo Vice-Ministro da Educação e Cultura de Angola.",
   },
@@ -440,6 +498,7 @@ export const BOOKS: Book[] = [
     bestseller: true,
     priceEUR: 7.7,
     priceBRL: 45.05,
+    countryOrigin: "Angola",
     description:
       "Romance vencedor do Prémio Sonangol de Literatura em 1998, do advogado e docente universitário Roderick Nehone.",
   },
@@ -454,6 +513,7 @@ export const BOOKS: Book[] = [
     priceKZ: 8500,
     priceEUR: 8.0,
     priceBRL: 46.7,
+    countryOrigin: "Angola",
     description:
       "Obra de um clássico da literatura angolana, com escrita direta e rigorosa sobre o processo colonial e as suas vítimas.",
   },
@@ -468,6 +528,7 @@ export const BOOKS: Book[] = [
     priceKZ: 4900,
     priceEUR: 4.6,
     priceBRL: 26.92,
+    countryOrigin: "Angola",
     description:
       "Narrativa do decano dos escritores angolanos, etnógrafo e ficcionista que dedicou a vida à cultura de Luanda.",
   },
@@ -482,6 +543,7 @@ export const BOOKS: Book[] = [
     priceKZ: 5700,
     priceEUR: 5.4,
     priceBRL: 31.32,
+    countryOrigin: "Angola",
     description:
       "Poesia de Jofre Rocha, ligada ao movimento «Vamos Descobrir Angola» e à afirmação da literatura angolana moderna.",
   },
@@ -496,6 +558,7 @@ export const BOOKS: Book[] = [
     priceKZ: 9000,
     priceEUR: 8.5,
     priceBRL: 49.45,
+    countryOrigin: "Angola",
     description:
       "Trinta anos de percurso poético de José Luís Mendonça, uma das vozes mais destacadas da poesia angolana contemporânea.",
   },
@@ -510,6 +573,7 @@ export const BOOKS: Book[] = [
     priceKZ: 4900,
     priceEUR: 4.6,
     priceBRL: 26.92,
+    countryOrigin: "Angola",
     description:
       "Obra de António Jacinto, poeta e antigo Ministro da Educação e Cultura, fundador da União dos Escritores Angolanos.",
   },
@@ -524,6 +588,7 @@ export const BOOKS: Book[] = [
     priceKZ: 7300,
     priceEUR: 6.9,
     priceBRL: 40.11,
+    countryOrigin: "Angola",
     description:
       "Quarenta e uma crónicas sobre o quotidiano luandense, publicadas no Jornal de Angola e no Correio da Semana entre 1989 e 1995.",
   },
@@ -538,6 +603,7 @@ export const BOOKS: Book[] = [
     priceKZ: 5800,
     priceEUR: 5.5,
     priceBRL: 31.87,
+    countryOrigin: "Angola",
     description:
       "Poesia de João Maimona, vencedor do Prémio Sagrada Esperança do concurso literário INALD.",
   },
@@ -552,6 +618,7 @@ export const BOOKS: Book[] = [
     priceKZ: 4900,
     priceEUR: 4.6,
     priceBRL: 26.92,
+    countryOrigin: "Angola",
     description:
       "Obra de António Jacinto, uma das figuras centrais da poesia angolana do século XX.",
   },
@@ -566,12 +633,10 @@ export const BOOKS: Book[] = [
     priceKZ: 4900,
     priceEUR: 4.6,
     priceBRL: 26.92,
+    countryOrigin: "Angola",
     description:
       "Considerado um marco da ficção angolana moderna, escrito originalmente em 1946 por António Jacinto.",
   },
-
-  // Capas reais fornecidas pela Alcance Editores (Moçambique) — recortadas das folhas de
-  // impressão originais (contracapa + lombada + capa) enviadas pelo editor.
   {
     slug: "pita-kufa-o-leito-da-morte",
     title: "Pita Kufa — O Leito da Morte",
@@ -585,8 +650,9 @@ export const BOOKS: Book[] = [
     featured: true,
     isbn: "9789928700704",
     coverUrl: "/covers/pita-kufa-o-leito-da-morte.jpg",
+    countryOrigin: "Moçambique",
     description:
-      "Novo romance de Carlos Paradona Rufino Roque, autor moçambicano nascido em Inhaminga, distrito de Cheringoma, e membro da Associação dos Escritores Moçambicanos (AEMO). Roque publica desde 1980, com obras como A Gestação do Luar, Tchanaze — A Donzela de Sena (vencedora do Prémio Internacional PEN Translate 2022), N'tsai Tchassassa — A Virgem de Missangas, Carota N'tchakatcha — Feitiços e Mitos e Mueda — Nos Labirintos dos Ritos de Iniciação. É também jurado do Grande Prémio SONANGOL de Literatura, de Angola.",
+      "Novo romance de Carlos Paradona Rufino Roque, autor moçambicano nascido em Inhaminga, distrito de Cheringoma, e membro da Associação dos Escritores Moçambicanos (AEMO).",
   },
   {
     slug: "a-goda-la-ku-bola",
@@ -599,8 +665,11 @@ export const BOOKS: Book[] = [
     priceEUR: 6.9,
     priceBRL: 38.9,
     coverUrl: "/covers/a-goda-la-ku-bola.jpg",
+    educationLevel: "ENSINO_SECUNDARIO",
+    subject: "Educação Cívica",
+    countryOrigin: "Moçambique",
     description:
-      "Uma colectânea de diálogos cívicos dirigidos aos mais novos, por Elísio Macamo, professor de sociologia e estudos africanos na Universidade de Basileia, na Suíça. Nascido e criado em Xai-Xai, formou-se em Maputo, Salford e Londres (Inglaterra) e Bayreuth (Alemanha), e é autor de várias obras académicas sobre risco e desastres, reflexão intelectual em África, desenvolvimento, política e metodologia.",
+      "Colectânea de diálogos cívicos dirigidos aos mais novos, por Elísio Macamo, professor de sociologia e estudos africanos.",
   },
   {
     slug: "mishu-1952-1975",
@@ -614,8 +683,9 @@ export const BOOKS: Book[] = [
     priceBRL: 35.9,
     isbn: "9789928700384",
     coverUrl: "/covers/mishu-1952-1975.jpg",
+    countryOrigin: "Moçambique",
     description:
-      "Musumbuluku Nhuvu — pseudónimo de Narciso Matos, professor universitário e gestor educacional — regressa à Alcance Editores depois de Ndangu Wa Txindi na Musumbuluku (2021). \"Mishu\" significa manhã nascer do sol, na praia do Bilene, em Gaza, cenário que atravessa esta obra passada entre 1952 e 1975.",
+      "Obra passada entre 1952 e 1975 na praia do Bilene, em Gaza, assinada por Musumbuluku Nhuvu, pseudónimo de Narciso Matos.",
   },
   {
     slug: "o-amor-o-gato-preto-e-outras-insonias",
@@ -629,8 +699,9 @@ export const BOOKS: Book[] = [
     priceBRL: 33.9,
     isbn: "9789928700391",
     coverUrl: "/covers/o-amor-o-gato-preto-e-outras-insonias.jpg",
+    countryOrigin: "Moçambique",
     description:
-      "Imaginaram alguma vez o inusitado de, em noites de insónia, acabarem a conversar com um gato preto? Nesta colectânea de textos poéticos, José Paulo da Fonseca Pinto Lobo — moçambicano nascido em Maputo em 1957, consultor de gestão e formador certificado — propõe uma jornada pelo Amor, pelas memórias do passado, pelas inquietações e certezas do presente e pelas esperanças do futuro. É também autor de Asas para Voar Raízes para Onde Voltar (2021) e Pelas Margens do Tempo (Lisboa, 2023).",
+      "Colectânea de textos poéticos de José Paulo da Fonseca Pinto Lobo sobre o amor, as memórias do passado e o futuro.",
   },
   {
     slug: "o-mundo-da-matematica-1a-classe",
@@ -642,10 +713,17 @@ export const BOOKS: Book[] = [
     priceKZ: 4900,
     priceEUR: 4.5,
     priceBRL: 24.9,
+    featured: true,
     year: 2025,
+    educationLevel: "ENSINO_PRIMARIO",
+    schoolGrade: "1ª Classe",
+    subject: "Matemática",
+    academicYear: 2026,
+    countryOrigin: "Moçambique",
+    allowQuote: true,
     coverUrl: "/covers/o-mundo-da-matematica-1a-classe.jpg",
     description:
-      "Manual oficial de Matemática para a 1ª classe, edição revista de 2025, propriedade do Ministério da Educação e Cultura de Moçambique, com coordenação geral de Ismael Cassamo Nhêze.",
+      "Manual oficial de Matemática para a 1ª classe, edição revista de 2025, propriedade do Ministério da Educação e Cultura de Moçambique.",
   },
   {
     slug: "ouvir-e-falar-ler-e-escrever",
@@ -657,10 +735,17 @@ export const BOOKS: Book[] = [
     priceKZ: 4900,
     priceEUR: 4.5,
     priceBRL: 24.9,
+    featured: true,
     year: 2025,
+    educationLevel: "ENSINO_PRIMARIO",
+    schoolGrade: "1ª Classe",
+    subject: "Língua Portuguesa",
+    academicYear: 2026,
+    countryOrigin: "Moçambique",
+    allowQuote: true,
     coverUrl: "/covers/ouvir-e-falar-ler-e-escrever.jpg",
     description:
-      "Manual oficial de Língua Portuguesa para a 1ª classe, edição revista de 2025, propriedade do Ministério da Educação e Cultura de Moçambique, com coordenação geral de Ismael Cassamo Nhêze.",
+      "Manual oficial de Língua Portuguesa para a 1ª classe, edição revista de 2025, propriedade do Ministério da Educação e Cultura de Moçambique.",
   },
   {
     slug: "educacao-visual-e-oficios-5a-classe",
@@ -673,9 +758,15 @@ export const BOOKS: Book[] = [
     priceEUR: 4.8,
     priceBRL: 26.5,
     year: 2025,
+    educationLevel: "ENSINO_PRIMARIO",
+    schoolGrade: "5ª Classe",
+    subject: "Educação Visual e Ofícios",
+    academicYear: 2026,
+    countryOrigin: "Moçambique",
+    allowQuote: true,
     coverUrl: "/covers/educacao-visual-e-oficios-5a-classe.jpg",
     description:
-      "Livro do aluno da 5ª classe para Educação Visual e Ofícios, edição revista de 2025, coordenação editorial da Alcance Editores, propriedade do Ministério da Educação e Cultura de Moçambique.",
+      "Livro do aluno da 5ª classe para Educação Visual e Ofícios, edição revista de 2025, coordenação editorial da Alcance Editores.",
   },
   {
     slug: "educacao-visual-e-oficios-6a-classe",
@@ -688,9 +779,15 @@ export const BOOKS: Book[] = [
     priceEUR: 4.8,
     priceBRL: 26.5,
     year: 2025,
+    educationLevel: "ENSINO_PRIMARIO",
+    schoolGrade: "6ª Classe",
+    subject: "Educação Visual e Ofícios",
+    academicYear: 2026,
+    countryOrigin: "Moçambique",
+    allowQuote: true,
     coverUrl: "/covers/educacao-visual-e-oficios-6a-classe.jpg",
     description:
-      "Livro do aluno da 6ª classe para Educação Visual e Ofícios, edição revista de 2025, coordenação editorial da Alcance Editores, propriedade do Ministério da Educação e Cultura de Moçambique.",
+      "Livro do aluno da 6ª classe para Educação Visual e Ofícios, edição revista de 2025, coordenação editorial da Alcance Editores.",
   },
 ];
 

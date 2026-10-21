@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { FileDown } from "lucide-react";
 import BookCard from "@/components/BookCard";
+import PageHeader from "@/components/PageHeader";
 import { getCategoryBySlug } from "@/lib/categories";
+import { getAllCatalogBooks } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/site";
 import { toCatalogBook } from "@/lib/book-view";
 
-// Página gerada automaticamente por categoria — corrige "Problema 4 – SEO
-// perdido": cada categoria passa a ter a sua própria página com metadata,
-// descrição, FAQ e Schema.org, sem precisar de código novo por categoria.
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -34,13 +35,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const category = await getCategoryBySlug(slug);
+  const [category, catalogBooks] = await Promise.all([
+    getCategoryBySlug(slug),
+    getAllCatalogBooks(),
+  ]);
   if (!category) notFound();
 
   const faq = category.faq as { pergunta: string; resposta: string }[] | null;
+  const enrichedMap = new Map(catalogBooks.map((b) => [b.slug, b]));
 
-  // Schema.org (CollectionPage + FAQPage quando há FAQ) — corrige a falta
-  // de dados estruturados apontada no relatório.
+  const books = category.books.map(
+    (b) => enrichedMap.get(b.slug) ?? toCatalogBook(b, category.name),
+  );
+
+  const breadcrumbs = [
+    { label: "Início", href: "/" },
+    { label: "Catálogo", href: "/catalogo" },
+    ...(category.parent
+      ? [
+          {
+            label: category.parent.name,
+            href: `/categoria/${category.parent.slug}`,
+          },
+        ]
+      : []),
+    { label: category.name },
+  ];
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -48,92 +69,82 @@ export default async function CategoryPage({ params }: Props) {
     description: category.description ?? undefined,
     url: `${SITE_URL}/categoria/${category.slug}`,
   };
-  const faqJsonLd = faq?.length
-    ? {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        mainEntity: faq.map((f) => ({
-          "@type": "Question",
-          name: f.pergunta,
-          acceptedAnswer: { "@type": "Answer", text: f.resposta },
-        })),
-      }
-    : null;
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+    <div className="pb-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      {faqJsonLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-        />
-      )}
 
-      {category.parent && (
-        <Link
-          href={`/categoria/${category.parent.slug}`}
-          className="text-xs font-medium text-brand hover:underline"
-        >
-          ← {category.parent.name}
-        </Link>
-      )}
+      <PageHeader
+        eyebrow="Categoria Editorial"
+        title={category.name}
+        description={category.description ?? undefined}
+        breadcrumbs={breadcrumbs}
+        actions={
+          <a
+            href={`/api/catalogo/pdf?categoria=${encodeURIComponent(category.name)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2.5 text-xs font-semibold text-ink hover:border-brand/40 hover:text-brand"
+          >
+            <FileDown size={14} />
+            <span>Exportar PDF ({category.name})</span>
+          </a>
+        }
+      />
 
-      <h1 className="mt-2 font-serif text-2xl font-semibold text-ink sm:text-3xl">
-        {category.name}
-      </h1>
-      {category.description && (
-        <p className="mt-3 max-w-2xl text-foreground/70">{category.description}</p>
-      )}
-
-      {category.children.length > 0 && (
-        <div className="mt-6 flex flex-wrap gap-2">
-          {category.children.map((child) => (
-            <Link
-              key={child.id}
-              href={`/categoria/${child.slug}`}
-              className="rounded-full border border-line px-4 py-1.5 text-xs font-medium text-ink hover:border-brand/40"
-            >
-              {child.name}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-4">
-        {category.books.map((book, index) => (
-          <BookCard
-            key={book.slug}
-            index={index}
-            book={toCatalogBook(book, category.name)}
-          />
-        ))}
-      </div>
-
-      {category.books.length === 0 && (
-        <p className="mt-10 text-sm text-foreground/60">
-          Ainda não há livros associados a esta categoria.
-        </p>
-      )}
-
-      {faq && faq.length > 0 && (
-        <div className="mt-16 border-t border-line pt-10">
-          <h2 className="font-serif text-xl font-semibold text-ink">
-            Perguntas frequentes
-          </h2>
-          <div className="mt-6 space-y-6">
-            {faq.map((f) => (
-              <div key={f.pergunta}>
-                <p className="font-medium text-ink">{f.pergunta}</p>
-                <p className="mt-1 text-sm text-foreground/70">{f.resposta}</p>
-              </div>
+      <section className="mx-auto max-w-7xl px-5 sm:px-8">
+        {category.children.length > 0 && (
+          <div className="mb-8 flex flex-wrap gap-2">
+            {category.children.map((sub) => (
+              <Link
+                key={sub.id}
+                href={`/categoria/${sub.slug}`}
+                className="rounded-full border border-line bg-white px-4 py-1.5 text-xs font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
+              >
+                {sub.name}
+              </Link>
             ))}
           </div>
-        </div>
-      )}
+        )}
+
+        {books.length === 0 ? (
+          <div className="rounded-2xl border border-line bg-white p-12 text-center">
+            <p className="font-serif text-xl font-semibold text-ink">
+              Nenhum título ativo nesta subcategoria no momento
+            </p>
+            <p className="mt-2 text-sm text-ink/65">
+              Consulte o catálogo geral ou solicite cotação comercial por ISBN.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {books.map((book, idx) => (
+              <BookCard key={book.slug} book={book} index={idx} />
+            ))}
+          </div>
+        )}
+
+        {faq && faq.length > 0 && (
+          <div className="mt-16 rounded-2xl border border-line bg-white p-8">
+            <h2 className="font-serif text-2xl font-semibold text-ink">
+               Perguntas frequentes
+            </h2>
+            <dl className="mt-6 space-y-5 divide-y divide-line/70">
+              {faq.map((f) => (
+                <div key={f.pergunta} className="pt-5 first:pt-0">
+                  <dt className="font-semibold text-ink">{f.pergunta}</dt>
+                  <dd className="mt-1.5 text-sm leading-relaxed text-ink/70">
+                    {f.resposta}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

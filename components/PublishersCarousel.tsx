@@ -1,76 +1,110 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import EditoraMark from "@/components/EditoraMark";
 import type { Editora } from "@/data/editoras";
-import { useLanguage } from "@/context/LanguageContext";
+import EditoraMark from "./EditoraMark";
+
+function PublisherTile({
+  editora,
+  tabIndex,
+}: {
+  editora: Editora;
+  tabIndex?: number;
+}) {
+  return (
+    <Link
+      href={`/editoras/${editora.slug}`}
+      aria-label={editora.name}
+      tabIndex={tabIndex}
+      className="group flex h-24 w-56 shrink-0 items-center justify-center rounded-2xl border border-line/90 bg-white px-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-sm motion-reduce:transform-none"
+    >
+      {editora.logo ? (
+        <Image
+          src={editora.logo}
+          alt={editora.name}
+          width={200}
+          height={80}
+          sizes="208px"
+          className="max-h-13 w-auto object-contain opacity-90 transition-opacity duration-200 group-hover:opacity-100"
+        />
+      ) : (
+        <EditoraMark name={editora.name} country={editora.country} />
+      )}
+    </Link>
+  );
+}
 
 export default function PublishersCarousel({
   publishers,
 }: {
   publishers: Editora[];
 }) {
-  const { dict } = useLanguage();
+  const seen = new Set<string>();
+  const uniquePublishers = publishers.filter((e) => {
+    if (seen.has(e.slug)) return false;
+    seen.add(e.slug);
+    return true;
+  });
 
-  if (publishers.length === 0) return null;
+  if (uniquePublishers.length === 0) return null;
 
   return (
-    <section
-      aria-label={dict.partnerMarquee.trustText}
-      className="overflow-hidden border-y border-line bg-cream-deep/40 py-6 sm:py-7"
-    >
-      <p className="mb-5 px-5 text-center text-xs font-medium uppercase tracking-wide text-foreground/55 sm:px-8">
-        {dict.partnerMarquee.trustText}
-      </p>
+    <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <div className="inline-flex items-center gap-2">
+            <span className="h-0.5 w-6 bg-accent" aria-hidden="true" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand">
+              Representação &amp; Parcerias Editoriais
+            </span>
+          </div>
+          <h2 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            Editoras e chancelas parceiras
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink/65">
+            Editoras escolares, académicas, infantis e literárias de Moçambique,
+            Angola, Portugal e Brasil com distribuição comercial integrada.
+          </p>
+        </div>
 
-      <div className="publishers-marquee-window overflow-hidden">
-        <div className="publishers-marquee flex w-max items-center" aria-label="Editoras parceiras">
-          {[0, 1].map((copyIndex) => {
-            const duplicate = copyIndex === 1;
+        <Link
+          href="/editoras"
+          className="text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
+        >
+          Ver diretório completo ({uniquePublishers.length}) →
+        </Link>
+      </div>
 
-            return (
-              <div
-                key={copyIndex}
-                className="publishers-marquee__group flex items-center"
-                aria-hidden={duplicate || undefined}
-              >
-                {publishers.map((publisher) => (
-                  <Link
-                    key={publisher.slug}
-                    href={publisher.website ?? `/editoras/${publisher.slug}`}
-                    target={publisher.website ? "_blank" : undefined}
-                    rel={publisher.website ? "noreferrer noopener" : undefined}
-                    tabIndex={duplicate ? -1 : undefined}
-                    aria-label={publisher.name}
-                    title={publisher.country ? `${publisher.name} — ${publisher.country}` : publisher.name}
-                    className="flex h-20 w-36 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border border-line/70 bg-cream px-3 text-center transition-colors hover:border-brand/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand sm:h-24 sm:w-40"
-                  >
-                    {publisher.logo ? (
-                      <Image
-                        src={publisher.logo}
-                        alt={publisher.name}
-                        width={144}
-                        height={48}
-                        sizes="160px"
-                        className="max-h-9 max-w-full object-contain"
-                      />
-                    ) : (
-                      <EditoraMark name={publisher.name} />
-                    )}
-                    <span className="line-clamp-1 max-w-full text-[11px] font-medium leading-tight text-ink/80">
-                      {publisher.name}
-                    </span>
-                    {publisher.country && (
-                      <span className="line-clamp-1 max-w-full text-[9px] uppercase tracking-wide text-foreground/45">
-                        {publisher.country}
-                      </span>
-                    )}
-                  </Link>
-                ))}
-              </div>
-            );
-          })}
+      <div
+        role="region"
+        aria-label="Editoras parceiras"
+        className="publishers-marquee-window relative mt-9 overflow-hidden py-1"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-cream to-transparent sm:w-20 motion-reduce:hidden"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-cream to-transparent sm:w-20 motion-reduce:hidden"
+        />
+        <div className="publishers-marquee flex w-max">
+          <div className="publishers-marquee__group flex shrink-0 items-center">
+            {uniquePublishers.map((editora) => (
+              <PublisherTile key={editora.slug} editora={editora} />
+            ))}
+          </div>
+          <div
+            aria-hidden="true"
+            className="publishers-marquee__group flex shrink-0 items-center"
+          >
+            {uniquePublishers.map((editora) => (
+              <PublisherTile
+                key={`dup-${editora.slug}`}
+                editora={editora}
+                tabIndex={-1}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>

@@ -1,99 +1,153 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, MapPin, Phone } from "lucide-react";
-import { LogoMark } from "@/components/Logo";
+import { ArrowUpRight, FileDown } from "lucide-react";
+import Logo from "./Logo";
 import { useLanguage } from "@/context/LanguageContext";
+import { MARKET_LIST } from "@/lib/markets";
 
 export default function Footer() {
   const { dict } = useLanguage();
 
   return (
-    <footer className="border-t border-line bg-ink text-cream">
-      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <LogoMark />
-            <span className="font-serif text-lg font-semibold">
-              <span className="text-cream">pro</span>
-              <span className="text-orange">capital</span>
-            </span>
+    <footer className="border-t border-white/10 bg-ink text-white">
+      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
+          <div className="lg:col-span-2">
+            <Logo variant="light" />
+            <p className="mt-4 max-w-md text-sm leading-relaxed text-white/70">
+              {dict.footer.tagline}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {MARKET_LIST.map((m) => (
+                <a
+                  key={m.code}
+                  href={`/api/catalogo/pdf?pais=${m.code}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/85 transition-colors hover:border-accent/60 hover:text-accent"
+                >
+                  <FileDown size={12} aria-hidden="true" />
+                  <span>
+                    PDF {m.name} ({m.currency})
+                  </span>
+                </a>
+              ))}
+            </div>
           </div>
-          <p className="mt-4 max-w-xs text-sm leading-relaxed text-cream/70">
-            {dict.footer.tagline}
+
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+              {dict.footer.navigationTitle}
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm text-white/75">
+              <li>
+                <Link href="/livros-escolares" className="hover:text-white">
+                  Livros Escolares (1.ª à 12.ª Classe)
+                </Link>
+              </li>
+              <li>
+                <Link href="/catalogo" className="hover:text-white">
+                  Catálogo Geral Multi-Mercado
+                </Link>
+              </li>
+              <li>
+                <Link href="/editoras" className="hover:text-white">
+                  Editoras e Chancelas Parceiras
+                </Link>
+              </li>
+              <li>
+                <Link href="/destaques" className="hover:text-white">
+                  Destaques Editoriais
+                </Link>
+              </li>
+              <li>
+                <Link href="/mais-vendidos" className="hover:text-white">
+                  Mais Vendidos
+                </Link>
+              </li>
+              <li>
+                <Link href="/livro/livro-gratuito" className="hover:text-white">
+                  {dict.nav.digitalBook}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+              Soluções B2B &amp; Conta
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm text-white/75">
+              <li>
+                <Link href="/cotacoes" className="hover:text-white">
+                  Pedidos de Cotação &amp; Volume
+                </Link>
+              </li>
+              <li>
+                <Link href="/convenios" className="hover:text-white">
+                  Convénios Escolares &amp; Institucionais
+                </Link>
+              </li>
+              <li>
+                <Link href="/cliente/catalogo" className="hover:text-white">
+                  Catálogo Comercial B2B
+                </Link>
+              </li>
+              <li>
+                <Link href="/loja/conta" className="hover:text-white">
+                  Área de Cliente &amp; Encomendas
+                </Link>
+              </li>
+              <li>
+                <Link href="/eventos" className="hover:text-white">
+                  Eventos &amp; Feiras do Livro
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog" className="hover:text-white">
+                  {dict.nav.blog}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">
+              {dict.footer.contactsTitle}
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm text-white/75">
+              <li>Rua Almeida Garrett n.º 366, Maputo</li>
+              <li>Angola · Moçambique · Portugal · Brasil</li>
+              <li>
+                <a
+                  href="mailto:comercial@procapitalmz.com"
+                  className="hover:text-white"
+                >
+                  comercial@procapitalmz.com
+                </a>
+              </li>
+              <li>+258 87 704 6220</li>
+              <li className="pt-2">
+                <Link
+                  href="/contactos?motivo=PARCERIA"
+                  className="inline-flex items-center gap-1 font-semibold text-accent hover:underline"
+                >
+                  <span>Solicitar parceria editorial</span>
+                  <ArrowUpRight size={14} aria-hidden="true" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-12 flex flex-col justify-between gap-4 border-t border-white/10 pt-7 text-xs text-white/55 sm:flex-row sm:items-center">
+          <p>{dict.footer.rights}</p>
+          <p>
+            Distribuição Editorial Multi-Mercado · Preços e disponibilidade sujeitos ao
+            stock de cada país
           </p>
         </div>
-
-        <div>
-          <h3 className="font-serif text-base font-semibold">{dict.footer.navigationTitle}</h3>
-          <ul className="mt-4 space-y-2 text-sm text-cream/70">
-            <li>
-              <Link href="/catalogo" className="hover:text-cream">{dict.nav.catalog}</Link>
-            </li>
-            <li>
-              <Link href="/editoras" className="hover:text-cream">{dict.nav.publishers}</Link>
-            </li>
-            <li>
-              <Link href="/#solucoes" className="hover:text-cream">{dict.nav.solutions}</Link>
-            </li>
-            <li>
-              <Link href="/#expansao" className="hover:text-cream">{dict.nav.expansion}</Link>
-            </li>
-            <li>
-              <Link href="/blog" className="hover:text-cream">{dict.nav.blog}</Link>
-            </li>
-            <li>
-              <Link href="/contactos" className="hover:text-cream">{dict.nav.contacts}</Link>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="font-serif text-base font-semibold">{dict.footer.marketsTitle}</h3>
-          <ul className="mt-4 space-y-2 text-sm text-cream/70">
-            <li>Moçambique</li>
-            <li>Angola</li>
-            <li>Portugal</li>
-            <li>Brasil</li>
-            <li className="text-cream/50">CPLP</li>
-          </ul>
-        </div>
-
-        <div>
-          <h3 className="font-serif text-base font-semibold">{dict.footer.contactsTitle}</h3>
-          <ul className="mt-4 space-y-3 text-sm text-cream/70">
-            <li className="flex items-start gap-2">
-              <MapPin size={16} className="mt-0.5 shrink-0" />
-              <span>
-                Rua Almeida Garrett, Bairro da Coop,
-                <br />
-                n.º 366, Maputo, Moçambique
-              </span>
-            </li>
-            <li className="flex items-start gap-2">
-              <Phone size={16} className="mt-0.5 shrink-0" />
-              <a
-                href="tel:+258877046220"
-                className="underline-offset-4 hover:text-cream hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
-              >
-                +258 87 704 6220
-              </a>
-            </li>
-            <li className="flex items-start gap-2">
-              <Mail size={16} className="mt-0.5 shrink-0" />
-              <a
-                href="mailto:comercial@procapitalmz.com"
-                className="underline-offset-4 hover:text-cream hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream"
-              >
-                comercial@procapitalmz.com
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div className="border-t border-cream/10 px-5 py-5 text-center text-xs text-cream/50 sm:px-8">
-        © {new Date().getFullYear()} Pro Capital, Lda · NUIT 401430857 · {dict.footer.rights}
       </div>
     </footer>
   );

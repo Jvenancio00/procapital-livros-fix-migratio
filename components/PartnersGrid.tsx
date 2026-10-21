@@ -1,84 +1,61 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, BookOpen, Building2 } from "lucide-react";
-import { EDITORAS } from "@/data/editoras";
+import Link from "next/link";
+import type { Editora } from "@/data/editoras";
+import EditoraMark from "./EditoraMark";
 import { useLanguage } from "@/context/LanguageContext";
 
-export default function PartnersGrid() {
+export default function PartnersGrid({
+  publishers,
+}: {
+  publishers?: Editora[];
+}) {
   const { dict } = useLanguage();
+  const list = publishers ?? [];
+
+  if (list.length === 0) return null;
 
   return (
-    <section className="border-b border-line bg-cream">
-      <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <span className="text-xs font-semibold uppercase tracking-widest text-brand">
-              {dict.partners.eyebrow}
-            </span>
-            <h2 className="mt-2 font-serif text-2xl font-semibold text-ink sm:text-3xl">
-              {dict.partners.title}
-            </h2>
-            <p className="mt-3 max-w-2xl text-foreground/70">
-              {dict.partners.description}
-            </p>
-          </div>
+    <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+            Rede Editorial
+          </span>
+          <h2 className="mt-2 font-serif text-3xl font-semibold text-ink">
+            Editoras e parceiros representados
+          </h2>
         </div>
+        <Link
+          href="/editoras"
+          className="text-sm font-semibold text-brand hover:underline"
+        >
+          Ver todas as editoras →
+        </Link>
+      </div>
 
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-5">
-          {EDITORAS.map((editora) => (
-            <div
-              key={editora.slug}
-              className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-line bg-cream-deep/40 px-3 py-3 text-center transition-colors hover:border-brand/30"
-            >
-              {editora.logo ? (
-                <Image
-                  src={editora.logo}
-                  alt={editora.name}
-                  width={120}
-                  height={40}
-                  className="max-h-8 max-w-full object-contain"
-                />
-              ) : (
-                <span className="flex min-h-8 max-w-full items-center justify-center gap-2 text-foreground/55">
-                  <BookOpen size={16} className="shrink-0 text-ink/40" aria-hidden="true" />
-                  <span className="line-clamp-2 text-[11px] font-medium leading-tight">
-                    {editora.name}
-                  </span>
-                </span>
-              )}
-              {editora.logo && (
-                <span className="line-clamp-1 max-w-full text-[11px] font-medium text-foreground/65">
-                  {editora.name}
-                </span>
-              )}
-              {editora.country && (
-                <span className="line-clamp-1 max-w-full text-[9px] uppercase tracking-wide text-foreground/45">
-                  {editora.country}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-cream-deep/40 px-6 py-5">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
-              <Building2 size={18} />
-            </span>
-            <span className="font-serif text-base font-semibold text-ink">
-              {dict.partners.becomeTitle}
-            </span>
-          </div>
+      <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        {list.map((editora) => (
           <Link
-            href="/contactos"
-            className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-cream transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            key={editora.slug}
+            href={`/editoras/${editora.slug}`}
+            className="group flex h-28 flex-col items-center justify-center rounded-2xl border border-line bg-white p-4 text-center transition-all hover:border-ink/30 hover:shadow-sm"
           >
-            {dict.partners.ctaBecome}
-            <ArrowRight size={15} />
+            {editora.logo ? (
+              <Image
+                src={editora.logo}
+                alt={editora.name}
+                width={180}
+                height={72}
+                sizes="(max-width: 639px) 44vw, 180px"
+                className="max-h-13 w-auto object-contain"
+              />
+            ) : (
+              <EditoraMark name={editora.name} country={editora.country} />
+            )}
           </Link>
-        </div>
+        ))}
       </div>
     </section>
   );

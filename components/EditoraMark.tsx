@@ -1,6 +1,3 @@
-// Marca de uma editora sem logo: um monograma com as iniciais do nome, em vez de
-// um ícone genérico. Assim cada editora do carrossel tem a sua identidade visual,
-// mesmo enquanto o ficheiro do logo não existe em /public/editoras.
 const STOP_WORDS = new Set([
   "de",
   "da",
@@ -22,8 +19,6 @@ export function editoraInitials(name: string): string {
     .split(/\s+/)
     .filter((word) => word.length > 0 && !STOP_WORDS.has(word.toLowerCase()));
   const source = words.length > 0 ? words : name.split(/\s+/);
-  // Um nome de uma só palavra dá duas letras ("Plural" → "PL"), para o monograma
-  // não ficar com uma letra só.
   if (source.length === 1) return source[0].slice(0, 2).toUpperCase();
   return source
     .slice(0, 2)
@@ -32,19 +27,33 @@ export function editoraInitials(name: string): string {
     .toUpperCase();
 }
 
+/**
+ * Apresentação tipográfica editorial para editoras sem ficheiro de logótipo:
+ * exibe sempre o nome real da editora com hierarquia de chancela editorial e
+ * filete dourado discreto, sem substituir o nome por círculos de iniciais.
+ */
 export default function EditoraMark({
   name,
+  country,
   className = "",
 }: {
   name: string;
+  country?: string;
   className?: string;
 }) {
   return (
-    <span
-      aria-hidden="true"
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 font-serif text-sm font-semibold tracking-wide text-brand ${className}`}
+    <div
+      className={`flex flex-col items-center justify-center px-2 text-center ${className}`}
     >
-      {editoraInitials(name)}
-    </span>
+      <span className="mb-1.5 h-0.5 w-6 bg-accent/85" aria-hidden="true" />
+      <span className="line-clamp-2 font-serif text-sm font-semibold leading-snug tracking-tight text-ink">
+        {name}
+      </span>
+      {country && (
+        <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-ink/45">
+          {country}
+        </span>
+      )}
+    </div>
   );
 }

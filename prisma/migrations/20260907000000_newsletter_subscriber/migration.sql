@@ -1,5 +1,5 @@
--- CreateTable
-CREATE TABLE "NewsletterSubscriber" (
+-- CreateTable (idempotente)
+CREATE TABLE IF NOT EXISTS "NewsletterSubscriber" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "source" TEXT,
@@ -11,8 +11,5 @@ CREATE TABLE "NewsletterSubscriber" (
     CONSTRAINT "NewsletterSubscriber_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "NewsletterSubscriber_email_key" ON "NewsletterSubscriber"("email");
-
--- CreateIndex
-CREATE INDEX "NewsletterSubscriber_createdAt_idx" ON "NewsletterSubscriber"("createdAt");
+CREATE UNIQUE INDEX IF NOT EXISTS "NewsletterSubscriber_email_key" ON "NewsletterSubscriber"("email");
+CREATE INDEX IF NOT EXISTS "NewsletterSubscriber_createdAt_idx" ON "NewsletterSubscriber"("createdAt");

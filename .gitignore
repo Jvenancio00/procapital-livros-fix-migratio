@@ -9,8 +9,10 @@
 .env
 .env*.local
 
-# Prisma
+# Prisma & base de dados local de desenvolvimento/teste
 /prisma/dev.db
+/.pgdata/
+/.tmp-test/
 
 # Logs
 npm-debug.log*
