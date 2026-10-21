@@ -1,13 +1,9 @@
-// Esquema da base de dados da Pro Capital — livraria digital
-// Depois de teres a "connection string" (Neon ou Vercel Postgres) no .env,
-// corre tudo de uma vez com:
-//   npm run db:setup
-// (equivale a "prisma migrate dev" + "tsx prisma/seed.ts", que cria as
-// tabelas e semeia categorias, livros, editoras, blog, eventos e o
-// administrador definido em ADMIN_BOOTSTRAP_EMAIL/ADMIN_BOOTSTRAP_PASSWORD)
+// Esquema da base de dados da Pro Capital — Plataforma Editorial & Comércio B2B Lusófono
+// Compatível com PostgreSQL (Neon, Vercel Postgres, RDS e PostgreSQL local).
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "client"
 }
 
 datasource db {
@@ -27,6 +23,134 @@ enum Currency {
   BRL
 }
 
+enum MarketCode {
+  AO
+  MZ
+  PT
+  BR
+}
+
+enum EducationLevel {
+  ENSINO_PRIMARIO
+  ENSINO_SECUNDARIO
+  TECNICO_PROFISSIONAL
+  ENSINO_SUPERIOR
+  GERAL
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  AWAITING_PAYMENT
+  PAID
+  PROCESSING
+  SHIPPED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PENDING_TRANSFER
+  UNDER_REVIEW
+  CONFIRMED
+  FAILED
+  REFUNDED
+}
+
+enum StockMovementType {
+  INITIAL_SEED
+  IMPORT_IN
+  MANUAL_ADJUSTMENT
+  CHECKOUT_RESERVE
+  RESERVATION_RELEASE
+  SALE_CONFIRMED
+  ORDER_REFUND
+}
+
+enum ReservationStatus {
+  ACTIVE
+  COMMITTED
+  RELEASED
+  EXPIRED
+}
+
+enum ImportMode {
+  UPDATE_STOCK
+  UPDATE_PRICES
+  IMPORT_BOOKS
+  COMBINED
+}
+
+enum QuoteStatus {
+  PENDING
+  IN_REVIEW
+  QUOTED
+  APPROVED
+  CONVERTED_ORDER
+  REJECTED
+}
+
+enum NoteKind {
+  BOOKMARK
+  NOTE
+}
+
+enum TipoInstituicao {
+  ESCOLA
+  UNIVERSIDADE
+  LIVRARIA
+  EDITORA
+  OUTRO
+}
+
+enum EstadoConvenio {
+  PENDENTE
+  EM_ANALISE
+  APROVADO
+  REJEITADO
+}
+
+enum TipoEvento {
+  LANCAMENTO
+  FEIRA
+  WORKSHOP
+  OUTRO
+}
+
+enum EstadoInscricao {
+  CONFIRMADA
+  LISTA_ESPERA
+  CANCELADA
+}
+
+enum ClientType {
+  PARTICULAR
+  LIVRARIA
+  REVENDEDOR
+  ESCOLA
+  UNIVERSIDADE
+  EDITORA
+  EMPRESA_INSTITUICAO
+  DISTRIBUIDOR_PARCEIRO
+}
+
+enum ContactReason {
+  PUBLICAR
+  COMPRAR
+  PARCERIA
+  SUPORTE_TECNICO
+  COMERCIAL
+  OUTRO
+  EDITORA
+  LIVRARIA
+  ESCOLA
+  PARCEIRO_COMERCIAL
+  INVESTIMENTO
+  LEITOR
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -36,20 +160,47 @@ model User {
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
 
-  // --- 2FA (TOTP, sem dependência de SMS/email externo) ---
   totpSecret  String?
   totpEnabled Boolean @default(false)
 
-  orders        Order[]
-  reviews       Review[]
-  favorites     Favorite[]
-  library       LibraryItem[]
-  readingNotes  ReadingNote[]
-  clientProfile ClientProfile?
-  loginEvents   LoginEvent[]
+  orders                  Order[]
+  reviews                 Review[]
+  favorites               Favorite[]
+  library                 LibraryItem[]
+  readingNotes            ReadingNote[]
+  clientProfile           ClientProfile?
+  loginEvents             LoginEvent[]
+  quoteRequests           QuoteRequest[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 }
 
-// Histórico de acessos — corrige a ausência apontada na secção "Entrar".
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id         String    @id @default(cuid())
+  token      String    @unique
+  expiresAt  DateTime
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
 model LoginEvent {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -63,17 +214,12 @@ model LoginEvent {
   @@index([userId, createdAt])
 }
 
-// ---------------------------------------------------------------------------
-// Categorias — passam a ser hierárquicas e geridas na base de dados
-// (corrige "Problema 1 – Categorias rígidas" e "Problema 2 – Hierarquia
-// inexistente" do relatório original).
-// ---------------------------------------------------------------------------
 model Category {
   id          String  @id @default(cuid())
   slug        String  @unique
   name        String  @unique
-  description String? // usado na página /categoria/[slug] para SEO
-  faq         Json? // lista [{ pergunta, resposta }] para a FAQ da página de categoria
+  description String?
+  faq         Json?
 
   parentId String?
   parent   Category?  @relation("CategoryTree", fields: [parentId], references: [id])
@@ -84,44 +230,46 @@ model Category {
   @@index([parentId])
 }
 
-// ---------------------------------------------------------------------------
-// Editoras — passam a ser uma entidade relacional (corrige a secção
-// "Editoras": antes o campo Book.editora era apenas texto livre, sem
-// integridade referencial).
-// ---------------------------------------------------------------------------
 model Editora {
-  id      String  @id @default(cuid())
-  slug    String  @unique
-  name    String  @unique
-  country String?
-  logo    String?
-  phone   String?
-  email   String?
-  address String?
-  website String?
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  name        String  @unique
+  country     String?
+  logo        String?
+  phone       String?
+  email       String?
+  address     String?
+  website     String?
+  description String?
 
   books Book[]
 }
 
 model Book {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  author      String
-  editora     String // mantido como legado/fallback de apresentação
-  description String?
-  isbn        String?
-  coverUrl    String?
-  pdfUrl      String?
-  pages       Int?
-  year        Int?
-  free        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String          @id @default(cuid())
+  slug           String          @unique
+  title          String
+  author         String
+  editora        String
+  description    String?
+  isbn           String?
+  isbnNormalized String?         @unique
+  coverUrl       String?
+  pdfUrl         String?
+  pages          Int?
+  year           Int?
+  free           Boolean         @default(false)
+  active         Boolean         @default(true)
+  educationLevel EducationLevel?
+  schoolGrade    String?
+  subject        String?
+  academicYear   Int?
+  countryOrigin  String?
+  allowPreorder  Boolean         @default(false)
+  allowQuote     Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
-  // --- Destaques (secção 8): mantém-se um botão manual, mas passa a
-  // aceitar uma janela de datas, para permitir regras automáticas
-  // ("novo lançamento fica em destaque 15 dias") em vez de um boolean fixo.
   featured     Boolean   @default(false)
   featuredFrom DateTime?
   featuredTo   DateTime?
@@ -133,19 +281,145 @@ model Book {
   editoraRef Editora? @relation(fields: [editoraId], references: [id])
 
   prices       Price[]
+  stockItems   StockItem[]
   orderItems   OrderItem[]
+  quoteItems   QuoteItem[]
   reviews      Review[]
   favorites    Favorite[]
   libraryOf    LibraryItem[]
   readingNotes ReadingNote[]
   licenses     License[]
+
+  @@index([isbnNormalized])
+  @@index([educationLevel, schoolGrade])
+  @@index([active, featured])
 }
 
-// Preço de um livro numa moeda específica (KZ, MT, EUR, BRL)
+model MarketConfig {
+  code                  MarketCode @id
+  name                  String
+  currency              Currency
+  isoCurrency           String
+  taxRatePercent        Decimal    @default(0)
+  shippingFlatFee       Decimal    @default(0)
+  freeShippingThreshold Decimal?
+  estimatedDeliveryDays String     @default("2 a 5 dias úteis")
+  bankTransferEnabled   Boolean    @default(true)
+  bankAccountDetails    String?
+  localMethodName       String?
+  localMethodEnabled    Boolean    @default(false)
+  cardGatewayEnabled    Boolean    @default(false)
+  quoteEnabled          Boolean    @default(true)
+  active                Boolean    @default(true)
+  updatedAt             DateTime   @updatedAt
+}
+
+model Warehouse {
+  id          String     @id @default(cuid())
+  code        String     @unique
+  name        String
+  countryCode MarketCode
+  city        String
+  address     String?
+  isPrimary   Boolean    @default(false)
+  active      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+
+  stockItems StockItem[]
+
+  @@index([countryCode, active])
+}
+
+model StockItem {
+  id                String   @id @default(cuid())
+  quantity          Int      @default(0)
+  reserved          Int      @default(0)
+  lowStockThreshold Int      @default(10)
+  updatedAt         DateTime @updatedAt
+
+  bookId String
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  movements    StockMovement[]
+  reservations StockReservation[]
+
+  @@unique([bookId, warehouseId])
+  @@index([warehouseId])
+}
+
+model StockReservation {
+  id         String            @id @default(cuid())
+  quantity   Int
+  status     ReservationStatus @default(ACTIVE)
+  expiresAt  DateTime
+  createdAt  DateTime          @default(now())
+  releasedAt DateTime?
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  stockItemId String
+  stockItem   StockItem @relation(fields: [stockItemId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@index([status, expiresAt])
+}
+
+model StockMovement {
+  id          String            @id @default(cuid())
+  type        StockMovementType
+  delta       Int
+  previousQty Int
+  newQty      Int
+  reason      String?
+  actorId     String?
+  actorEmail  String?
+  orderId     String?
+  createdAt   DateTime          @default(now())
+
+  stockItemId String
+  stockItem   StockItem @relation(fields: [stockItemId], references: [id], onDelete: Cascade)
+
+  importBatchId String?
+  importBatch   ImportBatch? @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+
+  @@index([stockItemId, createdAt])
+  @@index([createdAt])
+}
+
+model ImportBatch {
+  id              String     @id @default(cuid())
+  filename        String
+  mode            ImportMode @default(COMBINED)
+  status          String     @default("COMPLETED")
+  selectedActions Json?
+  totalRows       Int        @default(0)
+  validRows       Int        @default(0)
+  createdBooks    Int        @default(0)
+  updatedStock    Int        @default(0)
+  updatedPrices   Int        @default(0)
+  skippedRows     Int        @default(0)
+  errorRows       Int        @default(0)
+  summaryJson     Json?
+  reportJson      Json?
+  actorId         String?
+  actorEmail      String?
+  createdAt       DateTime   @default(now())
+
+  movements StockMovement[]
+
+  @@index([createdAt])
+}
+
 model Price {
-  id       String   @id @default(cuid())
-  amount   Decimal
-  currency Currency
+  id              String   @id @default(cuid())
+  amount          Decimal
+  currency        Currency
+  marketActive    Boolean  @default(true)
+  minWholesaleQty Int?
 
   bookId String
   book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
@@ -154,28 +428,54 @@ model Price {
 }
 
 model Order {
-  id          String      @id @default(cuid())
-  status      OrderStatus @default(PENDING)
-  currency    Currency    @default(KZ)
-  totalAmount Decimal
-  createdAt   DateTime    @default(now())
+  id                   String        @id @default(cuid())
+  orderNumber          String?       @unique
+  status               OrderStatus   @default(PENDING)
+  currency             Currency      @default(KZ)
+  countryCode          MarketCode    @default(MZ)
+  buyerName            String?
+  buyerEmail           String?
+  buyerPhone           String?
+  buyerTaxId           String?
+  companyName          String?
+  clientType           ClientType    @default(PARTICULAR)
+  shippingAddress      String?
+  shippingCity         String?
+  shippingPostalCode   String?
+  subtotalAmount       Decimal       @default(0)
+  discountAmount       Decimal       @default(0)
+  taxAmount            Decimal       @default(0)
+  shippingAmount       Decimal       @default(0)
+  totalAmount          Decimal
+  paymentMethod        String?
+  paymentStatus        PaymentStatus @default(UNPAID)
+  paymentReference     String?
+  invoiceRequested     Boolean       @default(false)
+  notes                String?
+  reservationExpiresAt DateTime?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @default(now()) @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  items OrderItem[]
-}
+  items        OrderItem[]
+  reservations StockReservation[]
+  payments     PaymentRecord[]
 
-enum OrderStatus {
-  PENDING
-  PAID
-  CANCELLED
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  quantity  Int
-  unitPrice Decimal
+  id                String    @id @default(cuid())
+  quantity          Int
+  unitPrice         Decimal
+  titleSnapshot     String?
+  isbnSnapshot      String?
+  publisherSnapshot String?
+  currencySnapshot  Currency?
+  discountPercent   Int       @default(0)
 
   orderId String
   order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
@@ -186,9 +486,94 @@ model OrderItem {
   @@index([bookId])
 }
 
+model PaymentRecord {
+  id                  String        @id @default(cuid())
+  provider            String
+  method              String
+  amount              Decimal
+  currency            Currency
+  status              PaymentStatus @default(PENDING_TRANSFER)
+  externalReference   String?
+  transferProofRef    String?
+  notes               String?
+  reviewedByEmail     String?
+  reviewedAt          DateTime?
+  confirmedAt         DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId, createdAt])
+  @@index([status])
+}
+
+model PaymentWebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String
+  eventId     String   @unique
+  eventType   String
+  orderId     String?
+  signatureOk Boolean  @default(false)
+  payloadJson Json?
+  processedAt DateTime @default(now())
+}
+
+model QuoteRequest {
+  id                String      @id @default(cuid())
+  quoteNumber       String      @unique
+  status            QuoteStatus @default(PENDING)
+  contactName       String
+  email             String
+  phone             String?
+  organizationName  String?
+  taxId             String?
+  clientType        ClientType  @default(ESCOLA)
+  countryCode       MarketCode  @default(MZ)
+  currency          Currency    @default(MT)
+  academicYear      Int?
+  deliveryAddress   String?
+  notes             String?
+  estimatedTotal    Decimal?
+  quotedTotal       Decimal?
+  adminNotes        String?
+  validUntil        DateTime?
+  convertedOrderId  String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  items QuoteItem[]
+
+  @@index([status, createdAt])
+  @@index([email])
+}
+
+model QuoteItem {
+  id              String   @id @default(cuid())
+  bookSlug        String?
+  bookTitle       String
+  isbn            String?
+  publisher       String?
+  quantity        Int
+  unitPriceQuoted Decimal?
+  notes           String?
+
+  quoteRequestId String
+  quoteRequest   QuoteRequest @relation(fields: [quoteRequestId], references: [id], onDelete: Cascade)
+
+  bookId String?
+  book   Book?   @relation(fields: [bookId], references: [id], onDelete: SetNull)
+
+  @@index([quoteRequestId])
+}
+
 model Review {
   id        String   @id @default(cuid())
-  rating    Int // 1 a 5
+  rating    Int
   comment   String?
   createdAt DateTime @default(now())
 
@@ -202,11 +587,8 @@ model Review {
 }
 
 model Favorite {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-
-  // Preço observado no momento em que foi guardado como favorito, para
-  // permitir detetar "baixou de preço desde que guardaste" (secção Favoritos).
+  id            String   @id @default(cuid())
+  createdAt     DateTime @default(now())
   priceAtSaveKZ Decimal?
 
   userId String
@@ -218,11 +600,10 @@ model Favorite {
   @@unique([userId, bookId])
 }
 
-// Biblioteca pessoal — livros comprados ou obtidos gratuitamente
 model LibraryItem {
   id         String   @id @default(cuid())
   acquiredAt DateTime @default(now())
-  source     String // "purchase" | "free-download"
+  source     String
 
   userId String
   user   User   @relation(fields: [userId], references: [id])
@@ -231,13 +612,6 @@ model LibraryItem {
   book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@unique([userId, bookId])
-}
-
-// Marcadores e notas do leitor integrado (corrige "Problema 3 – Leitor
-// próprio" da secção Livro Digital).
-enum NoteKind {
-  BOOKMARK
-  NOTE
 }
 
 model ReadingNote {
@@ -257,9 +631,6 @@ model ReadingNote {
   @@index([userId, bookId])
 }
 
-// Licenciamento (corrige "Problema 4 – Licenciamento" da secção Livro
-// Digital). Não é DRM real — não impede tecnicamente a cópia — mas dá à
-// editora controlo sobre quantas licenças/dispositivos e validade.
 model License {
   id          String    @id @default(cuid())
   code        String    @unique @default(cuid())
@@ -274,25 +645,6 @@ model License {
   book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@index([bookId])
-}
-
-// ---------------------------------------------------------------------------
-// Convénios
-// ---------------------------------------------------------------------------
-
-enum TipoInstituicao {
-  ESCOLA
-  UNIVERSIDADE
-  LIVRARIA
-  EDITORA
-  OUTRO
-}
-
-enum EstadoConvenio {
-  PENDENTE
-  EM_ANALISE
-  APROVADO
-  REJEITADO
 }
 
 model ConvenioPedido {
@@ -311,17 +663,6 @@ model ConvenioPedido {
   @@index([estado])
 }
 
-// ---------------------------------------------------------------------------
-// Eventos
-// ---------------------------------------------------------------------------
-
-enum TipoEvento {
-  LANCAMENTO
-  FEIRA
-  WORKSHOP
-  OUTRO
-}
-
 model Evento {
   id         String     @id @default(cuid())
   slug       String     @unique
@@ -330,8 +671,6 @@ model Evento {
   descricao  String
   local      String
   endereco   String?
-  // Coordenadas ficam prontas no esquema para quando houver uma chave de
-  // mapa (Google Maps/Mapbox) — sem isso, a UI só mostra endereço em texto.
   latitude   Float?
   longitude  Float?
   imageUrl   String?
@@ -348,12 +687,6 @@ model Evento {
   @@index([dataInicio])
 }
 
-enum EstadoInscricao {
-  CONFIRMADA
-  LISTA_ESPERA
-  CANCELADA
-}
-
 model Inscricao {
   id          String          @id @default(cuid())
   nome        String
@@ -361,8 +694,6 @@ model Inscricao {
   telefone    String?
   estado      EstadoInscricao @default(CONFIRMADA)
   createdAt   DateTime        @default(now())
-  // Check-in no dia do evento via QR Code gerado localmente (biblioteca
-  // "qrcode", sem serviço externo) — corrige "não existe check-in".
   checkinCode String          @unique @default(cuid())
   checkedInAt DateTime?
 
@@ -372,35 +703,26 @@ model Inscricao {
   @@unique([eventoId, email])
 }
 
-// ---------------------------------------------------------------------------
-// Área de Cliente unificada (corrige o achado de dois sistemas paralelos:
-// /loja/entrar com NextAuth+Prisma vs /cliente/login com lista fixa em
-// data/authorized-clients.ts). Agora há um único login (NextAuth) e o
-// perfil B2B vive ligado ao mesmo User.
-// ---------------------------------------------------------------------------
-enum ClientType {
-  PARTICULAR
-  LIVRARIA
-  REVENDEDOR
-  ESCOLA
-  UNIVERSIDADE
-  EDITORA
-}
-
 model ClientProfile {
-  id              String     @id @default(cuid())
-  companyName     String?
-  type            ClientType @default(PARTICULAR)
-  discountPercent Int        @default(0)
-  createdAt       DateTime   @default(now())
+  id               String     @id @default(cuid())
+  companyName      String?
+  type             ClientType @default(PARTICULAR)
+  discountPercent  Int        @default(0)
+  taxId            String?
+  countryCode      MarketCode @default(MZ)
+  phone            String?
+  billingAddress   String?
+  city             String?
+  contactRole      String?
+  approvedB2B      Boolean    @default(false)
+  paymentTermsDays Int        @default(0)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @default(now()) @updatedAt
 
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-// ---------------------------------------------------------------------------
-// Blog — deixa de ser uma página escrita à mão em código (secção Blog).
-// ---------------------------------------------------------------------------
 model BlogPost {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -416,34 +738,12 @@ model BlogPost {
   @@index([published, publishedAt])
 }
 
-// ---------------------------------------------------------------------------
-// Fale Connosco — passa a qualificar o motivo do contacto (secção "Fale
-// Connosco – Problema 2: não qualifica o contacto").
-// ---------------------------------------------------------------------------
-enum ContactReason {
-  PUBLICAR
-  COMPRAR
-  PARCERIA
-  SUPORTE_TECNICO
-  COMERCIAL
-  OUTRO
-  // Reformulação institucional (secção "Contacto"): motivos alinhados com o
-  // formulário corporativo — mantêm-se os valores antigos para não invalidar
-  // registos já gravados (ADD VALUE nunca remove os anteriores).
-  EDITORA
-  LIVRARIA
-  ESCOLA
-  PARCEIRO_COMERCIAL
-  INVESTIMENTO
-  LEITOR
-}
-
 model ContactRequest {
   id        String        @id @default(cuid())
   name      String
   email     String
   phone     String?
-  company   String? // Empresa/Instituição — opcional, pedido no formulário institucional
+  company   String?
   reason    ContactReason
   message   String
   createdAt DateTime      @default(now())
@@ -451,15 +751,6 @@ model ContactRequest {
   @@index([reason, createdAt])
 }
 
-// ---------------------------------------------------------------------------
-// Newsletter — o formulário da homepage não submetia nada; passa a gravar a
-// subscrição em base de dados (idempotente por email, ver
-// app/api/newsletter/route.ts).
-//
-// Este model corresponde exatamente à tabela já criada pela migration
-// prisma/migrations/20260907000000_newsletter_subscriber/migration.sql —
-// não gera uma segunda tabela nem exige nova migração.
-// ---------------------------------------------------------------------------
 model NewsletterSubscriber {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -470,4 +761,34 @@ model NewsletterSubscriber {
   updatedAt    DateTime @updatedAt
 
   @@index([createdAt])
+}
+
+model EmailLog {
+  id           String   @id @default(cuid())
+  template     String
+  recipient    String
+  subject      String
+  status       String
+  provider     String?
+  errorMessage String?
+  metaJson     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([status])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String?
+  actorId     String?
+  actorEmail  String?
+  ip          String?
+  detailsJson Json?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
 }

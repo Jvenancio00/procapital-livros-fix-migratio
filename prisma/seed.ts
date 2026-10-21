@@ -1,45 +1,53 @@
-import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { BOOKS } from "../data/books";
 import { EDITORAS } from "../data/editoras";
+import { prisma } from "../lib/prisma";
+import { normalizeIsbnForLookup } from "../lib/isbn";
+import { MARKET_LIST } from "../lib/markets";
+import { Role } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
-// ---------------------------------------------------------------------------
-// Categorias hierárquicas — corrige "Categorias rígidas"/"Hierarquia
-// inexistente". Os 4 nomes de topo mantêm-se iguais aos de data/books.ts
-// para que a migração dos livros existentes não exija reclassificar cada
-// título à mão; as subcategorias ficam prontas para uso futuro.
-// ---------------------------------------------------------------------------
 const CATEGORY_TREE = [
   {
     slug: "escolar",
     name: "Escolar",
-    description: "Manuais escolares alinhados aos currículos nacionais, do ensino primário ao superior.",
+    description:
+      "Manuais escolares e cadernos de atividades alinhados aos currículos nacionais, do ensino primário ao superior.",
     faq: [
-      { pergunta: "Os manuais seguem o currículo oficial?", resposta: "Sim, os títulos desta categoria seguem o currículo nacional do respetivo país e ano letivo." },
+      {
+        pergunta: "Os manuais seguem o currículo oficial?",
+        resposta:
+          "Sim. Os títulos desta categoria seguem o currículo oficial em vigor para o respetivo nível de ensino, classe e ano letivo.",
+      },
+      {
+        pergunta: "Como funcionam encomendas em quantidade para escolas e livrarias?",
+        resposta:
+          "Escolas, colégios, universidades e livrarias podem encomendar em lote no carrinho ou solicitar cotação comercial dedicada em /cotacoes.",
+      },
     ],
     children: [
       { slug: "ensino-primario", name: "Ensino Primário" },
       { slug: "ensino-secundario", name: "Ensino Secundário" },
+      { slug: "ensino-tecnico-profissional", name: "Ensino Técnico-Profissional" },
       { slug: "ensino-superior", name: "Ensino Superior" },
     ],
   },
   {
     slug: "ficcao",
     name: "Ficção",
-    description: "Romance, ficção científica e literatura policial de autores lusófonos e internacionais.",
+    description:
+      "Romance, conto, crónica e poesia de autores de Angola, Moçambique, Portugal, Brasil e demais países lusófonos.",
     faq: [],
     children: [
       { slug: "romance", name: "Romance" },
-      { slug: "policial", name: "Policial" },
-      { slug: "ficcao-cientifica", name: "Ficção Científica" },
+      { slug: "poesia", name: "Poesia" },
+      { slug: "cronicas", name: "Crónicas" },
     ],
   },
   {
     slug: "infantil",
     name: "Infantil",
-    description: "Livros para crianças organizados por faixa etária, dos 3 aos 8 anos.",
+    description:
+      "Obras ilustradas e literatura infantojuvenil de autores lusófonos para leitura autónoma e escolar.",
     faq: [],
     children: [
       { slug: "infantil-3-5-anos", name: "Infantil 3-5 anos" },
@@ -49,11 +57,93 @@ const CATEGORY_TREE = [
   {
     slug: "nao-ficcao",
     name: "Não-ficção",
-    description: "Ensaio, biografia e obras de referência.",
+    description: "Ensaio, pedagogia, história, biografia e obras de referência.",
     faq: [],
     children: [],
   },
 ];
+
+async function seedMarketsAndWarehouses() {
+  for (const m of MARKET_LIST) {
+    await prisma.marketConfig.upsert({
+      where: { code: m.code },
+      update: {
+        name: m.name,
+        currency: m.currency,
+        isoCurrency: m.isoCurrency,
+      },
+      create: {
+        code: m.code,
+        name: m.name,
+        currency: m.currency,
+        isoCurrency: m.isoCurrency,
+        taxRatePercent: m.defaultTaxRatePercent,
+        shippingFlatFee: m.defaultShippingFlatFee,
+        freeShippingThreshold: m.defaultFreeShippingThreshold,
+        estimatedDeliveryDays: m.estimatedDeliveryDays,
+        bankTransferEnabled: true,
+        bankAccountDetails: m.defaultBankDetails,
+        localMethodName: m.localMethodName,
+        localMethodEnabled: false,
+        cardGatewayEnabled: false,
+        quoteEnabled: true,
+        active: true,
+      },
+    });
+  }
+
+  const warehouses = [
+    {
+      code: "MZ-MPM-01",
+      name: "Armazém Central Maputo",
+      countryCode: "MZ" as const,
+      city: "Maputo",
+      address: "Rua Almeida Garrett, Bairro da Coop, n.º 366, Maputo",
+      isPrimary: true,
+    },
+    {
+      code: "AO-LAD-01",
+      name: "Centro Logístico Luanda",
+      countryCode: "AO" as const,
+      city: "Luanda",
+      address: "Maianga, Luanda",
+      isPrimary: true,
+    },
+    {
+      code: "PT-LIS-01",
+      name: "Entreposto Editorial Lisboa",
+      countryCode: "PT" as const,
+      city: "Lisboa",
+      address: "Lisboa, Portugal",
+      isPrimary: true,
+    },
+    {
+      code: "BR-SAO-01",
+      name: "Hub Distribuição São Paulo",
+      countryCode: "BR" as const,
+      city: "São Paulo",
+      address: "São Paulo, Brasil",
+      isPrimary: true,
+    },
+  ];
+
+  const warehouseByCountry = new Map<string, string>();
+  for (const wh of warehouses) {
+    const saved = await prisma.warehouse.upsert({
+      where: { code: wh.code },
+      update: {
+        name: wh.name,
+        countryCode: wh.countryCode,
+        city: wh.city,
+        address: wh.address,
+        isPrimary: wh.isPrimary,
+      },
+      create: wh,
+    });
+    warehouseByCountry.set(wh.countryCode, saved.id);
+  }
+  return warehouseByCountry;
+}
 
 async function seedCategories() {
   const idByName = new Map<string, string>();
@@ -82,9 +172,8 @@ async function seedEditoras() {
     const created = await prisma.editora.upsert({
       where: { slug: e.slug },
       update: {
-        slug: e.slug,
         name: e.name,
-        country: e.country,
+        country: e.country ?? (e.address?.includes("Maputo") || e.address?.includes("Coop") ? "Moçambique" : null),
         logo: e.logo,
         phone: e.phone,
         email: e.email,
@@ -94,7 +183,7 @@ async function seedEditoras() {
       create: {
         slug: e.slug,
         name: e.name,
-        country: e.country,
+        country: e.country ?? (e.address?.includes("Maputo") || e.address?.includes("Coop") ? "Moçambique" : null),
         logo: e.logo,
         phone: e.phone,
         email: e.email,
@@ -107,14 +196,17 @@ async function seedEditoras() {
   return idByName;
 }
 
-async function seedBooks(categoryIdByName: Map<string, string>, editoraIdByName: Map<string, string>) {
+async function seedBooks(
+  categoryIdByName: Map<string, string>,
+  editoraIdByName: Map<string, string>,
+  warehouseByCountry: Map<string, string>
+) {
   for (const book of BOOKS) {
     const categoryId = categoryIdByName.get(book.category);
-    if (!categoryId) {
-      console.warn(`Categoria "${book.category}" não encontrada para o livro ${book.slug} — a saltar.`);
-      continue;
-    }
+    if (!categoryId) continue;
+
     const editoraId = editoraIdByName.get(book.editora) ?? null;
+    const isbnNormalized = normalizeIsbnForLookup(book.isbn);
 
     const created = await prisma.book.upsert({
       where: { slug: book.slug },
@@ -126,12 +218,19 @@ async function seedBooks(categoryIdByName: Map<string, string>, editoraIdByName:
         categoryId,
         description: book.description,
         isbn: book.isbn,
+        isbnNormalized,
         coverUrl: book.coverUrl,
         pdfUrl: book.downloadUrl,
         pages: book.pages,
         year: book.year,
         free: Boolean(book.free),
         featured: Boolean(book.featured),
+        educationLevel: book.educationLevel ?? null,
+        schoolGrade: book.schoolGrade ?? null,
+        subject: book.subject ?? null,
+        academicYear: book.academicYear ?? null,
+        countryOrigin: book.countryOrigin ?? null,
+        allowQuote: book.allowQuote ?? true,
       },
       create: {
         slug: book.slug,
@@ -142,12 +241,19 @@ async function seedBooks(categoryIdByName: Map<string, string>, editoraIdByName:
         categoryId,
         description: book.description,
         isbn: book.isbn,
+        isbnNormalized,
         coverUrl: book.coverUrl,
         pdfUrl: book.downloadUrl,
         pages: book.pages,
         year: book.year,
         free: Boolean(book.free),
         featured: Boolean(book.featured),
+        educationLevel: book.educationLevel ?? null,
+        schoolGrade: book.schoolGrade ?? null,
+        subject: book.subject ?? null,
+        academicYear: book.academicYear ?? null,
+        countryOrigin: book.countryOrigin ?? null,
+        allowQuote: book.allowQuote ?? true,
       },
     });
 
@@ -161,30 +267,81 @@ async function seedBooks(categoryIdByName: Map<string, string>, editoraIdByName:
       await prisma.price.upsert({
         where: { bookId_currency: { bookId: created.id, currency: p.currency } },
         update: { amount: p.amount },
-        create: { bookId: created.id, currency: p.currency, amount: p.amount },
+        create: { bookId: created.id, currency: p.currency, amount: p.amount, marketActive: true },
       });
+    }
+
+    // Semeia stock inicial apenas se ainda não existir registo de stock para esse armazém
+    const isSchool = book.category === "Escolar";
+    const defaultStockByCountry: Record<string, number> = {
+      MZ: isSchool ? 180 : 45,
+      AO: isSchool ? 140 : book.countryOrigin === "Angola" ? 65 : 30,
+      PT: isSchool ? 25 : 35,
+      BR: isSchool ? 20 : 30,
+    };
+
+    for (const [countryCode, warehouseId] of warehouseByCountry.entries()) {
+      const existing = await prisma.stockItem.findUnique({
+        where: { bookId_warehouseId: { bookId: created.id, warehouseId } },
+      });
+      if (!existing) {
+        const initialQty = defaultStockByCountry[countryCode] ?? 25;
+        const stockItem = await prisma.stockItem.create({
+          data: {
+            bookId: created.id,
+            warehouseId,
+            quantity: initialQty,
+            reserved: 0,
+            lowStockThreshold: isSchool ? 25 : 10,
+          },
+        });
+        await prisma.stockMovement.create({
+          data: {
+            stockItemId: stockItem.id,
+            type: "INITIAL_SEED",
+            delta: initialQty,
+            previousQty: 0,
+            newQty: initialQty,
+            reason: `Stock inicial de arranque (${countryCode})`,
+            actorEmail: "system@procapitalmz.com",
+          },
+        });
+      }
     }
   }
 }
 
 async function seedBlog() {
-  await prisma.blogPost.upsert({
-    where: { slug: "distribuidora-de-livros-elo-essencial" },
-    update: {},
-    create: {
+  const posts = [
+    {
       slug: "distribuidora-de-livros-elo-essencial",
       title: "Distribuidora de livros: o elo essencial entre autores, editoras e livrarias",
       excerpt:
-        "Como funciona uma distribuidora de livros, que vantagens traz a editoras, livrarias, escolas e autores, e como escolher o parceiro certo.",
+        "Como funciona uma distribuidora editorial, que vantagens operacionais traz a editoras, livrarias, escolas e instituições, e como escolher o parceiro certo.",
       content:
-        "Este artigo foi originalmente publicado como página estática do site. O conteúdo completo mantém-se disponível em /blog/distribuidora-de-livros-elo-essencial — este registo serve para o artigo aparecer também listado a partir da base de dados, junto com os próximos artigos.",
+        "Uma distribuidora editorial profissional assegura logística integrada, consolidação comercial multi-editora, disponibilidade local por mercado e condições estruturadas para livrarias, escolas e bibliotecas universitárias.\n\nNa Pro Capital, trabalhamos diretamente com editoras em Moçambique, Angola, Portugal e Brasil para aproximar os manuais escolares e o catálogo literário lusófono de quem ensina, vende e lê.",
       publishedAt: new Date("2026-07-13"),
     },
-  });
+    {
+      slug: "preparacao-ano-letivo-manuais-escolares-cplp",
+      title: "Planeamento antecipado do ano letivo: como escolas e livrarias garantem stock de manuais",
+      excerpt:
+        "Boas práticas na encomenda antecipada de manuais escolares por classe, disciplina e mercado, evitando ruturas no arranque das aulas.",
+      content:
+        "O sucesso logístico do início do ano letivo começa meses antes da abertura das salas de aula. Ao consolidar listas de manuais do Ensino Primário, Secundário e Técnico-Profissional num único pedido de cotação ou encomenda programada, escolas e livrarias asseguram prazos de entrega previsíveis, preços comerciais confirmados na moeda local e faturação institucional organizada.",
+      publishedAt: new Date("2026-09-28"),
+    },
+  ];
+
+  for (const post of posts) {
+    await prisma.blogPost.upsert({
+      where: { slug: post.slug },
+      update: { title: post.title, excerpt: post.excerpt },
+      create: post,
+    });
+  }
 }
 
-// Cria o primeiro administrador a partir de variáveis de ambiente, em vez
-// de uma lista de emails fixa no código (ver lib/auth.ts).
 async function seedAdmin() {
   const email = process.env.ADMIN_BOOTSTRAP_EMAIL;
   const password = process.env.ADMIN_BOOTSTRAP_PASSWORD;
@@ -194,65 +351,73 @@ async function seedAdmin() {
   }
   const passwordHash = await bcrypt.hash(password, 12);
   await prisma.user.upsert({
-    where: { email },
+    where: { email: email.trim().toLowerCase() },
     update: { role: Role.ADMIN },
-    create: { email, passwordHash, role: Role.ADMIN, name: "Administrador" },
+    create: {
+      email: email.trim().toLowerCase(),
+      passwordHash,
+      role: Role.ADMIN,
+      name: "Administrador Pro Capital",
+      emailVerified: new Date(),
+    },
   });
 }
 
 async function seedEventos() {
   const eventos = [
     {
+      slug: "lancamento-manual-8a-classe-2027",
+      titulo: "Apresentação Editorial — Campanha Escolar 2026/2027",
+      tipo: "LANCAMENTO" as const,
+      descricao:
+        "Apresentação das edições revistas de manuais escolares do Ensino Primário e Secundário, aberta a diretores pedagógicos, coordenadores escolares e livrarias parceiras.",
+      local: "Auditório Pro Capital",
+      endereco: "Rua Almeida Garrett, Bairro da Coop, n.º 366, Maputo",
+      dataInicio: new Date("2026-11-12T14:00:00Z"),
+      capacidade: 80,
+      editora: "Alcance Editores / Plural Editores",
+      livroSlug: "matematica-8a-classe",
+    },
+    {
+      slug: "encontro-livreiros-editoras-lusofonia-2026",
+      titulo: "Encontro Comercial de Editoras e Livrarias da Lusofonia",
+      tipo: "FEIRA" as const,
+      descricao:
+        "Sessão profissional dedicada a catálogos multi-mercado, encomendas institucionais e distribuição entre Angola, Moçambique, Portugal e Brasil.",
+      local: "Centro Cultural Franco-Moçambicano / Transmissão Online",
+      endereco: "Maputo · Luanda · Lisboa · São Paulo",
+      dataInicio: new Date("2026-12-03T09:30:00Z"),
+      dataFim: new Date("2026-12-04T17:30:00Z"),
+      capacidade: 200,
+    },
+    {
       slug: "feira-do-livro-maputo-2026",
       titulo: "Feira do Livro de Maputo 2026",
       tipo: "FEIRA" as const,
       descricao:
-        "A Pro Capital estará presente com um stand dedicado às editoras da CPLP, com descontos especiais e sessões de autógrafos.",
+        "Presença institucional da Pro Capital com catálogo dedicado às editoras da CPLP, sessões com autores e atendimento comercial a escolas.",
       local: "Centro de Conferências Joaquim Chissano",
       endereco: "Av. 25 de Setembro, Maputo",
       dataInicio: new Date("2026-09-12T09:00:00Z"),
       dataFim: new Date("2026-09-14T18:00:00Z"),
       capacidade: 500,
     },
-    {
-      slug: "lancamento-manual-8a-classe-2027",
-      titulo: "Lançamento — Manuais Escolares 2027",
-      tipo: "LANCAMENTO" as const,
-      descricao:
-        "Apresentação da nova edição dos manuais escolares para o ano letivo de 2027, com sessão aberta a professores e diretores de escola.",
-      local: "Auditório Pro Capital",
-      endereco: "Maputo",
-      dataInicio: new Date("2026-11-05T14:00:00Z"),
-      capacidade: 80,
-      editora: "Plural Editores",
-      livroSlug: "matematica-8a-classe",
-    },
-    {
-      slug: "workshop-leitura-infantil",
-      titulo: "Workshop: Incentivar a Leitura na Infância",
-      tipo: "WORKSHOP" as const,
-      descricao:
-        "Workshop prático para educadores e encarregados de educação sobre como criar hábitos de leitura em crianças dos 3 aos 8 anos.",
-      local: "Biblioteca Municipal da Matola",
-      dataInicio: new Date("2026-08-22T09:30:00Z"),
-      capacidade: 40,
-    },
   ];
 
   for (const evento of eventos) {
-    await prisma.evento.upsert({ where: { slug: evento.slug }, update: {}, create: evento });
+    await prisma.evento.upsert({ where: { slug: evento.slug }, update: evento, create: evento });
   }
-  console.log(`Seed de eventos concluído: ${eventos.length} eventos criados/atualizados.`);
 }
 
 async function main() {
+  const warehouseByCountry = await seedMarketsAndWarehouses();
   const categoryIdByName = await seedCategories();
   const editoraIdByName = await seedEditoras();
-  await seedBooks(categoryIdByName, editoraIdByName);
+  await seedBooks(categoryIdByName, editoraIdByName, warehouseByCountry);
   await seedBlog();
   await seedAdmin();
   await seedEventos();
-  console.log("Seed concluído.");
+  console.log("Seed da plataforma Pro Capital concluído com sucesso.");
 }
 
 main()

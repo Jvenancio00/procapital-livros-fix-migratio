@@ -1,31 +1,31 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, CalendarDays } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import PageHeader from "@/components/PageHeader";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Blog | Pro Capital",
+  title: "Blog & Caderno Editorial | Pro Capital",
   description:
-    "Artigos da Pro Capital sobre distribuição de livros, mercado editorial e o setor livreiro em Moçambique e na CPLP.",
+    "Artigos da Pro Capital sobre distribuição de livros, ensino, mercado editorial e o setor livreiro em Angola, Moçambique, Portugal e Brasil.",
 };
 
-// Legado: o único artigo publicado antes desta correção, mantido como
-// fallback caso a base de dados ainda não tenha sido migrada.
 const LEGACY_POSTS = [
   {
     slug: "distribuidora-de-livros-elo-essencial",
-    title: "Distribuidora de livros: o elo essencial entre autores, editoras e livrarias",
+    title:
+      "Distribuidora de livros: o elo essencial entre autores, editoras e livrarias",
     excerpt:
       "Como funciona uma distribuidora de livros, que vantagens traz a editoras, livrarias, escolas e autores, e como escolher o parceiro certo.",
     publishedAt: new Date("2026-07-13"),
   },
 ];
 
-// Corrige a secção Blog: publicar um artigo novo deixa de exigir escrever
-// uma página .tsx e fazer deploy — passa a ser uma linha na tabela
-// BlogPost (ex.: a partir de um futuro painel admin).
 export default async function BlogPage() {
-  let posts: { slug: string; title: string; excerpt: string; publishedAt: Date }[] = LEGACY_POSTS;
+  let posts: { slug: string; title: string; excerpt: string; publishedAt: Date }[] =
+    LEGACY_POSTS;
 
   try {
     const dbPosts = await prisma.blogPost.findMany({
@@ -35,44 +35,61 @@ export default async function BlogPage() {
     });
     if (dbPosts.length > 0) posts = dbPosts;
   } catch {
-    // Sem ligação à base de dados — mantém o artigo legado como fallback.
+    // fallback legado
   }
 
   return (
-    <div>
-      <section className="border-b border-line bg-cream-deep/60">
-        <div className="mx-auto max-w-4xl px-5 py-16 sm:px-8 sm:py-24">
-          <span className="inline-block rounded-full bg-cream px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-ink">
-            Blog
-          </span>
-          <h1 className="mt-6 font-serif text-3xl font-semibold leading-tight text-ink sm:text-4xl">
-            Ideias e novidades sobre o mundo do livro.
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/70 sm:text-lg">
-            Reflexões da Pro Capital sobre distribuição, mercado editorial e o
-            setor livreiro em Moçambique e na CPLP.
-          </p>
-        </div>
-      </section>
+    <div className="pb-20">
+      <PageHeader
+        eyebrow="Caderno Editorial"
+        title="Ideias, mercado e distribuição do livro"
+        description="Reflexões e análises da Pro Capital sobre logística editorial, livro escolar e circulação cultural nos países de língua portuguesa."
+        breadcrumbs={[
+          { label: "Início", href: "/" },
+          { label: "Blog" },
+        ]}
+      />
 
-      <section className="mx-auto max-w-4xl px-5 py-16 sm:px-8 sm:py-20">
-        <div className="divide-y divide-line border-y border-line">
+      <section className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
-            <Link
+            <article
               key={post.slug}
-              href={`/blog/${post.slug}`}
-              className="flex flex-col gap-2 py-8 transition-colors hover:bg-cream-deep/40"
+              className="group flex flex-col justify-between rounded-2xl border border-line bg-white p-7 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-md motion-reduce:transform-none"
             >
-              <h2 className="font-serif text-xl font-semibold text-ink">{post.title}</h2>
-              <p className="text-sm text-foreground/70">{post.excerpt}</p>
-              <div className="mt-1 flex items-center gap-3 text-xs text-foreground/45">
-                <span>{new Date(post.publishedAt).toLocaleDateString("pt-PT")}</span>
-                <span className="flex items-center gap-1">
-                  <Clock size={12} /> leitura rápida
-                </span>
-                <ArrowRight size={13} />
+              <div>
+                <p className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/55">
+                  <CalendarDays size={13} className="text-brand" />
+                  <span>
+                    {new Date(post.publishedAt).toLocaleDateString("pt-PT", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                </p>
+
+                <Link href={`/blog/${post.slug}`} className="mt-3 block">
+                  <h2 className="font-serif text-xl font-semibold leading-snug text-ink transition-colors group-hover:text-brand">
+                    {post.title}
+                  </h2>
+                </Link>
+
+                <p className="mt-3 text-sm leading-relaxed text-ink/70">
+                  {post.excerpt}
+                </p>
               </div>
-            </Link>
+
+              <div className="mt-6 border-t border-line/70 pt-4">
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand transition-colors hover:text-brand-dark"
+                >
+                  <span>Ler artigo completo</span>
+                  <ArrowRight size={14} />
+                </Link>
+              </div>
+            </article>
           ))}
         </div>
       </section>

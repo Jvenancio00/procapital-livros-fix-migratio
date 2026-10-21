@@ -3,12 +3,15 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Download, BookOpen } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import PageHeader from "@/components/PageHeader";
+
+export const dynamic = "force-dynamic";
 
 export default async function BibliotecaPage() {
   const session = await auth();
 
   if (!session?.user?.email) {
-    redirect("/loja/entrar");
+    redirect("/loja/entrar?callbackUrl=/loja/biblioteca");
   }
 
   const user = await prisma.user.findUnique({
@@ -21,73 +24,83 @@ export default async function BibliotecaPage() {
   const items = user?.library ?? [];
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
-      <h1 className="font-serif text-2xl font-semibold text-ink sm:text-3xl">
-        Minha Biblioteca
-      </h1>
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-foreground/60">
-          Todos os livros que compraste ou obtiveste gratuitamente.
-        </p>
-        <Link
-          href="/loja/encomendas"
-          className="text-sm font-medium text-brand hover:underline"
-        >
-          Ver as minhas encomendas →
-        </Link>
-      </div>
+    <main>
+      <PageHeader
+        eyebrow="Acervo Digital Pessoal"
+        title="A Minha Biblioteca"
+        description="Aceda aos títulos digitais adquiridos ou disponibilizados gratuitamente na sua conta Pro Capital."
+      />
 
-      {items.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-line bg-cream-deep/60 p-10 text-center">
-          <BookOpen size={32} className="mx-auto text-foreground/30" />
-          <p className="mt-4 text-foreground/60">
-            Ainda não tens livros na tua biblioteca.
+      <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 sm:py-16">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-ink/65">
+            {items.length} obra(s) registada(s) na sua biblioteca.
           </p>
           <Link
-            href="/catalogo"
-            className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-brand-dark"
+            href="/loja/encomendas"
+            className="text-xs font-semibold text-brand hover:underline"
           >
-            Explorar catálogo
-            <ArrowRight size={16} />
+            Ver encomendas e faturas proforma →
           </Link>
         </div>
-      ) : (
-        <div className="mt-8 divide-y divide-line border-y border-line">
-          {items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between gap-4 py-4">
-              <div>
-                <p className="font-serif text-sm font-semibold text-ink">
-                  {item.book.title}
-                </p>
-                <p className="text-xs text-foreground/55">{item.book.author}</p>
-                <p className="mt-0.5 text-[11px] uppercase tracking-wide text-foreground/40">
-                  {item.source === "free-download" ? "Download gratuito" : "Comprado"} ·{" "}
-                  {new Date(item.acquiredAt).toLocaleDateString("pt-PT")}
-                </p>
-              </div>
-              {item.book.pdfUrl && (
-                <div className="flex items-center gap-2">
-                  <Link
-                    href={`/loja/leitor/${item.book.slug}`}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-xs font-semibold text-cream hover:bg-brand-dark"
-                  >
-                    <BookOpen size={13} />
-                    Ler agora
-                  </Link>
-                  <a
-                    href={item.book.pdfUrl}
-                    download
-                    className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-xs font-semibold text-ink hover:border-brand/40"
-                  >
-                    <Download size={13} />
-                    Baixar
-                  </a>
+
+        {items.length === 0 ? (
+          <div className="mt-8 rounded-2xl border border-line bg-white p-10 text-center">
+            <BookOpen size={32} className="mx-auto text-ink/30" />
+            <p className="mt-4 text-sm text-ink/65">
+              Ainda não existem livros digitais associados a esta conta.
+            </p>
+            <Link
+              href="/catalogo"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
+            >
+              <span>Explorar catálogo</span>
+              <ArrowRight size={15} />
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-6 space-y-3">
+            {items.map((item) => (
+              <div
+                key={item.id}
+                className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-white p-5"
+              >
+                <div>
+                  <p className="font-serif text-base font-semibold text-ink">
+                    {item.book.title}
+                  </p>
+                  <p className="text-xs text-ink/60">{item.book.author}</p>
+                  <p className="mt-1 text-[11px] uppercase tracking-wide text-ink/45">
+                    {item.source === "free-download"
+                      ? "Acesso editorial gratuito"
+                      : "Adquirido"}{" "}
+                    · {new Date(item.acquiredAt).toLocaleDateString("pt-PT")}
+                  </p>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+                {item.book.pdfUrl && (
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/loja/leitor/${item.book.slug}`}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-2 text-xs font-semibold text-white hover:bg-brand-dark"
+                    >
+                      <BookOpen size={13} />
+                      <span>Ler agora</span>
+                    </Link>
+                    <a
+                      href={item.book.pdfUrl}
+                      download
+                      className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-xs font-semibold text-ink hover:border-brand/40"
+                    >
+                      <Download size={13} />
+                      <span>Descarregar</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
   );
 }

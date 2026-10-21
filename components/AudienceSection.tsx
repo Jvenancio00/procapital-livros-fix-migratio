@@ -1,105 +1,122 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Store, GraduationCap, Building2 } from "lucide-react";
-import { useLanguage } from "@/context/LanguageContext";
+import {
+  ArrowRight,
+  Building2,
+  GraduationCap,
+  Landmark,
+  Store,
+} from "lucide-react";
 
-const AUDIENCE_META = [
+const SOLUTIONS = [
   {
+    profile: "Livrarias & Revendedores",
+    title: "Reposição ágil e margens de revenda multi-editora",
+    description:
+      "Consolide encomendas de múltiplas chancelas escolares, literárias e infantis numa única fatura comercial, com stock real por armazém e histórico de reposição.",
+    highlights: ["Desconto comercial B2B sujeito a aprovação", "Repetição rápida de encomendas", "Catálogo PDF atualizado por mercado"],
+    cta: "Abrir conta de livraria",
+    href: "/loja/registo?perfil=LIVRARIA",
     icon: Store,
-    image: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=700&h=700&fit=crop",
-    gradient: "from-wine to-brand",
-    href: "/contactos",
   },
   {
+    profile: "Escolas & Universidades",
+    title: "Fornecimento estruturado para o ano letivo",
+    description:
+      "Seleção completa por país, nível de ensino (primário, secundário, técnico e superior), classe e disciplina, com pedidos de cotação em lote e convénios institucionais.",
+    highlights: ["Encomendas em quantidade por classe", "Proposta proforma e faturação fiscal", "Apoio dedicado à época escolar"],
+    cta: "Pedir cotação escolar",
+    href: "/cotacoes?perfil=ESCOLA",
     icon: GraduationCap,
-    image: "https://images.unsplash.com/photo-1427504494785-cdda5f45fb4d?w=700&h=700&fit=crop",
-    gradient: "from-brand to-orange",
-    href: "/contactos",
   },
   {
+    profile: "Editoras & Chancelas",
+    title: "Representação comercial em Angola, Moçambique, Portugal e Brasil",
+    description:
+      "Integre o seu catálogo na rede de distribuição Pro Capital com atualização automática de stock por Excel/CSV, visibilidade editorial e presença em feiras.",
+    highlights: ["Importação de tabelas por ISBN", "Controlo independente por país e moeda", "Divulgação editorial e eventos"],
+    cta: "Solicitar parceria editorial",
+    href: "/contactos?motivo=PARCERIA",
     icon: Building2,
-    image: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=700&h=700&fit=crop",
-    gradient: "from-orange to-accent",
-    href: "/contactos",
+  },
+  {
+    profile: "Empresas, ONGs & Instituições",
+    title: "Projetos de leitura, bibliotecas e programas educativos",
+    description:
+      " Curadoria de acervos literários, técnicos e pedagógicos para bibliotecas escolares, projetos sociais, fundações e programas de responsabilidade corporativa.",
+    highlights: ["Curadoria por faixa etária e tema", "Logística coordenada para províncias", "Condições contratuais transparentes"],
+    cta: "Conhecer convénios",
+    href: "/convenios",
+    icon: Landmark,
   },
 ];
 
-function AudienceImage({ image, gradient }: { image: string; gradient: string }) {
-  const [failed, setFailed] = useState(false);
-
-  if (failed) {
-    return (
-      <div
-        className={`absolute inset-0 bg-gradient-to-br ${gradient} transition-transform duration-500 group-hover:scale-110`}
-      />
-    );
-  }
-
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={image}
-      alt=""
-      onError={() => setFailed(true)}
-      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-    />
-  );
-}
-
 export default function AudienceSection() {
-  const { dict } = useLanguage();
-
   return (
-    <section id="solucoes" className="scroll-mt-24 py-16 sm:py-24 bg-gradient-to-b from-cream via-white to-cream">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
-        <div className="mb-12">
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-ink mb-4">
-            {dict.audience.title}
+    <section className="border-y border-line/80 bg-cream-deep/45 py-20">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="max-w-3xl">
+          <div className="inline-flex items-center gap-2">
+            <span className="h-0.5 w-6 bg-accent" aria-hidden="true" />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand">
+              Soluções Comerciais &amp; Institucionais
+            </span>
+          </div>
+          <h2 className="mt-2.5 font-serif text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            Estrutura pensada para quem compra, ensina e publica
           </h2>
-          <p className="text-lg text-foreground/70 max-w-2xl">
-            {dict.audience.description}
+          <p className="mt-3 text-base leading-relaxed text-ink/70">
+            Cada perfil comprador dispõe de fluxos próprios de consulta, encomenda em
+            volume, pedido de cotação e acompanhamento logístico.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {dict.audience.items.map((audience, index) => {
-            const { icon: Icon, image, gradient, href } = AUDIENCE_META[index];
+        <div className="mt-11 grid gap-6 md:grid-cols-2">
+          {SOLUTIONS.map((item) => {
+            const Icon = item.icon;
             return (
-              <Link
-                key={audience.title}
-                href={href}
-                className="group relative overflow-hidden rounded-2xl h-96 sm:h-[450px] flex flex-col justify-end"
+              <article
+                key={item.profile}
+                className="flex flex-col justify-between rounded-2xl border border-line/90 bg-white p-7 transition-all duration-200 hover:border-ink/25 hover:shadow-md"
               >
-                {/* Imagem de fundo — se falhar a carregar, cai automaticamente para um gradiente da marca (nunca fica em branco) */}
-                <AudienceImage image={image} gradient={gradient} />
-
-                {/* Dark overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/60 to-transparent" />
-
-                {/* Content */}
-                <div className="relative z-10 p-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-brand/20 rounded-full flex items-center justify-center">
-                      <Icon size={24} className="text-brand" />
-                    </div>
+                <div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-brand">
+                      <Icon size={16} className="text-brand" aria-hidden="true" />
+                      {item.profile}
+                    </span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
                   </div>
 
-                  <h3 className="text-2xl font-bold text-white mb-3 font-serif">
-                    {audience.title}
+                  <h3 className="mt-3.5 font-serif text-2xl font-semibold leading-snug text-ink">
+                    {item.title}
                   </h3>
-                  <p className="text-cream/90 leading-relaxed">
-                    {audience.description}
+
+                  <p className="mt-3 text-sm leading-relaxed text-ink/70">
+                    {item.description}
                   </p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-cream/90 transition-colors group-hover:text-white">
-                    <ArrowRight size={15} />
-                  </span>
+
+                  <ul className="mt-5 space-y-2 border-t border-line/70 pt-4 text-xs text-ink/75">
+                    {item.highlights.map((point) => (
+                      <li key={point} className="flex items-center gap-2">
+                        <span className="h-1 w-1 rounded-full bg-accent" aria-hidden="true" />
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
-                {/* Hover accent */}
-                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-brand via-accent to-transparent transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
-              </Link>
+                <div className="mt-6 pt-2">
+                  <Link
+                    href={item.href}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
+                  >
+                    <span>{item.cta}</span>
+                    <ArrowRight size={15} aria-hidden="true" />
+                  </Link>
+                </div>
+              </article>
             );
           })}
         </div>

@@ -1,8 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 
-export function LogoMark({ size = 36 }: { size?: number }) {
+export function LogoMark({ size = 38 }: { size?: number }) {
   return (
-    <div style={{ width: size, height: size }} className="relative">
+    <div
+      style={{ width: size, height: size }}
+      className="relative overflow-hidden rounded-lg bg-white p-0.5 shadow-2xs"
+    >
       <Image
         src="/procapital/logo.jpg"
         alt="Pro Capital"
@@ -15,18 +19,34 @@ export function LogoMark({ size = 36 }: { size?: number }) {
   );
 }
 
-export default function Logo({ tagline = false }: { tagline?: boolean }) {
+export default function Logo({
+  tagline = true,
+  variant = "default",
+}: {
+  tagline?: boolean;
+  variant?: "default" | "light";
+}) {
   return (
-    <span className="flex items-center gap-2.5">
+    <Link href="/" className="inline-flex items-center gap-2.5">
       <LogoMark />
       {tagline && (
         <span className="flex flex-col leading-none">
-          <span className="text-[13px] font-medium text-ink">pro<span className="text-brand">capital</span></span>
-          <span className="mt-0.5 text-[9px] font-medium uppercase tracking-wide text-foreground/50">
-            Distribuidora de livros
+          <span
+            className={`font-serif text-base font-bold tracking-tight ${
+              variant === "light" ? "text-white" : "text-ink"
+            }`}
+          >
+            Pro<span className={variant === "light" ? "text-accent" : "text-brand"}>Capital</span>
+          </span>
+          <span
+            className={`mt-1 text-[9px] font-semibold uppercase tracking-[0.16em] ${
+              variant === "light" ? "text-white/65" : "text-ink/55"
+            }`}
+          >
+            Distribuidora Editorial
           </span>
         </span>
       )}
-    </span>
+    </Link>
   );
 }

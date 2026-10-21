@@ -1,95 +1,159 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Mail, MapPin, Phone } from "lucide-react";
+import Link from "next/link";
+import { FileDown, FileSpreadsheet, Globe, Mail, MapPin, Phone } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import BookCard from "@/components/BookCard";
 import EditoraMark from "@/components/EditoraMark";
-import { toCatalogBook } from "@/lib/book-view";
+import PageHeader from "@/components/PageHeader";
+import { getAllCatalogBooks } from "@/lib/catalog";
 
-// Corrige "Editoras – não há página de perfil por editora nem ligação
-// automática aos livros que publica": os livros agora ligam-se à editora
-// por chave estrangeira (Book.editoraId -> Editora.id) em vez de apenas
-// repetir o mesmo texto em dois sítios.
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
 async function getEditora(slug: string) {
-  return prisma.editora.findUnique({
-    where: { slug },
-    include: { books: { include: { prices: true }, take: 40 } },
-  });
+  return prisma.editora.findUnique({ where: { slug } });
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const editora = await getEditora(slug);
-  if (!editora) return {};
+  if (!editora) return { title: "Editora não encontrada | Pro Capital" };
   return {
     title: `${editora.name} | Editoras Pro Capital`,
-    description: `Catálogo de ${editora.name} distribuído pela Pro Capital.`,
+    description: `Catálogo editorial de ${editora.name} distribuído pela Pro Capital.`,
   };
 }
 
 export default async function EditoraPage({ params }: Props) {
   const { slug } = await params;
-  const editora = await getEditora(slug);
+  const [editora, allBooks] = await Promise.all([
+    getEditora(slug),
+    getAllCatalogBooks(),
+  ]);
+
   if (!editora) notFound();
 
+  const publisherBooks = allBooks.filter(
+    (b) => b.editora.toLowerCase() === editora.name.toLowerCase(),
+  );
+
   return (
-    <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-      <div className="flex flex-wrap items-center gap-6 border-b border-line pb-8">
-        <div className="flex h-20 w-32 items-center justify-center rounded-xl bg-cream-deep/60">
-          {editora.logo ? (
-            <Image src={editora.logo} alt={editora.name} width={120} height={48} className="max-h-12 w-auto object-contain" />
-          ) : (
-            <EditoraMark name={editora.name} className="h-12 w-12 text-base" />
-          )}
+    <div className="pb-20">
+      <PageHeader
+        eyebrow={`Editora Parceira${editora.country ? ` · ${editora.country}` : ""}`}
+        title={editora.name}
+        description="Obras, manuais escolares e edições literárias distribuídas comercialmente pela Pro Capital."
+        breadcrumbs={[
+          { label: "Início", href: "/" },
+          { label: "Editoras", href: "/editoras" },
+          { label: editora.name },
+        ]}
+        actions={
+          <>
+            <a
+              href={`/api/catalogo/pdf?editora=${encodeURIComponent(editora.name)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2.5 text-xs font-semibold text-ink hover:border-brand/40 hover:text-brand"
+            >
+              <FileDown size={14} />
+              <span>Exportar Catálogo PDF</span>
+            </a>
+            <Link
+              href={`/cotacoes`}
+              className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-xs font-semibold text-white hover:bg-brand-dark"
+            >
+              <FileSpreadsheet size={14} />
+              <span>Pedir Cotação desta Editora</span>
+            </Link>
+          </>
+        }
+      />
+
+      <section className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="mb-10 flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-line bg-white p-6">
+          <div className="flex items-center gap-5">
+            <div className="flex h-20 w-40 items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-3">
+              {editora.logo ? (
+                <Image
+                  src={editora.logo}
+                  alt={editora.name}
+                  width={180}
+                  height={72}
+                  className="max-h-14 w-auto object-contain"
+                />
+              ) : (
+                <EditoraMark name={editora.name} country={editora.country ?? undefined} />
+              )}
+            </div>
+            <div className="space-y-1.5 text-xs text-ink/70">
+              {editora.address && (
+                <p className="flex items-center gap-2">
+                  <MapPin size={14} className="text-brand" />
+                  <span>{editora.address}</span>
+                </p>
+              )}
+              {editora.phone && (
+                <p className="flex items-center gap-2">
+                  <Phone size={14} className="text-brand" />
+                  <span>{editora.phone}</span>
+                </p>
+              )}
+              {editora.email && (
+                <p className="flex items-center gap-2">
+                  <Mail size={14} className="text-brand" />
+                  <span>{editora.email}</span>
+                </p>
+              )}
+              {editora.website && (
+                <p className="flex items-center gap-2">
+                  <Globe size={14} className="text-brand" />
+                  <a
+                    href={editora.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-brand hover:underline"
+                  >
+                    {editora.website}
+                  </a>
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="text-right">
+            <p className="font-serif text-3xl font-semibold text-ink">
+              {publisherBooks.length}
+            </p>
+            <p className="text-xs text-ink/55">
+              {publisherBooks.length === 1 ? "título ativo" : "títulos ativos"}
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="font-serif text-2xl font-semibold text-ink sm:text-3xl">{editora.name}</h1>
-          {editora.country && <p className="text-sm text-foreground/60">{editora.country}</p>}
-          <ul className="mt-2 flex flex-wrap gap-4 text-xs text-foreground/60">
-            {editora.phone && (
-              <li className="flex items-center gap-1.5">
-                <Phone size={12} /> {editora.phone}
-              </li>
-            )}
-            {editora.email && (
-              <li className="flex items-center gap-1.5">
-                <Mail size={12} /> {editora.email}
-              </li>
-            )}
-            {editora.address && (
-              <li className="flex items-center gap-1.5">
-                <MapPin size={12} /> {editora.address}
-              </li>
-            )}
-          </ul>
-        </div>
-      </div>
 
-      <h2 className="mt-10 font-serif text-lg font-semibold text-ink">
-        Catálogo desta editora ({editora.books.length})
-      </h2>
-
-      <div className="mt-6 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-4">
-        {editora.books.map((book, index) => (
-          <BookCard
-            key={book.slug}
-            index={index}
-            book={toCatalogBook(book)}
-          />
-        ))}
-      </div>
-
-      {editora.books.length === 0 && (
-        <p className="mt-6 text-sm text-foreground/60">
-          Ainda não há livros associados a esta editora na base de dados.
-        </p>
-      )}
+        {publisherBooks.length === 0 ? (
+          <div className="rounded-2xl border border-line bg-white p-10 text-center">
+            <p className="font-serif text-xl font-semibold text-ink">
+              Catálogo desta chancela em preparação para venda online
+            </p>
+            <p className="mt-2 text-sm text-ink/65">
+              Pode solicitar desde já cotação ou reposição por lista ISBN junto da
+              equipa comercial Pro Capital.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {publisherBooks.map((book, idx) => (
+              <BookCard key={book.slug} book={book} index={idx} />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

@@ -1,199 +1,180 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BookOpen, Building2, Globe2, GraduationCap } from "lucide-react";
+import type { Book } from "@/data/books";
+import BookCover from "./BookCover";
 import { useLanguage } from "@/context/LanguageContext";
-import BookCover from "@/components/BookCover";
-import { BOOKS } from "@/data/books";
-import {
-  HERO_POSTER_DIMENSIONS,
-  HERO_POSTER_LQIP,
-  HERO_POSTER_SRC,
-  HERO_POSTER_WEBP_SRC,
-  HERO_VIDEO_ENABLED,
-  HERO_VIDEO_URL,
-} from "@/lib/hero";
 
-// Colagem de capas do cartaz. A ordem de preferência é explícita para o banner
-// não mostrar um bloco de cor no lugar de uma capa: primeiro os títulos com
-// capa local (asset em /public/covers, que vai sempre no deploy) e só no fim
-// os que ainda não têm capa.
-const FEATURED_BOOKS = BOOKS.filter((book) => book.featured);
-const HERO_BOOKS = [
-  ...FEATURED_BOOKS.filter((book) => book.coverUrl),
-  ...FEATURED_BOOKS.filter((book) => !book.coverUrl),
-].slice(0, 3);
-
-// O cartaz e o vídeo vivem em `lib/hero.ts`, que decide os URLs uma única vez
-// (next/image não é usado aqui: o cartaz é um full-bleed com `<picture>`, para
-// poder servir o WebP com o JPEG como fallback). Sem
-// NEXT_PUBLIC_HERO_VIDEO_URL definido não há camada de vídeo — o banner fica
-// só com a imagem, em vez de descarregar um MP4 de 2,5 MB em autoplay.
-
-// Cada capa do cartaz tem deslocamento vertical fixo (no link, para o hover
-// continuar a funcionar), inclinação e atraso próprios (no wrapper animado,
-// ver `.hero-float-item` em globals.css). Assim as três capas nunca flutuam em
-// sincronia e o conjunto parece uma colagem viva, não uma imagem parada.
-const COVER_POSITIONS = [
-  "translate-y-2",
-  "z-10 -translate-y-3 sm:-translate-y-5",
-  "translate-y-2",
-];
-const COVER_FLOAT = [
-  { tilt: "-5deg", delay: "0s" },
-  { tilt: "1.5deg", delay: "1.4s" },
-  { tilt: "5deg", delay: "2.6s" },
+const COVER_MOTION = [
+  { delay: "0s", tilt: "-1.5deg", offset: "sm:mt-6" },
+  { delay: "1.6s", tilt: "0deg", offset: "" },
+  { delay: "3.2s", tilt: "1.5deg", offset: "sm:mt-10" },
 ];
 
-export default function HeroSection() {
+export interface HeroStats {
+  totalBooks: number;
+  totalPublishers: number;
+  schoolBooks: number;
+  activeMarkets: number;
+}
+
+export default function HeroSection({
+  featuredBooks,
+  stats,
+}: {
+  featuredBooks: Book[];
+  stats: HeroStats;
+}) {
   const { dict } = useLanguage();
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoFailed, setVideoFailed] = useState(false);
-  const [posterFailed, setPosterFailed] = useState(false);
-
-  const showVideo = HERO_VIDEO_ENABLED && !videoFailed;
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Setting the property explicitly helps autoplay work consistently across browsers.
-    video.muted = true;
-    const playPromise = video.play();
-    if (playPromise) {
-      playPromise.catch(() => {
-        // If autoplay is blocked, the poster remains visible as the fallback.
-      });
-    }
-  }, [showVideo]);
+  const showcase = featuredBooks.slice(0, 3);
 
   return (
-    <section
-      className="relative isolate overflow-hidden bg-ink"
-      // LQIP (data URI de ~0,5 KB, definido em `lib/hero.ts`) como fundo do
-      // contentor: a mancha de cor aparece no primeiro frame, por isso o
-      // utilizador não vê um bloco preto enquanto o cartaz descarrega.
-      style={{
-        backgroundImage: `url(${HERO_POSTER_LQIP})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      {!posterFailed && (
-        <picture>
-          {HERO_POSTER_WEBP_SRC ? (
-            <source srcSet={HERO_POSTER_WEBP_SRC} type="image/webp" />
-          ) : null}
-          <img
-            src={HERO_POSTER_SRC}
-            alt=""
-            aria-hidden="true"
-            width={HERO_POSTER_DIMENSIONS.width}
-            height={HERO_POSTER_DIMENSIONS.height}
-            // É a maior imagem acima da dobra: `fetchPriority="high"` trata do
-            // LCP e as dimensões explícitas evitam layout shift.
-            fetchPriority="high"
-            decoding="async"
-            className="absolute inset-0 z-0 h-full w-full object-cover"
-            onError={() => setPosterFailed(true)}
-          />
-        </picture>
-      )}
+    <section className="relative overflow-hidden bg-ink text-white">
+      {/* Textura editorial subtil sem gradientes berrantes */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+          backgroundSize: "64px 64px",
+        }}
+      />
 
-      {showVideo && (
-        <video
-          ref={videoRef}
-          className="absolute inset-0 z-[1] h-full w-full object-cover motion-reduce:hidden"
-          src={HERO_VIDEO_URL}
-          poster={HERO_POSTER_SRC}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          aria-hidden="true"
-          onError={() => setVideoFailed(true)}
-        />
-      )}
-
-      <div className="absolute inset-0 z-[2] bg-gradient-to-b from-ink-dark/90 via-ink-dark/75 to-ink-dark/85 sm:bg-gradient-to-r sm:from-ink-dark/95 sm:via-ink-dark/80 sm:to-ink-dark/55" />
-
-      <div className="relative z-10 mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-12 lg:py-12">
-        <div className="grid items-center gap-10 lg:min-h-[28rem] lg:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] lg:gap-12">
-          <div className="max-w-2xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand/15 px-3.5 py-1.5">
-              <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
-              <span className="text-[10px] font-medium uppercase tracking-[0.16em] text-cream">
+      <div className="relative mx-auto max-w-7xl px-5 pt-14 pb-16 sm:px-8 lg:pt-20 lg:pb-22">
+        <div className="grid items-center gap-12 lg:grid-cols-12">
+          {/* Coluna Editorial Principal */}
+          <div className="lg:col-span-7">
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200/95">
                 {dict.hero.badge}
               </span>
             </div>
 
-            <h1 className="max-w-[15ch] font-serif text-4xl font-semibold leading-[1.04] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mt-6 font-serif text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-5xl xl:text-[3.5rem]">
               {dict.hero.title}
             </h1>
 
-            <p className="mt-5 max-w-xl text-sm leading-relaxed text-cream/85 sm:text-base lg:text-lg">
+            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
               {dict.hero.subtitle}
             </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            {/* Botões Principais Exatos */}
+            <div className="mt-8 flex flex-wrap items-center gap-3.5">
               <Link
                 href="/catalogo"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+                className="inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark"
               >
-                {dict.hero.ctaCatalog}
-                <ArrowRight size={16} />
+                <span>{dict.hero.ctaCatalog}</span>
+                <ArrowRight size={16} aria-hidden="true" />
               </Link>
+
               <Link
-                href="/sobre"
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-cream/40 px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-cream/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
+                href="/contactos?motivo=PARCERIA"
+                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/[0.04] px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:border-accent hover:bg-white/[0.09]"
               >
-                {dict.hero.ctaAbout}
+                <span>{dict.hero.ctaPartnership}</span>
+              </Link>
+
+              <Link
+                href="/livros-escolares"
+                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent transition-opacity hover:opacity-85"
+              >
+                <GraduationCap size={15} aria-hidden="true" />
+                <span>Área Escolar Prioritária</span>
               </Link>
             </div>
 
-            <Link
-              href="/contactos"
-              className="mt-5 inline-flex min-h-8 items-center gap-1.5 text-xs font-medium text-cream/70 underline-offset-4 transition-colors hover:text-cream hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream"
-            >
-              {dict.hero.ctaPartnership}
-              <ArrowRight size={12} />
-            </Link>
-
-            <p className="mt-5 text-[10px] font-medium uppercase tracking-[0.16em] text-cream/55">
-              {dict.hero.deliveryNote}
-            </p>
+            {/* Indicadores Reais da Rede Editorial */}
+            <dl className="mt-12 grid grid-cols-2 gap-6 border-t border-white/12 pt-7 sm:grid-cols-4">
+              <div>
+                <dt className="flex items-center gap-1.5 text-xs text-white/60">
+                  <BookOpen size={13} className="text-accent" aria-hidden="true" />
+                  <span>Títulos em catálogo</span>
+                </dt>
+                <dd className="mt-1 font-serif text-2xl font-semibold text-white">
+                  {stats.totalBooks}
+                </dd>
+              </div>
+              <div>
+                <dt className="flex items-center gap-1.5 text-xs text-white/60">
+                  <Building2 size={13} className="text-accent" aria-hidden="true" />
+                  <span>Editoras representadas</span>
+                </dt>
+                <dd className="mt-1 font-serif text-2xl font-semibold text-white">
+                  {stats.totalPublishers}
+                </dd>
+              </div>
+              <div>
+                <dt className="flex items-center gap-1.5 text-xs text-white/60">
+                  <GraduationCap size={13} className="text-accent" aria-hidden="true" />
+                  <span>Manuais escolares</span>
+                </dt>
+                <dd className="mt-1 font-serif text-2xl font-semibold text-white">
+                  {stats.schoolBooks}
+                </dd>
+              </div>
+              <div>
+                <dt className="flex items-center gap-1.5 text-xs text-white/60">
+                  <Globe2 size={13} className="text-accent" aria-hidden="true" />
+                  <span>Mercados lusófonos</span>
+                </dt>
+                <dd className="mt-1 font-serif text-2xl font-semibold text-white">
+                  {stats.activeMarkets} países
+                </dd>
+              </div>
+            </dl>
           </div>
 
-          <div className="mx-auto w-full max-w-[34rem] px-1 sm:px-2 lg:px-0">
-            <div className="grid grid-cols-3 items-center justify-items-center gap-2 sm:gap-4">
-              {HERO_BOOKS.map((book, index) => (
-                <Link
-                  key={book.slug}
-                  href={`/livro/${book.slug}`}
-                  aria-label={`Ver ${book.title}`}
-                  className={`group w-full max-w-[7.5rem] transition-transform duration-300 ease-out hover:z-20 hover:-translate-y-2 hover:rotate-0 hover:scale-[1.04] focus-visible:z-20 focus-visible:rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cream sm:max-w-[9rem] lg:max-w-[10rem] ${COVER_POSITIONS[index]}`}
-                >
-                  <div
-                    className="hero-float-item"
-                    style={
-                      {
-                        "--hero-tilt": COVER_FLOAT[index].tilt,
-                        "--hero-delay": COVER_FLOAT[index].delay,
-                      } as React.CSSProperties
-                    }
-                  >
-                    <BookCover
-                      book={book}
-                      preload={index === 0}
-                      showCategory={false}
-                      sizes="(max-width: 639px) 28vw, (max-width: 1023px) 20vw, 15vw"
-                      className="rounded-lg shadow-2xl ring-1 ring-cream/20 sm:rounded-xl"
-                    />
-                  </div>
-                </Link>
-              ))}
+          {/* Vitrine Editorial com Capas Reais */}
+          <div className="lg:col-span-5">
+            <div className="rounded-3xl border border-white/12 bg-white/[0.03] p-5 sm:p-6">
+              <div className="mb-4 flex items-center justify-between text-xs">
+                <span className="font-semibold uppercase tracking-[0.16em] text-accent">
+                  {dict.hero.highlightsLabel}
+                </span>
+                <span className="text-white/60">{dict.hero.deliveryNote}</span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 sm:gap-4">
+                {showcase.map((book, index) => {
+                  const motion = COVER_MOTION[index] ?? COVER_MOTION[1];
+                  return (
+                    <Link
+                      key={book.slug}
+                      href={`/livro/${book.slug}`}
+                      className={`group flex flex-col ${motion.offset}`}
+                    >
+                      <div
+                        className="hero-float-item overflow-hidden rounded-xl border border-white/20 bg-white/5 shadow-xl transition-transform duration-300 group-hover:scale-[1.03]"
+                        style={
+                          {
+                            "--hero-delay": motion.delay,
+                            "--hero-tilt": motion.tilt,
+                          } as CSSProperties
+                        }
+                      >
+                        <BookCover
+                          book={book}
+                          preload={index === 1}
+                          showCategory={false}
+                          sizes="(max-width: 1024px) 30vw, 14vw"
+                          className="rounded-xl"
+                        />
+                      </div>
+                      <p className="mt-2.5 line-clamp-1 text-[11px] font-medium text-white/85 group-hover:text-accent">
+                        {book.title}
+                      </p>
+                      <p className="line-clamp-1 text-[10px] text-white/50">
+                        {book.editora}
+                      </p>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>

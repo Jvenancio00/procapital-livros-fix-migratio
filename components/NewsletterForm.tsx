@@ -1,91 +1,81 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Loader2 } from "lucide-react";
-import { useLanguage } from "@/context/LanguageContext";
+import { CheckCircle2, Mail } from "lucide-react";
 
-/**
- * Formulário de newsletter do rodapé da homepage.
- *
- * Antes era um `<form>` sem `action` nem `onSubmit`: submeter recarregava
- * a página e o email não ia a lado nenhum. Agora envia para
- * /api/newsletter e dá confirmação visível ao visitante.
- */
-export default function NewsletterForm({ source = "homepage" }: { source?: string }) {
-  const { dict } = useLanguage();
+export default function NewsletterForm() {
   const [email, setEmail] = useState("");
-  const [state, setState] = useState<"idle" | "sending" | "done">("idle");
-  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (state === "sending") return;
-
-    setState("sending");
-    setError(null);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus("loading");
+    setMessage("");
 
     try {
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source }),
+        body: JSON.stringify({ email: email.trim() }),
       });
-
+      const json = await res.json();
       if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        setError(data?.error ?? "Não foi possível subscrever. Tente novamente.");
-        setState("idle");
+        setStatus("error");
+        setMessage(json.error ?? "Não foi possível registar o email.");
         return;
       }
-
-      setState("done");
+      setStatus("success");
+      setMessage(json.message ?? "Subscrição confirmada.");
       setEmail("");
     } catch {
-      setError("Sem ligação ao servidor. Verifique a Internet e tente novamente.");
-      setState("idle");
+      setStatus("error");
+      setMessage("Erro de ligação ao servidor. Tente novamente.");
     }
   }
 
-  if (state === "done") {
-    return (
-      <p className="flex w-full max-w-sm shrink-0 items-center gap-2 rounded-full border border-accent/40 bg-accent/10 px-4 py-2.5 text-sm text-cream sm:w-auto">
-        <Check size={16} className="shrink-0 text-accent" />
-        Subscrição registada. Obrigado!
-      </p>
-    );
-  }
-
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full max-w-sm shrink-0 sm:w-auto"
-      noValidate
-    >
-      <div className="flex items-center gap-2">
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder={dict.home.newsletter.placeholder}
-          aria-label={dict.home.newsletter.placeholder}
-          aria-invalid={error ? true : undefined}
-          className="w-full min-w-0 rounded-full border border-cream/20 bg-cream/5 px-4 py-2.5 text-sm text-cream placeholder:text-cream/40 focus:border-brand focus:outline-none"
-        />
+    <div>
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-3 sm:flex-row"
+        aria-label="Subscrição de boletim editorial"
+      >
+        <div className="relative flex-1">
+          <Mail
+            size={16}
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-white/45"
+            aria-hidden="true"
+          />
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="O seu email profissional ou institucional..."
+            aria-label="Endereço de email"
+            className="w-full rounded-full border border-white/20 bg-white/10 py-3 pl-10 pr-4 text-sm text-white placeholder:text-white/55 focus:border-accent focus:outline-none"
+          />
+        </div>
         <button
           type="submit"
-          disabled={state === "sending"}
-          className="inline-flex shrink-0 items-center gap-2 rounded-full bg-cream px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-cream/90 disabled:cursor-not-allowed disabled:opacity-60"
+          disabled={status === "loading"}
+          className="shrink-0 rounded-full bg-brand px-7 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
         >
-          {state === "sending" && <Loader2 size={14} className="animate-spin" />}
-          {dict.home.newsletter.button}
+          {status === "loading" ? "A subscrever..." : "Subscrever boletim"}
         </button>
-      </div>
-      {error && (
-        <p role="alert" className="mt-2 px-2 text-xs text-accent">
-          {error}
+      </form>
+
+      {status === "success" && (
+        <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-emerald-300">
+          <CheckCircle2 size={14} aria-hidden="true" />
+          <span>{message}</span>
         </p>
       )}
-    </form>
+      {status === "error" && (
+        <p className="mt-3 text-xs font-medium text-amber-300">{message}</p>
+      )}
+    </div>
   );
 }

@@ -1,100 +1,88 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ShoppingCart, Heart, BookOpen, UserPlus } from "lucide-react";
+import { ArrowRight, BookOpen, Heart, ShoppingCart, UserPlus } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
 
 export const metadata: Metadata = {
-  title: "Livro digital | Pro Capital",
+  title: "Biblioteca & Leitura Digital | Pro Capital",
   description:
-    "Compre livros online, guarde favoritos e aceda à sua biblioteca pessoal na Pro Capital.",
+    "Adquira obras no catálogo Pro Capital, guarde favoritos e aceda à sua biblioteca digital pessoal.",
 };
 
 const STEPS = [
   {
     icon: ShoppingCart,
-    title: "Escolha e compre",
+    title: "Escolha no catálogo por país",
     description:
-      "Adicione livros ao carrinho diretamente do catálogo, com preços em Kwanzas, Meticais, Euros ou Reais.",
+      "Consulte disponibilidade e preços oficiais em Kwanzas (KZ), Meticais (MT), Euros (€) ou Reais (R$).",
   },
   {
     icon: Heart,
-    title: "Guarde favoritos",
+    title: "Organize os seus favoritos",
     description:
-      "Marque títulos que lhe interessam para decidir com calma mais tarde.",
+      "Guarde títulos escolares, técnicos ou literários para preparar compras individuais ou institucionais.",
   },
   {
     icon: UserPlus,
-    title: "Crie uma conta",
+    title: "Crie a sua conta Pro Capital",
     description:
-      "Registe-se em segundos para guardar o seu histórico e simplificar futuras compras.",
+      "Registe-se como leitor particular, escola, livraria, editora ou empresa para centralizar encomendas.",
   },
   {
     icon: BookOpen,
-    title: "Aceda à sua biblioteca",
+    title: "Leia e anote na Biblioteca Digital",
     description:
-      "Todos os livros comprados ou obtidos gratuitamente ficam reunidos em \"Minha Biblioteca\".",
+      "Aceda aos títulos digitais adquiridos com leitor integrado e registo pessoal de notas por página.",
   },
 ];
 
 export default function LivroDigitalPage() {
   return (
-    <div>
-      <section className="border-b border-line bg-cream-deep/60">
-        <div className="mx-auto max-w-4xl px-5 py-16 sm:px-8 sm:py-24">
-          <span className="inline-block rounded-full bg-cream px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-ink">
-            Livro digital
-          </span>
-          <h1 className="mt-6 font-serif text-3xl font-semibold leading-tight text-ink sm:text-4xl">
-            A sua livraria, também online.
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-relaxed text-foreground/70 sm:text-lg">
-            Explore o catálogo, compre com poucos cliques e acompanhe tudo
-            numa biblioteca pessoal — pensada para leitores em toda a CPLP.
-          </p>
+    <main>
+      <PageHeader
+        eyebrow="Leitura & Acervo Digital"
+        title="A Sua Biblioteca Digital Pro Capital"
+        description="Acesso simples e seguro a edições digitais, anotações de estudo e histórico completo de aquisições em qualquer dispositivo."
+      />
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/catalogo"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-brand-dark"
-            >
-              Ver catálogo
-              <ArrowRight size={16} />
-            </Link>
-            <Link
-              href="/loja/registo"
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-line px-6 py-3 text-sm font-semibold text-ink transition-colors hover:border-brand/40"
-            >
-              Criar conta
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-        <h2 className="font-serif text-2xl font-semibold text-ink sm:text-3xl">
-          Como funciona
-        </h2>
-
-        <div className="mt-10 grid gap-6 sm:grid-cols-2">
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+        <div className="grid gap-6 sm:grid-cols-2">
           {STEPS.map(({ icon: Icon, title, description }) => (
             <div
               key={title}
-              className="flex gap-4 rounded-2xl border border-line bg-cream p-6"
+              className="flex gap-4 rounded-2xl border border-line bg-white p-6"
             >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
                 <Icon size={20} />
               </span>
               <div>
                 <h3 className="font-serif text-base font-semibold text-ink">
                   {title}
                 </h3>
-                <p className="mt-1 text-sm leading-relaxed text-foreground/70">
+                <p className="mt-1.5 text-xs leading-relaxed text-ink/70">
                   {description}
                 </p>
               </div>
             </div>
           ))}
         </div>
+
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link
+            href="/catalogo"
+            className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
+          >
+            <span>Explorar catálogo</span>
+            <ArrowRight size={15} />
+          </Link>
+          <Link
+            href="/loja/biblioteca"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-6 py-3 text-xs font-semibold text-ink hover:border-brand/40"
+          >
+            <span>Abrir Minha Biblioteca</span>
+          </Link>
+        </div>
       </section>
-    </div>
+    </main>
   );
 }

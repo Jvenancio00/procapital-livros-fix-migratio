@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BOOKS, getBookBySlug, getRelatedBooks } from "@/data/books";
 import BookCard from "@/components/BookCard";
 import BookCover from "@/components/BookCover";
 import BookPurchasePanel from "@/components/BookPurchasePanel";
@@ -9,10 +8,10 @@ import BookReviews from "@/components/BookReviews";
 import { SITE_URL } from "@/lib/site";
 import { prisma } from "@/lib/prisma";
 import { getFrequentlyBoughtTogether } from "@/lib/cross-sell";
+import { getAllCatalogBooks, getCatalogBookBySlug } from "@/lib/catalog";
+import { EDUCATION_LEVEL_LABELS } from "@/lib/enums";
 
-export function generateStaticParams() {
-  return BOOKS.map((book) => ({ slug: book.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -20,7 +19,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const book = getBookBySlug(slug);
+  const book = await getCatalogBookBySlug(slug);
 
   if (!book) {
     return { title: "Livro não encontrado | Pro Capital" };
@@ -30,24 +29,16 @@ export async function generateMetadata({
     title: `${book.title} | Pro Capital`,
     description:
       book.description ??
-      `${book.title}, de ${book.author}, disponível no catálogo da Pro Capital.`,
+      `${book.title}, de ${book.author}, disponível no catálogo editorial da Pro Capital.`,
     alternates: { canonical: `/livro/${book.slug}` },
     openGraph: {
       title: book.title,
-      description:
-        book.description ?? `${book.title}, de ${book.author}.`,
+      description: book.description ?? `${book.title}, de ${book.author}.`,
       url: `${SITE_URL}/livro/${book.slug}`,
       siteName: "Pro Capital",
       type: "book",
       locale: "pt_MZ",
-      // A capa local é a mesma que o site mostra; a pré-visualização nas redes
-      // sociais deixa de depender de um serviço externo poder responder.
       images: book.coverUrl ? [`${SITE_URL}${book.coverUrl}`] : undefined,
-    },
-    twitter: {
-      card: "summary",
-      title: book.title,
-      description: book.description ?? `${book.title}, de ${book.author}.`,
     },
   };
 }
@@ -58,48 +49,52 @@ export default async function LivroPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const book = getBookBySlug(slug);
+  const [book, allBooks] = await Promise.all([
+    getCatalogBookBySlug(slug),
+    getAllCatalogBooks(),
+  ]);
 
   if (!book) {
     notFound();
   }
 
-  const related = getRelatedBooks(book);
-
-  // "Compre também" real, calculado a partir de encomendas pagas — com
-  // recuo silencioso para sugestões da mesma categoria enquanto não há
-  // encomendas suficientes para gerar o padrão de compra conjunta.
-  let crossSell: { slug: string; title: string }[] = [];
+  let crossSellSlugs: string[] = [];
   let soldLast30Days = 0;
   try {
-    const dbBook = await prisma.book.findUnique({
-      where: { slug: book.slug },
-      select: { id: true },
-    });
-    if (dbBook) {
-      const boughtTogether = await getFrequentlyBoughtTogether(dbBook.id);
-      crossSell = boughtTogether.map((b) => ({ slug: b.slug, title: b.title }));
+    if (book.id) {
+      const boughtTogether = await getFrequentlyBoughtTogether(book.id);
+      crossSellSlugs = boughtTogether.map((b) => b.slug);
 
       const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const sales = await prisma.orderItem.aggregate({
         where: {
-          bookId: dbBook.id,
-          order: { status: "PAID", createdAt: { gte: since } },
+          bookId: book.id,
+          order: {
+            status: { in: ["PAID", "PROCESSING", "SHIPPED", "COMPLETED"] },
+            createdAt: { gte: since },
+          },
         },
         _sum: { quantity: true },
       });
       soldLast30Days = sales._sum.quantity ?? 0;
     }
   } catch {
-    // Sem ligação à base de dados — mantém-se só o recuo por categoria
+    // fallback silencioso
   }
+
+  const sameCategory = allBooks
+    .filter((b) => b.slug !== book.slug && b.category === book.category)
+    .slice(0, 4);
+
   const relatedBooks =
-    crossSell.length > 0
-      ? crossSell
-          .map((c) => BOOKS.find((b) => b.slug === c.slug))
-          .filter((b): b is (typeof BOOKS)[number] => Boolean(b))
-      : related;
-  const relatedHeading = crossSell.length > 0 ? "Compre também" : `Também em ${book.category}`;
+    crossSellSlugs.length > 0
+      ? crossSellSlugs
+          .map((s) => allBooks.find((b) => b.slug === s))
+          .filter((b): b is (typeof allBooks)[number] => Boolean(b))
+      : sameCategory;
+
+  const relatedHeading =
+    crossSellSlugs.length > 0 ? "Compre também" : `Também em ${book.category}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -113,163 +108,183 @@ export default async function LivroPage({
     datePublished: book.year ? String(book.year) : undefined,
     description: book.description,
     publisher: { "@type": "Organization", name: book.editora },
-    aggregateRating:
-      book.rating && book.reviewCount
-        ? {
-            "@type": "AggregateRating",
-            ratingValue: book.rating,
-            reviewCount: book.reviewCount,
-          }
-        : undefined,
     offers: {
       "@type": "Offer",
-      price: book.free ? 0 : book.priceKZ,
-      priceCurrency: "AOA",
+      price: book.free ? 0 : book.price,
+      priceCurrency: "MZN",
       availability: "https://schema.org/InStock",
       url: `${SITE_URL}/livro/${book.slug}`,
     },
   };
 
-  const breadcrumbJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Início", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Catálogo", item: `${SITE_URL}/catalogo` },
-      {
-        "@type": "ListItem",
-        position: 3,
-        name: book.title,
-        item: `${SITE_URL}/livro/${book.slug}`,
-      },
-    ],
-  };
-
   return (
-    <div>
-      {/* Dados estruturados para motores de busca — melhora a apresentação nos
-          resultados (preço, avaliação) e é um canal de aquisição de baixo custo */}
+    <div className="pb-20">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-      <section className="border-b border-line bg-cream-deep/60">
-        <div className="mx-auto max-w-6xl px-5 py-6 sm:px-8">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs font-medium text-foreground/60">
-            <Link href="/" className="transition-colors hover:text-brand">
-              Início
-            </Link>
-            <span aria-hidden="true">/</span>
-            <Link href="/catalogo" className="transition-colors hover:text-brand">
-              Catálogo
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-ink" aria-current="page">
-              {book.title}
-            </span>
-          </nav>
-        </div>
-      </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-        <div className="grid gap-10 sm:grid-cols-[280px_1fr] sm:gap-14">
-          <div className="mx-auto w-full max-w-[280px] sm:mx-0">
-            <BookCover book={book} index={0} className="rounded-2xl" />
+      <div className="mx-auto max-w-7xl px-5 pt-8 sm:px-8">
+        <nav
+          aria-label="Navegação estrutural"
+          className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-ink/55"
+        >
+          <Link href="/" className="hover:text-brand">
+            Início
+          </Link>
+          <span aria-hidden="true">/</span>
+          <Link href="/catalogo" className="hover:text-brand">
+            Catálogo
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span className="text-ink/85" aria-current="page">
+            {book.title}
+          </span>
+        </nav>
+      </div>
+
+      <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
+        <div className="grid gap-10 lg:grid-cols-[320px_1fr] lg:gap-14">
+          <div className="mx-auto w-full max-w-[320px] lg:mx-0">
+            <div className="overflow-hidden rounded-2xl border border-line bg-white p-3 shadow-sm">
+              <BookCover
+                book={book}
+                preload
+                sizes="(max-width: 1024px) 320px, 320px"
+                className="rounded-xl"
+              />
+            </div>
           </div>
 
           <div>
-            <span className="inline-block rounded-full bg-cream px-3 py-1 text-xs font-medium uppercase tracking-wide text-ink">
-              {book.category}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-ink">
+                {book.category}
+              </span>
+              {book.educationLevel && (
+                <span className="rounded-full bg-cream-deep px-3 py-1 text-xs font-semibold text-brand">
+                  {EDUCATION_LEVEL_LABELS[book.educationLevel]}
+                </span>
+              )}
+              {book.schoolGrade && (
+                <span className="rounded-full bg-cream-deep px-3 py-1 text-xs font-medium text-ink/80">
+                  {book.schoolGrade}
+                </span>
+              )}
+            </div>
 
-            <h1 className="mt-4 font-serif text-2xl font-semibold leading-tight text-ink sm:text-3xl">
+            <h1 className="mt-4 font-serif text-3xl font-semibold leading-tight text-ink sm:text-4xl">
               {book.title}
             </h1>
-            <p className="mt-2 text-base text-foreground/60">{book.author}</p>
+            <p className="mt-2 text-base font-medium text-ink/70">
+              {book.author} · <span className="text-brand">{book.editora}</span>
+            </p>
 
             {book.description && (
-              <p className="mt-6 max-w-2xl text-sm leading-relaxed text-foreground/75 sm:text-base">
+              <p className="mt-5 max-w-3xl text-base leading-relaxed text-ink/75">
                 {book.description}
               </p>
             )}
 
             {soldLast30Days >= 3 && (
-              <p className="mt-3 text-xs font-medium text-brand">
-                {soldLast30Days} vendidos nos últimos 30 dias
+              <p className="mt-3 text-xs font-semibold text-brand">
+                {soldLast30Days} exemplares vendidos nos últimos 30 dias
               </p>
             )}
 
             <BookPurchasePanel book={book} />
 
-            <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-4 border-t border-line pt-6 text-sm sm:max-w-md">
+            {/* Ficha Técnica Editorial Completa */}
+            <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-4 rounded-2xl border border-line bg-white p-6 text-sm sm:grid-cols-3">
               <div>
-                <dt className="text-xs uppercase tracking-wide text-foreground/45">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
                   Editora
                 </dt>
                 <dd className="mt-1 font-medium text-ink">{book.editora}</dd>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-foreground/45">
-                  Categoria
-                </dt>
-                <dd className="mt-1 font-medium text-ink">{book.category}</dd>
-              </div>
+              {book.isbn && (
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
+                    ISBN
+                  </dt>
+                  <dd className="mt-1 font-mono text-xs font-semibold text-ink">
+                    {book.isbn}
+                  </dd>
+                </div>
+              )}
               {book.year && (
                 <div>
-                  <dt className="text-xs uppercase tracking-wide text-foreground/45">
-                    Ano de publicação
+                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
+                    Ano de Edição
                   </dt>
                   <dd className="mt-1 font-medium text-ink">{book.year}</dd>
                 </div>
               )}
               {book.pages && (
                 <div>
-                  <dt className="text-xs uppercase tracking-wide text-foreground/45">
+                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
                     Páginas
                   </dt>
                   <dd className="mt-1 font-medium text-ink">{book.pages}</dd>
                 </div>
               )}
+              {book.subject && (
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
+                    Disciplina
+                  </dt>
+                  <dd className="mt-1 font-medium text-ink">{book.subject}</dd>
+                </div>
+              )}
+              {book.schoolGrade && (
+                <div>
+                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
+                    Classe / Ano
+                  </dt>
+                  <dd className="mt-1 font-medium text-ink">{book.schoolGrade}</dd>
+                </div>
+              )}
               <div>
-                <dt className="text-xs uppercase tracking-wide text-foreground/45">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
                   Idioma
                 </dt>
                 <dd className="mt-1 font-medium text-ink">Português</dd>
               </div>
-              {book.isbn && (
+              {book.countryOrigin && (
                 <div>
-                  <dt className="text-xs uppercase tracking-wide text-foreground/45">
-                    ISBN
+                  <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
+                    País de Origem
                   </dt>
-                  <dd className="mt-1 font-medium text-ink">{book.isbn}</dd>
+                  <dd className="mt-1 font-medium text-ink">{book.countryOrigin}</dd>
                 </div>
               )}
             </dl>
-
-            <BookReviews slug={book.slug} />
           </div>
         </div>
       </section>
 
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <BookReviews slug={book.slug} />
+      </div>
+
       {relatedBooks.length > 0 && (
-        <section className="border-t border-line bg-cream-deep/60">
-          <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
-            <span className="text-xs font-semibold uppercase tracking-widest text-brand">
-              Continuar a explorar
-            </span>
-            <h2 className="mt-2 font-serif text-xl font-semibold text-ink sm:text-2xl">
+        <section className="mx-auto mt-16 max-w-7xl border-t border-line/80 px-5 pt-14 sm:px-8">
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="font-serif text-2xl font-semibold text-ink sm:text-3xl">
               {relatedHeading}
             </h2>
+            <Link
+              href="/catalogo"
+              className="text-sm font-semibold text-brand hover:underline"
+            >
+              Ver catálogo completo →
+            </Link>
+          </div>
 
-            <div className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-4">
-              {relatedBooks.map((relatedBook, index) => (
-                <BookCard key={relatedBook.slug} book={relatedBook} index={index} />
-              ))}
-            </div>
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {relatedBooks.map((item, idx) => (
+              <BookCard key={item.slug} book={item} index={idx} />
+            ))}
           </div>
         </section>
       )}

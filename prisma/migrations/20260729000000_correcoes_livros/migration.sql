@@ -1,35 +1,17 @@
--- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'CUSTOMER');
+-- Idempotent baseline migration (PostgreSQL) — safe on clean and pre-migrated databases.
 
--- CreateEnum
-CREATE TYPE "Currency" AS ENUM ('KZ', 'MT', 'EUR', 'BRL');
+DO $$ BEGIN CREATE TYPE "Role" AS ENUM ('ADMIN', 'CUSTOMER'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "Currency" AS ENUM ('KZ', 'MT', 'EUR', 'BRL'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'PAID', 'CANCELLED'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "NoteKind" AS ENUM ('BOOKMARK', 'NOTE'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "TipoInstituicao" AS ENUM ('ESCOLA', 'UNIVERSIDADE', 'LIVRARIA', 'EDITORA', 'OUTRO'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "EstadoConvenio" AS ENUM ('PENDENTE', 'EM_ANALISE', 'APROVADO', 'REJEITADO'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "TipoEvento" AS ENUM ('LANCAMENTO', 'FEIRA', 'WORKSHOP', 'OUTRO'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "EstadoInscricao" AS ENUM ('CONFIRMADA', 'LISTA_ESPERA', 'CANCELADA'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "ClientType" AS ENUM ('PARTICULAR', 'LIVRARIA', 'REVENDEDOR', 'ESCOLA', 'UNIVERSIDADE', 'EDITORA'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE "ContactReason" AS ENUM ('PUBLICAR', 'COMPRAR', 'PARCERIA', 'SUPORTE_TECNICO', 'COMERCIAL', 'OUTRO'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
--- CreateEnum
-CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'PAID', 'CANCELLED');
-
--- CreateEnum
-CREATE TYPE "NoteKind" AS ENUM ('BOOKMARK', 'NOTE');
-
--- CreateEnum
-CREATE TYPE "TipoInstituicao" AS ENUM ('ESCOLA', 'UNIVERSIDADE', 'LIVRARIA', 'EDITORA', 'OUTRO');
-
--- CreateEnum
-CREATE TYPE "EstadoConvenio" AS ENUM ('PENDENTE', 'EM_ANALISE', 'APROVADO', 'REJEITADO');
-
--- CreateEnum
-CREATE TYPE "TipoEvento" AS ENUM ('LANCAMENTO', 'FEIRA', 'WORKSHOP', 'OUTRO');
-
--- CreateEnum
-CREATE TYPE "EstadoInscricao" AS ENUM ('CONFIRMADA', 'LISTA_ESPERA', 'CANCELADA');
-
--- CreateEnum
-CREATE TYPE "ClientType" AS ENUM ('PARTICULAR', 'LIVRARIA', 'REVENDEDOR', 'ESCOLA', 'UNIVERSIDADE', 'EDITORA');
-
--- CreateEnum
-CREATE TYPE "ContactReason" AS ENUM ('PUBLICAR', 'COMPRAR', 'PARCERIA', 'SUPORTE_TECNICO', 'COMERCIAL', 'OUTRO');
-
--- CreateTable
-CREATE TABLE "User" (
+CREATE TABLE IF NOT EXISTS "User" (
     "id" TEXT NOT NULL,
     "name" TEXT,
     "email" TEXT NOT NULL,
@@ -42,8 +24,7 @@ CREATE TABLE "User" (
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "LoginEvent" (
+CREATE TABLE IF NOT EXISTS "LoginEvent" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "ip" TEXT,
@@ -53,8 +34,7 @@ CREATE TABLE "LoginEvent" (
     CONSTRAINT "LoginEvent_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Category" (
+CREATE TABLE IF NOT EXISTS "Category" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -64,8 +44,7 @@ CREATE TABLE "Category" (
     CONSTRAINT "Category_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Editora" (
+CREATE TABLE IF NOT EXISTS "Editora" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -78,8 +57,7 @@ CREATE TABLE "Editora" (
     CONSTRAINT "Editora_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Book" (
+CREATE TABLE IF NOT EXISTS "Book" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -102,8 +80,7 @@ CREATE TABLE "Book" (
     CONSTRAINT "Book_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Price" (
+CREATE TABLE IF NOT EXISTS "Price" (
     "id" TEXT NOT NULL,
     "amount" DECIMAL(65,30) NOT NULL,
     "currency" "Currency" NOT NULL,
@@ -111,8 +88,7 @@ CREATE TABLE "Price" (
     CONSTRAINT "Price_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Order" (
+CREATE TABLE IF NOT EXISTS "Order" (
     "id" TEXT NOT NULL,
     "status" "OrderStatus" NOT NULL DEFAULT 'PENDING',
     "currency" "Currency" NOT NULL DEFAULT 'KZ',
@@ -122,8 +98,7 @@ CREATE TABLE "Order" (
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "OrderItem" (
+CREATE TABLE IF NOT EXISTS "OrderItem" (
     "id" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
     "unitPrice" DECIMAL(65,30) NOT NULL,
@@ -132,8 +107,7 @@ CREATE TABLE "OrderItem" (
     CONSTRAINT "OrderItem_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Review" (
+CREATE TABLE IF NOT EXISTS "Review" (
     "id" TEXT NOT NULL,
     "rating" INTEGER NOT NULL,
     "comment" TEXT,
@@ -143,8 +117,7 @@ CREATE TABLE "Review" (
     CONSTRAINT "Review_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Favorite" (
+CREATE TABLE IF NOT EXISTS "Favorite" (
     "id" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "priceAtSaveKZ" DECIMAL(65,30),
@@ -153,8 +126,7 @@ CREATE TABLE "Favorite" (
     CONSTRAINT "Favorite_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "LibraryItem" (
+CREATE TABLE IF NOT EXISTS "LibraryItem" (
     "id" TEXT NOT NULL,
     "acquiredAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "source" TEXT NOT NULL,
@@ -163,8 +135,7 @@ CREATE TABLE "LibraryItem" (
     CONSTRAINT "LibraryItem_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "ReadingNote" (
+CREATE TABLE IF NOT EXISTS "ReadingNote" (
     "id" TEXT NOT NULL,
     "page" INTEGER NOT NULL,
     "kind" "NoteKind" NOT NULL,
@@ -176,8 +147,7 @@ CREATE TABLE "ReadingNote" (
     CONSTRAINT "ReadingNote_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "License" (
+CREATE TABLE IF NOT EXISTS "License" (
     "id" TEXT NOT NULL,
     "code" TEXT NOT NULL,
     "buyerEmail" TEXT NOT NULL,
@@ -190,8 +160,7 @@ CREATE TABLE "License" (
     CONSTRAINT "License_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "ConvenioPedido" (
+CREATE TABLE IF NOT EXISTS "ConvenioPedido" (
     "id" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
     "instituicao" TEXT NOT NULL,
@@ -206,8 +175,7 @@ CREATE TABLE "ConvenioPedido" (
     CONSTRAINT "ConvenioPedido_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Evento" (
+CREATE TABLE IF NOT EXISTS "Evento" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "titulo" TEXT NOT NULL,
@@ -228,8 +196,7 @@ CREATE TABLE "Evento" (
     CONSTRAINT "Evento_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "Inscricao" (
+CREATE TABLE IF NOT EXISTS "Inscricao" (
     "id" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -242,8 +209,7 @@ CREATE TABLE "Inscricao" (
     CONSTRAINT "Inscricao_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "ClientProfile" (
+CREATE TABLE IF NOT EXISTS "ClientProfile" (
     "id" TEXT NOT NULL,
     "companyName" TEXT,
     "type" "ClientType" NOT NULL DEFAULT 'PARTICULAR',
@@ -253,8 +219,7 @@ CREATE TABLE "ClientProfile" (
     CONSTRAINT "ClientProfile_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "BlogPost" (
+CREATE TABLE IF NOT EXISTS "BlogPost" (
     "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "title" TEXT NOT NULL,
@@ -268,8 +233,7 @@ CREATE TABLE "BlogPost" (
     CONSTRAINT "BlogPost_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "ContactRequest" (
+CREATE TABLE IF NOT EXISTS "ContactRequest" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -280,120 +244,48 @@ CREATE TABLE "ContactRequest" (
     CONSTRAINT "ContactRequest_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");
+CREATE INDEX IF NOT EXISTS "LoginEvent_userId_createdAt_idx" ON "LoginEvent"("userId", "createdAt");
+CREATE UNIQUE INDEX IF NOT EXISTS "Category_slug_key" ON "Category"("slug");
+CREATE UNIQUE INDEX IF NOT EXISTS "Category_name_key" ON "Category"("name");
+CREATE INDEX IF NOT EXISTS "Category_parentId_idx" ON "Category"("parentId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Editora_slug_key" ON "Editora"("slug");
+CREATE UNIQUE INDEX IF NOT EXISTS "Editora_name_key" ON "Editora"("name");
+CREATE UNIQUE INDEX IF NOT EXISTS "Book_slug_key" ON "Book"("slug");
+CREATE UNIQUE INDEX IF NOT EXISTS "Price_bookId_currency_key" ON "Price"("bookId", "currency");
+CREATE INDEX IF NOT EXISTS "OrderItem_bookId_idx" ON "OrderItem"("bookId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Review_userId_bookId_key" ON "Review"("userId", "bookId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Favorite_userId_bookId_key" ON "Favorite"("userId", "bookId");
+CREATE UNIQUE INDEX IF NOT EXISTS "LibraryItem_userId_bookId_key" ON "LibraryItem"("userId", "bookId");
+CREATE INDEX IF NOT EXISTS "ReadingNote_userId_bookId_idx" ON "ReadingNote"("userId", "bookId");
+CREATE UNIQUE INDEX IF NOT EXISTS "License_code_key" ON "License"("code");
+CREATE INDEX IF NOT EXISTS "License_bookId_idx" ON "License"("bookId");
+CREATE INDEX IF NOT EXISTS "ConvenioPedido_estado_idx" ON "ConvenioPedido"("estado");
+CREATE UNIQUE INDEX IF NOT EXISTS "Evento_slug_key" ON "Evento"("slug");
+CREATE INDEX IF NOT EXISTS "Evento_dataInicio_idx" ON "Evento"("dataInicio");
+CREATE UNIQUE INDEX IF NOT EXISTS "Inscricao_checkinCode_key" ON "Inscricao"("checkinCode");
+CREATE UNIQUE INDEX IF NOT EXISTS "Inscricao_eventoId_email_key" ON "Inscricao"("eventoId", "email");
+CREATE UNIQUE INDEX IF NOT EXISTS "ClientProfile_userId_key" ON "ClientProfile"("userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "BlogPost_slug_key" ON "BlogPost"("slug");
+CREATE INDEX IF NOT EXISTS "BlogPost_published_publishedAt_idx" ON "BlogPost"("published", "publishedAt");
+CREATE INDEX IF NOT EXISTS "ContactRequest_reason_createdAt_idx" ON "ContactRequest"("reason", "createdAt");
 
--- CreateIndex
-CREATE INDEX "LoginEvent_userId_createdAt_idx" ON "LoginEvent"("userId", "createdAt");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Category_slug_key" ON "Category"("slug");
-CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
-CREATE INDEX "Category_parentId_idx" ON "Category"("parentId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Editora_slug_key" ON "Editora"("slug");
-CREATE UNIQUE INDEX "Editora_name_key" ON "Editora"("name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Book_slug_key" ON "Book"("slug");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Price_bookId_currency_key" ON "Price"("bookId", "currency");
-
--- CreateIndex
-CREATE INDEX "OrderItem_bookId_idx" ON "OrderItem"("bookId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Review_userId_bookId_key" ON "Review"("userId", "bookId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Favorite_userId_bookId_key" ON "Favorite"("userId", "bookId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "LibraryItem_userId_bookId_key" ON "LibraryItem"("userId", "bookId");
-
--- CreateIndex
-CREATE INDEX "ReadingNote_userId_bookId_idx" ON "ReadingNote"("userId", "bookId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "License_code_key" ON "License"("code");
-CREATE INDEX "License_bookId_idx" ON "License"("bookId");
-
--- CreateIndex
-CREATE INDEX "ConvenioPedido_estado_idx" ON "ConvenioPedido"("estado");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Evento_slug_key" ON "Evento"("slug");
-CREATE INDEX "Evento_dataInicio_idx" ON "Evento"("dataInicio");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Inscricao_checkinCode_key" ON "Inscricao"("checkinCode");
-CREATE UNIQUE INDEX "Inscricao_eventoId_email_key" ON "Inscricao"("eventoId", "email");
-
--- CreateIndex
-CREATE UNIQUE INDEX "ClientProfile_userId_key" ON "ClientProfile"("userId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "BlogPost_slug_key" ON "BlogPost"("slug");
-CREATE INDEX "BlogPost_published_publishedAt_idx" ON "BlogPost"("published", "publishedAt");
-
--- CreateIndex
-CREATE INDEX "ContactRequest_reason_createdAt_idx" ON "ContactRequest"("reason", "createdAt");
-
--- AddForeignKey
-ALTER TABLE "LoginEvent" ADD CONSTRAINT "LoginEvent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Category" ADD CONSTRAINT "Category_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Book" ADD CONSTRAINT "Book_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Book" ADD CONSTRAINT "Book_editoraId_fkey" FOREIGN KEY ("editoraId") REFERENCES "Editora"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Price" ADD CONSTRAINT "Price_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Review" ADD CONSTRAINT "Review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Review" ADD CONSTRAINT "Review_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Favorite" ADD CONSTRAINT "Favorite_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Favorite" ADD CONSTRAINT "Favorite_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "LibraryItem" ADD CONSTRAINT "LibraryItem_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "LibraryItem" ADD CONSTRAINT "LibraryItem_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ReadingNote" ADD CONSTRAINT "ReadingNote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ReadingNote" ADD CONSTRAINT "ReadingNote_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "License" ADD CONSTRAINT "License_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Inscricao" ADD CONSTRAINT "Inscricao_eventoId_fkey" FOREIGN KEY ("eventoId") REFERENCES "Evento"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "ClientProfile" ADD CONSTRAINT "ClientProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN ALTER TABLE "LoginEvent" ADD CONSTRAINT "LoginEvent_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Category" ADD CONSTRAINT "Category_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Category"("id") ON DELETE SET NULL ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Book" ADD CONSTRAINT "Book_categoryId_fkey" FOREIGN KEY ("categoryId") REFERENCES "Category"("id") ON DELETE RESTRICT ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Book" ADD CONSTRAINT "Book_editoraId_fkey" FOREIGN KEY ("editoraId") REFERENCES "Editora"("id") ON DELETE SET NULL ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Price" ADD CONSTRAINT "Price_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "OrderItem" ADD CONSTRAINT "OrderItem_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE RESTRICT ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Review" ADD CONSTRAINT "Review_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Review" ADD CONSTRAINT "Review_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Favorite" ADD CONSTRAINT "Favorite_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Favorite" ADD CONSTRAINT "Favorite_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "LibraryItem" ADD CONSTRAINT "LibraryItem_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "LibraryItem" ADD CONSTRAINT "LibraryItem_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "ReadingNote" ADD CONSTRAINT "ReadingNote_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "ReadingNote" ADD CONSTRAINT "ReadingNote_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "License" ADD CONSTRAINT "License_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "Book"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "Inscricao" ADD CONSTRAINT "Inscricao_eventoId_fkey" FOREIGN KEY ("eventoId") REFERENCES "Evento"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN ALTER TABLE "ClientProfile" ADD CONSTRAINT "ClientProfile_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE; EXCEPTION WHEN duplicate_object THEN NULL; END $$;

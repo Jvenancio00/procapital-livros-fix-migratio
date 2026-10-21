@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fdfaf3;
-  --foreground: #1c1a17;
-  --ink: #123a44;
-  --ink-dark: #0b262d;
-  --brand: #c8142f;
-  --brand-dark: #9c0f24;
-  --accent: #d9a441;
-  --wine: #7a1636;
-  --orange: #e8752f;
-  --cream: #fdfaf3;
-  --cream-deep: #f4ecd9;
-  --line: #e7dcc4;
+  --background: #faf8f5;
+  --foreground: #0f172a;
+  --ink: #0f172a;
+  --ink-dark: #090f1e;
+  --brand: #991b1b;
+  --brand-dark: #7f1d1d;
+  --accent: #f59e0b;
+  --wine: #7f1d1d;
+  --orange: #d97706;
+  --cream: #faf8f5;
+  --cream-deep: #f2ede4;
+  --line: #e5dfd3;
 }
 
 @theme inline {
@@ -32,6 +32,16 @@
   --font-sans: var(--font-inter);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -42,14 +52,13 @@ body {
   from {
     transform: translateX(0);
   }
-
   to {
     transform: translateX(-50%);
   }
 }
 
 .publishers-marquee {
-  animation: publishers-marquee 42s linear infinite;
+  animation: publishers-marquee 44s linear infinite;
 }
 
 .publishers-marquee:hover,
@@ -59,8 +68,8 @@ body {
 
 .publishers-marquee__group {
   flex: none;
-  gap: clamp(1.25rem, 4vw, 3rem);
-  padding-right: clamp(1.25rem, 4vw, 3rem);
+  gap: clamp(1rem, 3vw, 2rem);
+  padding-right: clamp(1rem, 3vw, 2rem);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -80,7 +89,7 @@ body {
     flex: initial;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.875rem;
     padding-right: 0;
   }
 
@@ -89,15 +98,13 @@ body {
   }
 }
 
-/* Capas do banner principal: flutuação lenta e inclinação própria por capa.
-   --hero-tilt e --hero-delay vêm inline do HeroSection (um por capa). */
 @keyframes hero-float {
   0%,
   100% {
     transform: translateY(0) rotate(var(--hero-tilt, 0deg));
   }
   50% {
-    transform: translateY(-0.6rem) rotate(calc(var(--hero-tilt, 0deg) * 0.5));
+    transform: translateY(-0.45rem) rotate(calc(var(--hero-tilt, 0deg) * 0.5));
   }
 }
 
@@ -107,7 +114,6 @@ body {
   will-change: transform;
 }
 
-/* Ao passar o rato numa capa, ela fica parada para o hover ser legível. */
 .group:hover .hero-float-item {
   animation-play-state: paused;
 }
