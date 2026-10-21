@@ -39,7 +39,7 @@ async function main() {
   const isLocal = /localhost|127\.0\.0\.1|sslmode=disable/i.test(connectionString);
   const client = new pg.Client({
     connectionString,
-    connectionTimeoutMillis: 10_000,
+    connectionTimeoutMillis: 15_000,
     ...(isLocal ? {} : { ssl: { rejectUnauthorized: false } }),
   });
 
@@ -47,7 +47,7 @@ async function main() {
     await client.connect();
   } catch (connErr) {
     console.warn(
-      "[db:migrate] Aviso: não foi possível ligar à BD durante o build — a prosseguir com build resiliente:",
+      "[db:migrate] Aviso: BD inacessível no momento do build — a prosseguir com fallback resiliente:",
       connErr instanceof Error ? connErr.message : connErr,
     );
     return;
@@ -103,31 +103,47 @@ async function main() {
       console.log(`[db:migrate] Concluída: ${dirName}`);
     }
 
-    const countRes = await client.query(`SELECT COUNT(*)::int AS total FROM "Book"`);
-    if ((countRes.rows[0]?.total ?? 0) === 0) {
+    const marketCount = await client.query(
+      `SELECT COUNT(*)::int AS total FROM "MarketConfig"`,
+    );
+    const bookCount = await client.query(
+      `SELECT COUNT(*)::int AS total FROM "Book"`,
+    );
+    if (
+      (marketCount.rows[0]?.total ?? 0) < 4 ||
+      (bookCount.rows[0]?.total ?? 0) === 0
+    ) {
       needsSeed = true;
     }
-  } catch (migErr) {
-    console.warn(
-      "[db:migrate] Aviso durante migração SQL (a prosseguir com build):",
-      migErr instanceof Error ? migErr.message : migErr,
-    );
   } finally {
     await client.end().catch(() => {});
   }
 
   if (needsSeed) {
-    console.log("[db:migrate] Base de dados vazia detetada — a executar seed inicial Pro Capital...");
-    const seedRes = spawnSync("npx", ["tsx", "prisma/seed.ts"], {
+    console.log(
+      "[db:migrate] A sincronizar catálogo, mercados e armazéns iniciais na base de dados...",
+    );
+    const localTsxBin = path.join(
+      process.cwd(),
+      "node_modules",
+      ".bin",
+      process.platform === "win32" ? "tsx.cmd" : "tsx",
+    );
+    const cmd = fs.existsSync(localTsxBin) ? localTsxBin : "npx";
+    const args = fs.existsSync(localTsxBin)
+      ? ["prisma/seed.ts"]
+      : ["tsx", "prisma/seed.ts"];
+    const seedRes = spawnSync(cmd, args, {
       stdio: "inherit",
       env: process.env,
     });
     if (seedRes.status !== 0) {
-      console.warn("[db:migrate] Aviso: seed inicial não concluiu completamente.");
+      throw new Error("Falha ao sincronizar seed inicial da plataforma.");
     }
   }
 }
 
 main().catch((err) => {
-  console.warn("[db:migrate] Aviso inesperado em db:migrate:", err);
+  console.error("[db:migrate] Erro fatal ao sincronizar base de dados:", err);
+  process.exit(1);
 });

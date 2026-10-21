@@ -16,7 +16,27 @@ interface Props {
 }
 
 async function getEditora(slug: string) {
-  return prisma.editora.findUnique({ where: { slug } });
+  try {
+    const dbRow = await prisma.editora.findUnique({ where: { slug } });
+    if (dbRow) return dbRow;
+  } catch {
+    // Fallback para lista de editoras de catálogo
+  }
+  const { EDITORAS } = await import("@/data/editoras");
+  const fb = EDITORAS.find((e) => e.slug === slug);
+  if (!fb) return null;
+  return {
+    id: fb.slug,
+    slug: fb.slug,
+    name: fb.name,
+    country: fb.country ?? null,
+    logo: fb.logo ?? null,
+    phone: fb.phone ?? null,
+    email: fb.email ?? null,
+    address: fb.address ?? null,
+    website: fb.website ?? null,
+    description: null,
+  };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

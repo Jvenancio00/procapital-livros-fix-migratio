@@ -25,11 +25,16 @@ function formatDate(date: Date) {
 }
 
 const getEvento = cache(async (slug: string) => {
-  const evento = await prisma.evento.findUnique({
-    where: { slug },
-    include: { _count: { select: { inscricoes: { where: { estado: "CONFIRMADA" } } } } },
-  });
-  return evento;
+  try {
+    return await prisma.evento.findUnique({
+      where: { slug },
+      include: {
+        _count: { select: { inscricoes: { where: { estado: "CONFIRMADA" } } } },
+      },
+    });
+  } catch {
+    return null;
+  }
 });
 
 export async function generateMetadata({

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import path from "node:path";
 import { spawnSync } from "node:child_process";
 
 const fallbackBin = fs.existsSync("/bin/true")
@@ -7,6 +8,13 @@ const fallbackBin = fs.existsSync("/bin/true")
   : fs.existsSync("/usr/bin/true")
     ? "/usr/bin/true"
     : process.execPath;
+
+const localPrismaBin = path.join(
+  process.cwd(),
+  "node_modules",
+  ".bin",
+  process.platform === "win32" ? "prisma.cmd" : "prisma",
+);
 
 const env = {
   ...process.env,
@@ -19,7 +27,12 @@ const env = {
     process.env.PRISMA_QUERY_ENGINE_LIBRARY || fallbackBin,
 };
 
-const result = spawnSync("npx", ["prisma", "generate"], {
+const cmd = fs.existsSync(localPrismaBin) ? localPrismaBin : "npx";
+const args = fs.existsSync(localPrismaBin)
+  ? ["generate"]
+  : ["prisma@6.19.3", "generate"];
+
+const result = spawnSync(cmd, args, {
   stdio: "inherit",
   env,
 });
