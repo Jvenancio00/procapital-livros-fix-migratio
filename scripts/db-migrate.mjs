@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import crypto from "node:crypto";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import pg from "pg";
@@ -15,7 +16,10 @@ function loadDotEnvIfNeeded() {
     if (eq === -1) continue;
     const key = trimmed.slice(0, eq).trim();
     let val = trimmed.slice(eq + 1).trim();
-    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
       val = val.slice(1, -1);
     }
     if (!process.env[key]) process.env[key] = val;
@@ -26,12 +30,30 @@ async function main() {
   loadDotEnvIfNeeded();
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString || connectionString.includes("utilizador:password@host")) {
-    console.log("[db:migrate] Sem DATABASE_URL real configurada — a ignorar migrações (modo estático/build sem BD).");
+    console.log(
+      "[db:migrate] Sem DATABASE_URL real configurada — a ignorar migrações (modo estático/build sem BD).",
+    );
     return;
   }
 
-  const client = new pg.Client({ connectionString });
-  await client.connect();
+  const isLocal = /localhost|127\.0\.0\.1|sslmode=disable/i.test(connectionString);
+  const client = new pg.Client({
+    connectionString,
+    connectionTimeoutMillis: 10_000,
+    ...(isLocal ? {} : { ssl: { rejectUnauthorized: false } }),
+  });
+
+  try {
+    await client.connect();
+  } catch (connErr) {
+    console.warn(
+      "[db:migrate] Aviso: não foi possível ligar à BD durante o build — a prosseguir com build resiliente:",
+      connErr instanceof Error ? connErr.message : connErr,
+    );
+    return;
+  }
+
+  let needsSeed = false;
 
   try {
     await client.query(`
@@ -60,7 +82,7 @@ async function main() {
 
       const existing = await client.query(
         `SELECT id FROM "_prisma_migrations" WHERE migration_name = $1 AND finished_at IS NOT NULL AND rolled_back_at IS NULL`,
-        [dirName]
+        [dirName],
       );
       if (existing.rowCount && existing.rowCount > 0) {
         console.log(`[db:migrate] Já aplicada: ${dirName}`);
@@ -76,16 +98,36 @@ async function main() {
       await client.query(
         `INSERT INTO "_prisma_migrations" ("id", "checksum", "finished_at", "migration_name", "applied_steps_count")
          VALUES ($1, $2, now(), $3, 1)`,
-        [id, checksum, dirName]
+        [id, checksum, dirName],
       );
       console.log(`[db:migrate] Concluída: ${dirName}`);
     }
+
+    const countRes = await client.query(`SELECT COUNT(*)::int AS total FROM "Book"`);
+    if ((countRes.rows[0]?.total ?? 0) === 0) {
+      needsSeed = true;
+    }
+  } catch (migErr) {
+    console.warn(
+      "[db:migrate] Aviso durante migração SQL (a prosseguir com build):",
+      migErr instanceof Error ? migErr.message : migErr,
+    );
   } finally {
-    await client.end();
+    await client.end().catch(() => {});
+  }
+
+  if (needsSeed) {
+    console.log("[db:migrate] Base de dados vazia detetada — a executar seed inicial Pro Capital...");
+    const seedRes = spawnSync("npx", ["tsx", "prisma/seed.ts"], {
+      stdio: "inherit",
+      env: process.env,
+    });
+    if (seedRes.status !== 0) {
+      console.warn("[db:migrate] Aviso: seed inicial não concluiu completamente.");
+    }
   }
 }
 
 main().catch((err) => {
-  console.error("[db:migrate] Erro ao aplicar migrações:", err);
-  process.exit(1);
+  console.warn("[db:migrate] Aviso inesperado em db:migrate:", err);
 });
