@@ -111,6 +111,8 @@ export async function POST(request: Request) {
       isbn: body?.isbn ? String(body.isbn).trim() : null,
       isbnNormalized: isbnValidation.normalized,
       coverUrl: body?.coverUrl ? String(body.coverUrl).trim() : null,
+      pdfUrl: body?.pdfUrl ? String(body.pdfUrl).trim() : null,
+      free: Boolean(body?.free),
       pages: body?.pages ? Number(body.pages) : null,
       year: body?.year ? Number(body.year) : null,
       featured: Boolean(body?.featured),
@@ -194,6 +196,10 @@ export async function PATCH(request: Request) {
       ...(body.coverUrl !== undefined
         ? { coverUrl: body.coverUrl ? String(body.coverUrl).trim() : null }
         : {}),
+      ...(body.pdfUrl !== undefined
+        ? { pdfUrl: body.pdfUrl ? String(body.pdfUrl).trim() : null }
+        : {}),
+      ...(body.free !== undefined ? { free: Boolean(body.free) } : {}),
       ...(body.featured !== undefined ? { featured: Boolean(body.featured) } : {}),
       ...(body.active !== undefined ? { active: Boolean(body.active) } : {}),
       ...(body.allowPreorder !== undefined

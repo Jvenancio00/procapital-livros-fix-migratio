@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import BookCard from "@/components/BookCard";
 import BookCover from "@/components/BookCover";
 import BookPurchasePanel from "@/components/BookPurchasePanel";
@@ -49,6 +49,10 @@ export default async function LivroPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  if (slug === "livro-gratuito") {
+    redirect("/livro-digital");
+  }
+
   const [book, allBooks] = await Promise.all([
     getCatalogBookBySlug(slug),
     getAllCatalogBooks(),

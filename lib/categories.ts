@@ -57,6 +57,17 @@ export async function getCategoryTree(): Promise<CategoryNode[]> {
       orderBy: { name: "asc" },
     });
 
+    if (categories.length === 0) {
+      return FALLBACK_CATEGORIES.map((c) => ({
+        id: c.slug,
+        slug: c.slug,
+        name: c.name,
+        description: c.description,
+        faq: null,
+        children: [],
+      }));
+    }
+
     const byId = new Map<string, CategoryNode>(
       categories.map((c) => [
         c.id,
