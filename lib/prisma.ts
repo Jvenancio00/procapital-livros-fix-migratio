@@ -17,19 +17,18 @@ function createPrismaClient(): PrismaClient {
     process.env.DATABASE_URL?.trim() ||
     "postgresql://postgres:postgres@127.0.0.1:54322/template1?sslmode=disable";
 
-  // Instâncias embebidas PGLite-socket operam sobre uma única sessão ativa;
-  // max = 1 fila todas as queries concorrentes e transações sem fechar sockets.
-  // Em produção (Neon / RDS / PostgreSQL dedicado) usa pool concorrente normal.
+  const isLocal = /localhost|127\.0\.0\.1|sslmode=disable/i.test(connectionString);
   const isEmbeddedLocalSocket = connectionString.includes("127.0.0.1:54322");
 
   const pool =
     globalForPrisma.pgPool ??
     new Pool({
       connectionString,
-      max: isEmbeddedLocalSocket ? 1 : 10,
-      connectionTimeoutMillis: 10_000,
+      max: isEmbeddedLocalSocket ? 2 : 10,
+      connectionTimeoutMillis: 8_000,
       idleTimeoutMillis: 2_000,
       allowExitOnIdle: true,
+      ...(isLocal ? {} : { ssl: { rejectUnauthorized: false } }),
     });
 
   if (process.env.NODE_ENV !== "production") {
