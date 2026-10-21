@@ -108,6 +108,20 @@ export default async function AdminDashboardPage() {
             <FileDown size={14} />
             <span>Gerar Catálogo PDF</span>
           </Link>
+          <a
+            href="/api/admin/relatorios?tipo=stock"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-4 py-2.5 text-xs font-semibold text-ink hover:border-brand/40"
+          >
+            <FileSpreadsheet size={14} />
+            <span>Relatório Stock (.xlsx)</span>
+          </a>
+          <a
+            href="/api/admin/relatorios?tipo=vendas"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-4 py-2.5 text-xs font-semibold text-ink hover:border-brand/40"
+          >
+            <FileSpreadsheet size={14} />
+            <span>Relatório Vendas (.xlsx)</span>
+          </a>
         </div>
       </div>
 

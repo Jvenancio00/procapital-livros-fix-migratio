@@ -4,7 +4,7 @@ import { prisma } from "../lib/prisma";
 
 const BASE = "http://127.0.0.1:3000";
 
-describe("Pro Capital — E2E HTTP, SSR, PDF, Cotações & RBAC (Servidor Live Next.js 16)", () => {
+describe("Pro Capital — E2E HTTP, SSR, PDF, Cotações, Documentos & RBAC (Servidor Live Next.js 16)", () => {
   it("1. Renderiza Homepage SSR com banner oficial, secção escolar e dados reais da BD", async () => {
     const res = await fetch(`${BASE}/`);
     assert.equal(res.status, 200);
@@ -19,7 +19,7 @@ describe("Pro Capital — E2E HTTP, SSR, PDF, Cotações & RBAC (Servidor Live N
     assert.ok(html.includes("Solicitar parceria"));
   });
 
-  it("2. Responde 200 OK em todas as páginas públicas, escolares e editoriais", async () => {
+  it("2. Responde 200 OK em todas as páginas públicas, escolares, institucionais e conta", async () => {
     const paths = [
       "/livros-escolares",
       "/catalogo",
@@ -30,6 +30,13 @@ describe("Pro Capital — E2E HTTP, SSR, PDF, Cotações & RBAC (Servidor Live N
       "/blog",
       "/eventos",
       "/contactos",
+      "/sobre",
+      "/convenios",
+      "/favoritos",
+      "/livro-digital",
+      "/loja/entrar",
+      "/loja/registo",
+      "/loja/verificar-email",
     ];
     for (const p of paths) {
       const res = await fetch(`${BASE}${p}`);
@@ -80,18 +87,27 @@ describe("Pro Capital — E2E HTTP, SSR, PDF, Cotações & RBAC (Servidor Live N
     const createdQuoteNum = qJson.quoteNumber ?? qJson.quote?.quoteNumber;
     assert.ok(createdQuoteNum);
 
-    // Limpa cotação criada pelo teste E2E
     await prisma.quoteRequest.deleteMany({
       where: { quoteNumber: createdQuoteNum },
     });
 
-    // Verifica bloqueio real de RBAC no servidor sem autenticação
     const adminApiRes = await fetch(`${BASE}/api/admin/livros`);
     assert.equal(adminApiRes.status, 401);
 
     const adminPageRes = await fetch(`${BASE}/admin`, { redirect: "manual" });
     assert.equal(adminPageRes.status, 307);
     assert.match(adminPageRes.headers.get("location") ?? "", /\/loja\/entrar/);
+  });
+
+  it("6. Protege Documento Comercial PDF, Modelo Excel e Relatórios Admin sem sessão (401)", async () => {
+    const docRes = await fetch(`${BASE}/api/encomendas/test-id/documento`);
+    assert.equal(docRes.status, 401);
+
+    const modelRes = await fetch(`${BASE}/api/admin/importacoes/modelo`);
+    assert.equal(modelRes.status, 401);
+
+    const reportRes = await fetch(`${BASE}/api/admin/relatorios?tipo=stock`);
+    assert.equal(reportRes.status, 401);
 
     await prisma.$disconnect();
   });

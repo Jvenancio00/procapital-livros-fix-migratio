@@ -133,27 +133,36 @@ export default function OrderActionsClient({
         </form>
       )}
 
-      {repeatableItems.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-cream-deep/50 p-5">
-          <div>
-            <p className="text-sm font-semibold text-ink">
-              Repetição Rápida de Encomenda
-            </p>
-            <p className="text-xs text-ink/65">
-              Volte a colocar todos os títulos e quantidades desta encomenda no
-              carrinho com um clique.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleRepeatOrder}
-            className="inline-flex items-center gap-2 rounded-full border border-ink bg-ink px-5 py-2.5 text-xs font-semibold text-white hover:bg-ink/90"
-          >
-            <RefreshCw size={14} />
-            <span>Repetir Encomenda</span>
-          </button>
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-cream-deep/50 p-5">
+        <div>
+          <p className="text-sm font-semibold text-ink">
+            Documento Comercial &amp; Repetição de Encomenda
+          </p>
+          <p className="text-xs text-ink/65">
+            Descarregue a Fatura Proforma / Nota de Encomenda oficial em PDF ou
+            volte a colocar todos os artigos no carrinho com um clique.
+          </p>
         </div>
-      )}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <a
+            href={`/api/encomendas/${orderId}/documento`}
+            className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-xs font-semibold text-white hover:bg-brand-dark"
+          >
+            <FileCheck2 size={14} />
+            <span>Documento Comercial (PDF)</span>
+          </a>
+          {repeatableItems.length > 0 && (
+            <button
+              type="button"
+              onClick={handleRepeatOrder}
+              className="inline-flex items-center gap-2 rounded-full border border-ink bg-ink px-5 py-2.5 text-xs font-semibold text-white hover:bg-ink/90"
+            >
+              <RefreshCw size={14} />
+              <span>Repetir Encomenda</span>
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

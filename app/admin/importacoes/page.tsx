@@ -323,9 +323,18 @@ export default function AdminImportacoesPage() {
 
       {/* Histórico Completo de Importações com Exportação de Relatório */}
       <div className="rounded-2xl border border-line bg-white p-6">
-        <h2 className="font-serif text-lg font-semibold text-ink">
-          Histórico de Importações Registadas
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-serif text-lg font-semibold text-ink">
+            Histórico de Importações Registadas
+          </h2>
+          <a
+            href="/api/admin/importacoes/modelo"
+            className="inline-flex items-center gap-1.5 rounded-full border border-line bg-cream/60 px-4 py-1.5 text-xs font-semibold text-ink hover:border-brand/40"
+          >
+            <Download size={13} />
+            <span>Descarregar modelo Excel (.xlsx)</span>
+          </a>
+        </div>
 
         {batches.length === 0 ? (
           <p className="mt-3 text-xs text-ink/60">
@@ -363,12 +372,21 @@ export default function AdminImportacoesPage() {
                     </td>
                     <td className="px-3 py-2.5">{b.actorEmail ?? "—"}</td>
                     <td className="px-3 py-2.5 text-right">
-                      <a
-                        href={`/api/admin/importacoes?exportBatchId=${b.id}`}
-                        className="font-semibold text-brand hover:underline"
-                      >
-                        Exportar .xlsx
-                      </a>
+                      <div className="inline-flex items-center gap-2">
+                        <a
+                          href={`/api/admin/importacoes/${b.id}/relatorio`}
+                          className="font-semibold text-brand hover:underline"
+                        >
+                          .xlsx
+                        </a>
+                        <span className="text-ink/30">·</span>
+                        <a
+                          href={`/api/admin/importacoes/${b.id}/relatorio?formato=csv`}
+                          className="font-semibold text-ink/70 hover:underline"
+                        >
+                          .csv
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 ))}

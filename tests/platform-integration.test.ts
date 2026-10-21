@@ -28,6 +28,7 @@ import {
   sendTransactionalEmail,
 } from "../lib/email";
 import { generateCatalogPdfBuffer } from "../lib/pdf-catalog";
+import { generateOrderCommercialPdf } from "../lib/pdf-invoice";
 
 describe("Pro Capital — Plataforma Editorial & Comércio B2B (Testes Reais PostgreSQL)", () => {
   after(async () => {
@@ -427,5 +428,58 @@ describe("Pro Capital — Plataforma Editorial & Comércio B2B (Testes Reais Pos
     assert.ok(Buffer.isBuffer(pdfBuffer));
     assert.ok(pdfBuffer.byteLength > 5_000, "PDF deve conter páginas e capas reais");
     assert.equal(pdfBuffer.subarray(0, 4).toString("ascii"), "%PDF");
+  });
+
+  it("8. Geração de Fatura Proforma / Documento Comercial PDF real a partir do snapshot da encomenda", async () => {
+    const adminUser = await prisma.user.findUniqueOrThrow({
+      where: { email: "admin@procapitalmz.com" },
+    });
+    const sampleBook = await prisma.book.findFirstOrThrow();
+
+    const tempOrder = await prisma.order.create({
+      data: {
+        orderNumber: `PC-DOC-${Date.now()}`,
+        status: "AWAITING_PAYMENT",
+        paymentStatus: "PENDING_TRANSFER",
+        countryCode: "AO",
+        currency: "KZ",
+        buyerName: "Direção Financeira Teste",
+        buyerEmail: "financeiro@escola-luanda.ao",
+        buyerTaxId: "5417000123",
+        companyName: "Colégio Internacional de Luanda",
+        clientType: "ESCOLA",
+        shippingAddress: "Talatona, Via S8",
+        shippingCity: "Luanda",
+        subtotalAmount: 65000,
+        discountAmount: 6500,
+        shippingAmount: 2500,
+        totalAmount: 61000,
+        userId: adminUser.id,
+        items: {
+          create: [
+            {
+              bookId: sampleBook.id,
+              quantity: 10,
+              unitPrice: 6500,
+              titleSnapshot: sampleBook.title,
+              isbnSnapshot: sampleBook.isbn,
+              publisherSnapshot: sampleBook.editora,
+              currencySnapshot: "KZ",
+              discountPercent: 10,
+            },
+          ],
+        },
+      },
+    });
+
+    try {
+      const pdfDoc = await generateOrderCommercialPdf(tempOrder.id);
+      assert.ok(pdfDoc, "Deve gerar documento comercial válido");
+      assert.equal(pdfDoc.buffer.subarray(0, 4).toString("ascii"), "%PDF");
+      assert.ok(pdfDoc.buffer.byteLength > 3_000);
+      assert.match(pdfDoc.filename, /^procapital-documento-pc-doc-/);
+    } finally {
+      await prisma.order.delete({ where: { id: tempOrder.id } });
+    }
   });
 });

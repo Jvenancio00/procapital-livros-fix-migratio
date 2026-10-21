@@ -1,57 +1,58 @@
 import type { Metadata } from "next";
 import {
-  GraduationCap,
-  School,
-  Store,
   BookMarked,
   FileSpreadsheet,
-  Percent,
-  Truck,
+  GraduationCap,
   Headphones,
+  Percent,
+  School,
+  Store,
+  Truck,
 } from "lucide-react";
 import ConvenioForm from "@/components/ConvenioForm";
+import PageHeader from "@/components/PageHeader";
 
 export const metadata: Metadata = {
-  title: "Convénios | Pro Capital",
+  title: "Convénios & Parcerias Institucionais | Pro Capital",
   description:
-    "Condições comerciais para escolas, universidades, livrarias e editoras que trabalham com a Pro Capital em Moçambique e na CPLP.",
+    "Condições comerciais dedicadas para escolas, universidades, livrarias, empresas e editoras em Angola, Moçambique, Portugal e Brasil.",
 };
 
 const PUBLICOS = [
   {
     icon: School,
-    title: "Escolas",
+    title: "Escolas e Colégios",
     beneficios: [
-      "Preços por volume para adoção de manuais escolares",
-      "Prazos de entrega alinhados ao calendário letivo",
+      "Condições por volume para adoção de manuais escolares",
+      "Planeamento logístico alinhado com o calendário letivo",
       "Faturação centralizada por instituição",
     ],
   },
   {
     icon: GraduationCap,
-    title: "Universidades",
+    title: "Universidades e Institutos",
     beneficios: [
-      "Bibliografia de referência com condições de compra recorrente",
-      "Apoio à biblioteca com listas de leitura por curso",
-      "Possibilidade de licenciamento digital para uso académico",
+      "Bibliografia técnica e científica sob encomenda recorrente",
+      "Apoio a bibliotecas académicas com listas por curso",
+      "Licenciamento digital para consulta institucional",
     ],
   },
   {
     icon: Store,
-    title: "Livrarias",
+    title: "Livrarias e Revendedores",
     beneficios: [
-      "Margem de revenda competitiva",
-      "Reposição facilitada via encomenda expresso",
-      "Catálogo alargado de editoras da CPLP",
+      "Condições comerciais configuradas na conta B2B",
+      "Reposição ágil via portal de encomenda rápida",
+      "Catálogo multi-editora num único fornecedor",
     ],
   },
   {
     icon: BookMarked,
-    title: "Editoras",
+    title: "Editoras Parceiras",
     beneficios: [
-      "Distribuição em Moçambique e nos mercados da CPLP",
-      "Presença no catálogo digital e físico da Pro Capital",
-      "Relatórios de vendas por título",
+      "Representação comercial em Angola, Moçambique, Portugal e Brasil",
+      "Presença destacada nos catálogos digitais e PDF",
+      "Gestão rigorosa de stock por armazém",
     ],
   },
 ] as const;
@@ -59,108 +60,97 @@ const PUBLICOS = [
 const VANTAGENS = [
   {
     icon: Percent,
-    title: "Condições comerciais dedicadas",
-    description: "Tabela de preços por escalão, ajustada ao volume e à recorrência da instituição.",
+    title: "Condições comerciais transparentes",
+    description:
+      "Descontos e escalões revistos e atribuídos pela equipa comercial de acordo com o perfil institucional.",
   },
   {
     icon: Truck,
-    title: "Logística simplificada",
-    description: "Entregas coordenadas com antecedência, com um único ponto de contacto.",
+    title: "Logística coordenada por país",
+    description:
+      "Expedição acompanhada desde os armazéns locais com prazos e portes claros.",
   },
   {
     icon: FileSpreadsheet,
-    title: "Faturação e relatórios",
-    description: "Documentação organizada por período, pronta para os processos internos da instituição.",
+    title: "Proformas e relatórios claros",
+    description:
+      "Emissão imediata de notas de encomenda e faturas proforma em PDF por mercado e moeda.",
   },
   {
     icon: Headphones,
-    title: "Acompanhamento próximo",
-    description: "Uma pessoa da nossa equipa comercial acompanha o convénio do início ao fim.",
+    title: "Gestor comercial dedicado",
+    description:
+      "Acompanhamento direto para listas escolares anuais, bibliotecas e reposições de livraria.",
   },
 ] as const;
 
 export default function ConveniosPage() {
   return (
-    <div>
-      <section className="border-b border-line bg-cream-deep/60">
-        <div className="mx-auto max-w-4xl px-5 py-16 text-center sm:px-8 sm:py-24">
-          <span className="inline-block rounded-full bg-cream px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-ink">
-            Convénios
-          </span>
-          <h1 className="mt-6 font-serif text-3xl font-semibold leading-tight text-ink sm:text-4xl">
-            Condições especiais para compra recorrente.
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-foreground/70 sm:text-lg">
-            Trabalhamos com escolas, universidades, livrarias e editoras que
-            precisam de um parceiro estável para o fornecimento de livros —
-            com preços, prazos e faturação pensados para necessidades
-            recorrentes.
-          </p>
-        </div>
-      </section>
+    <main>
+      <PageHeader
+        eyebrow="Acordos & Parcerias B2B"
+        title="Convénios Institucionais e Comerciais"
+        description="Soluções estruturadas de fornecimento recorrente para escolas, universidades, livrarias, empresas públicas/privadas e editoras."
+      />
 
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-        <h2 className="font-serif text-2xl font-semibold text-ink sm:text-3xl">
-          O que ganha ao entrar num convénio
+      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+        <h2 className="font-serif text-2xl font-semibold text-ink">
+          Modalidades de Parceria
         </h2>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {PUBLICOS.map(({ icon: Icon, title, beneficios }) => (
-            <div key={title} className="rounded-2xl border border-line bg-cream p-6">
+            <div
+              key={title}
+              className="rounded-2xl border border-line bg-white p-6"
+            >
               <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand/10 text-brand">
                 <Icon size={20} />
               </span>
               <h3 className="mt-4 font-serif text-base font-semibold text-ink">
                 {title}
               </h3>
-              <ul className="mt-3 space-y-2">
+              <ul className="mt-3 space-y-2 text-xs leading-relaxed text-ink/70">
                 {beneficios.map((item) => (
-                  <li key={item} className="text-sm leading-relaxed text-foreground/70">
-                    • {item}
-                  </li>
+                  <li key={item}>• {item}</li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
-      </section>
 
-      <section className="border-t border-line bg-cream-deep/40">
-        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
-          <h2 className="font-serif text-2xl font-semibold text-ink sm:text-3xl">
-            Como funciona um convénio Pro Capital
-          </h2>
-          <div className="mt-10 grid gap-6 sm:grid-cols-2">
-            {VANTAGENS.map(({ icon: Icon, title, description }) => (
-              <div key={title} className="flex gap-4 rounded-2xl border border-line bg-cream p-6">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
-                  <Icon size={20} />
-                </span>
-                <div>
-                  <h3 className="font-serif text-base font-semibold text-ink">
-                    {title}
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-foreground/70">
-                    {description}
-                  </p>
-                </div>
-              </div>
-            ))}
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {VANTAGENS.map(({ icon: Icon, title, description }) => (
+            <div
+              key={title}
+              className="rounded-2xl border border-line bg-cream-deep/50 p-6"
+            >
+              <Icon size={20} className="text-ink" />
+              <h3 className="mt-3 font-serif text-base font-semibold text-ink">
+                {title}
+              </h3>
+              <p className="mt-2 text-xs leading-relaxed text-ink/70">
+                {description}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-16 rounded-3xl border border-line bg-white p-7 sm:p-10">
+          <div className="max-w-2xl">
+            <h2 className="font-serif text-2xl font-semibold text-ink">
+              Apresentar Proposta de Convénio
+            </h2>
+            <p className="mt-2 text-xs leading-relaxed text-ink/65">
+              Preencha os dados da sua instituição ou livraria. O pedido fica
+              registado na base de dados comercial da Pro Capital para análise
+              pela equipa de parcerias.
+            </p>
+          </div>
+          <div className="mt-6">
+            <ConvenioForm />
           </div>
         </div>
       </section>
-
-      <section className="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-20">
-        <h2 className="font-serif text-2xl font-semibold text-ink sm:text-3xl">
-          Solicitar convénio
-        </h2>
-        <p className="mt-2 text-sm text-foreground/70">
-          Preencha os dados da sua instituição — respondemos em até 2 dias
-          úteis com uma proposta de condições comerciais.
-        </p>
-        <div className="mt-8">
-          <ConvenioForm />
-        </div>
-      </section>
-    </div>
+    </main>
   );
 }

@@ -107,7 +107,15 @@ export default function EncomendasAdminTable({
                 </p>
               </td>
               <td className="px-3 py-3.5 font-serif text-sm font-bold text-ink">
-                {formatMoney(Number(order.totalAmount), order.currency)}
+                <p>{formatMoney(Number(order.totalAmount), order.currency)}</p>
+                <a
+                  href={`/api/encomendas/${order.id}/documento`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1.5 inline-block font-sans text-[11px] font-semibold text-brand hover:underline"
+                >
+                  Documento PDF →
+                </a>
               </td>
               <td className="space-y-2 px-3 py-3.5">
                 <select
