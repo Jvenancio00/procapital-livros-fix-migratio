@@ -10,7 +10,7 @@ export default function Footer() {
   const { dict } = useLanguage();
 
   return (
-    <footer className="border-t border-white/10 bg-ink text-white">
+    <footer className="border-t border-white/10 bg-ink pb-20 text-white lg:pb-0">
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
@@ -109,6 +109,11 @@ export default function Footer() {
                   {dict.nav.blog}
                 </Link>
               </li>
+              <li>
+                <Link href="/privacidade" className="hover:text-white">
+                  Política de Privacidade
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -143,10 +148,19 @@ export default function Footer() {
 
         <div className="mt-12 flex flex-col justify-between gap-4 border-t border-white/10 pt-7 text-xs text-white/55 sm:flex-row sm:items-center">
           <p>{dict.footer.rights}</p>
-          <p>
-            Distribuição Editorial Multi-Mercado · Preços e disponibilidade sujeitos ao
-            stock de cada país
-          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <Link
+              href="/privacidade"
+              className="text-white/75 transition-colors hover:text-white hover:underline"
+            >
+              Política de Privacidade
+            </Link>
+            <span aria-hidden="true">·</span>
+            <span>
+              Distribuição Editorial Multi-Mercado · Preços e disponibilidade sujeitos ao
+              stock de cada país
+            </span>
+          </div>
         </div>
       </div>
     </footer>

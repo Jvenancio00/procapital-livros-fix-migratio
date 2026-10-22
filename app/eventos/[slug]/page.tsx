@@ -5,6 +5,12 @@ import Link from "next/link";
 import { CalendarDays, MapPin, BookMarked } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import InscricaoForm from "@/components/InscricaoForm";
+import { SITE_URL } from "@/lib/site";
+import {
+  DEFAULT_OG_IMAGE,
+  buildBreadcrumbJsonLd,
+  getEditoraSlugForName,
+} from "@/lib/seo";
 
 const TIPO_LABEL: Record<string, string> = {
   LANCAMENTO: "Lançamento",
@@ -44,11 +50,25 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const evento = await getEvento(slug);
-  if (!evento) return { title: "Evento | Pro Capital" };
+  if (!evento) {
+    return {
+      title: "Evento não encontrado",
+      description:
+        "O evento consultado não está disponível. Consulte a agenda cultural e editorial da Pro Capital.",
+      robots: { index: false, follow: true },
+    };
+  }
 
   return {
-    title: `${evento.titulo} | Pro Capital`,
+    title: `${evento.titulo} — Eventos`,
     description: evento.descricao,
+    alternates: { canonical: `${SITE_URL}/eventos/${evento.slug}` },
+    openGraph: {
+      title: `${evento.titulo} | Pro Capital`,
+      description: evento.descricao,
+      url: `${SITE_URL}/eventos/${evento.slug}`,
+      images: [DEFAULT_OG_IMAGE],
+    },
   };
 }
 
@@ -69,6 +89,16 @@ export default async function EventoDetailPage({
       : null;
   const esgotado = vagasRestantes !== null && vagasRestantes <= 0;
 
+  const breadcrumbs = [
+    { label: "Início", href: "/" },
+    { label: "Eventos", href: "/eventos" },
+    { label: evento.titulo },
+  ];
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(
+    breadcrumbs,
+    `/eventos/${evento.slug}`,
+  );
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -80,21 +110,45 @@ export default async function EventoDetailPage({
       name: evento.local,
       address: evento.endereco ?? evento.local,
     },
+    organizer: {
+      "@id": `${SITE_URL}/#organization`,
+    },
     description: evento.descricao,
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-20">
+    <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-18">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      <nav
+        aria-label="Navegação estrutural"
+        className="mb-6 flex flex-wrap items-center gap-1.5 text-xs font-medium text-ink/55"
+      >
+        <Link href="/" className="hover:text-brand">
+          Início
+        </Link>
+        <span aria-hidden="true">/</span>
+        <Link href="/eventos" className="hover:text-brand">
+          Eventos
+        </Link>
+        <span aria-hidden="true">/</span>
+        <span className="text-ink/85" aria-current="page">
+          {evento.titulo}
+        </span>
+      </nav>
+
       <span className="inline-block rounded-full bg-cream-deep px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-ink">
         {TIPO_LABEL[evento.tipo] ?? evento.tipo}
       </span>
 
-      <h1 className="mt-6 font-serif text-3xl font-semibold leading-tight text-ink sm:text-4xl">
+      <h1 className="mt-5 font-serif text-3xl font-semibold leading-tight text-ink sm:text-4xl">
         {evento.titulo}
       </h1>
 
@@ -108,10 +162,13 @@ export default async function EventoDetailPage({
           {evento.endereco ? `${evento.local} — ${evento.endereco}` : evento.local}
         </span>
         {evento.editora && (
-          <span className="flex items-center gap-2">
+          <Link
+            href={`/editoras/${getEditoraSlugForName(evento.editora)}`}
+            className="flex items-center gap-2 font-medium text-brand hover:underline"
+          >
             <BookMarked size={16} />
             {evento.editora}
-          </span>
+          </Link>
         )}
       </div>
 
@@ -122,8 +179,11 @@ export default async function EventoDetailPage({
       <div className="mt-12 rounded-2xl border border-line bg-cream p-6 sm:p-8">
         {jaPassou ? (
           <p className="text-sm text-foreground/60">
-            Este evento já terminou. Consulte os próximos eventos na página
-            de <Link href="/eventos" className="text-brand underline">Eventos</Link>.
+            Este evento já terminou. Consulte os próximos eventos na página de{" "}
+            <Link href="/eventos" className="text-brand underline">
+              Eventos
+            </Link>
+            .
           </p>
         ) : (
           <>

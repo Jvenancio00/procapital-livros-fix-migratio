@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { ArrowRight, CheckCircle2, Clock, ShieldCheck } from "lucide-react";
@@ -9,6 +10,13 @@ import { MARKETS, ORDER_STATUS_LABELS, CLIENT_TYPE_LABELS } from "@/lib/markets"
 import OrderActionsClient from "./OrderActionsClient";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Encomenda Confirmada & Fatura Proforma",
+  description:
+    "Confirmação de encomenda registada, resumo financeiro, instruções de pagamento e download de documento comercial PDF na Pro Capital.",
+  robots: { index: false, follow: false },
+};
 
 export default async function EncomendaConfirmadaPage({
   params,

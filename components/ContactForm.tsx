@@ -1,13 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Send } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, Clock, Send } from "lucide-react";
 
-// Reformulação institucional: motivos alinhados com o público-alvo da
-// Pro Capital (editoras, livrarias, escolas, parceiros comerciais,
-// investidores e leitores), cada um já com o seu ContactReason próprio
-// (os valores antigos continuam válidos no enum, apenas deixaram de
-// aparecer no formulário, para não invalidar contactos já gravados).
 const MOTIVOS = [
   { label: "Sou uma editora", value: "EDITORA" },
   { label: "Sou uma livraria", value: "LIVRARIA" },
@@ -41,15 +37,48 @@ export default function ContactForm() {
       if (!res.ok) throw new Error("Falha ao gravar o contacto.");
       setStatus("sent");
     } catch {
-      // Se a gravação falhar (ex.: sem base de dados configurada), o
-      // mailto continua a funcionar como plano B, tal como acontecia antes.
       window.location.href = `mailto:comercial@procapitalmz.com?subject=${encodeURIComponent(
-        `Contacto do site — ${motivo}`
+        `Contacto do site — ${motivo}`,
       )}&body=${encodeURIComponent(
-        `Nome: ${name}\nEmpresa/Instituição: ${company || "-"}\nEmail: ${email}\nTelefone: ${phone || "-"}\n\n${message}`
+        `Nome: ${name}\nEmpresa/Instituição: ${company || "-"}\nEmail: ${email}\nTelefone: ${phone || "-"}\n\n${message}`,
       )}`;
       setStatus("error");
     }
+  }
+
+  if (status === "sent") {
+    return (
+      <div className="rounded-2xl border border-line bg-cream/60 p-7 text-center sm:p-8">
+        <CheckCircle2 size={36} className="mx-auto text-emerald-700" />
+        <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+          Mensagem Registada com Sucesso
+        </p>
+        <h3 className="mt-2 font-serif text-2xl font-semibold text-ink">
+          Obrigado pelo seu contacto
+        </h3>
+        <p className="mx-auto mt-2.5 max-w-md text-sm leading-relaxed text-ink/75">
+          A equipa comercial e editorial da Pro Capital recebeu o seu pedido.{" "}
+          <strong>Respondemos em até 24 horas úteis</strong> (segunda a
+          sexta-feira).
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/catalogo"
+            className="inline-flex items-center gap-1.5 rounded-full bg-brand px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
+          >
+            <span>Explorar catálogo</span>
+            <ArrowRight size={14} />
+          </Link>
+          <button
+            type="button"
+            onClick={() => setStatus("idle")}
+            className="inline-flex items-center rounded-full border border-line bg-white px-5 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-brand/40"
+          >
+            Enviar outra mensagem
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -131,20 +160,22 @@ export default function ContactForm() {
         />
       </label>
 
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-medium text-cream transition-colors hover:bg-brand-dark disabled:opacity-50"
-      >
-        {status === "loading" ? "A enviar..." : "Enviar mensagem"}
-        <Send size={16} />
-      </button>
+      <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-medium text-cream transition-colors hover:bg-brand-dark disabled:opacity-50"
+        >
+          {status === "loading" ? "A enviar..." : "Enviar mensagem"}
+          <Send size={16} />
+        </button>
 
-      {status === "sent" && (
-        <p className="text-sm text-brand">
-          Mensagem recebida — vamos responder o mais breve possível.
+        <p className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/65">
+          <Clock size={14} className="text-brand" aria-hidden="true" />
+          <span>Respondemos em até 24 horas úteis.</span>
         </p>
-      )}
+      </div>
+
       {status === "error" && (
         <p className="text-sm text-foreground/60">
           A abrir o seu cliente de email como alternativa.

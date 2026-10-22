@@ -1,8 +1,27 @@
+import type { Metadata } from "next";
 import HomeClient from "./HomeClient";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAllCatalogBooks, getAllPublishers } from "@/lib/catalog";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Pro Capital | Distribuidora de Livros em Moçambique e na CPLP",
+  },
+  description:
+    "Distribuidora editorial de livros escolares, académicos, infantis e literários em Maputo com rede comercial em Moçambique, Angola, Portugal e Brasil.",
+  alternates: { canonical: SITE_URL },
+  openGraph: {
+    title: "Pro Capital | Distribuidora de Livros em Moçambique e na CPLP",
+    description:
+      "Livros escolares, editoras parceiras, cotações B2B e soluções comerciais para livrarias, escolas e leitores nos mercados da CPLP.",
+    url: SITE_URL,
+    images: [DEFAULT_OG_IMAGE],
+  },
+};
 
 export default async function HomePage() {
   const dbReady = isDatabaseConfigured();

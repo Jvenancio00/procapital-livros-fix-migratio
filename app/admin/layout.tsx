@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
+export const metadata: Metadata = {
+  title: "Centro Administrativo",
+  description:
+    "Gestão editorial, preços multi-mercado, stock, importações Excel/CSV, encomendas e cotações B2B da Pro Capital.",
+  robots: { index: false, follow: false },
+};
 
 const ADMIN_NAV = [
   { href: "/admin", label: "Painel & Relatórios" },

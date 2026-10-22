@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowRight, Download, BookOpen } from "lucide-react";
@@ -6,6 +7,13 @@ import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/PageHeader";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "A Minha Biblioteca Digital",
+  description:
+    "Consulte e leia online os títulos digitais adquiridos ou disponibilizados gratuitamente na sua conta Pro Capital.",
+  robots: { index: false, follow: false },
+};
 
 export default async function BibliotecaPage() {
   const session = await auth();

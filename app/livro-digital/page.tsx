@@ -22,7 +22,7 @@ import DigitalWorkspaceClient, {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Livro Digital & Biblioteca Online | Pro Capital",
+  title: "Livro Digital & Biblioteca Online",
   description:
     "Aceda à Biblioteca Digital Pro Capital, consulte edições digitais e catálogos oficiais em PDF com leitor integrado, marcadores e notas de estudo.",
 };

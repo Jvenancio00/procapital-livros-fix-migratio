@@ -9,7 +9,7 @@ export function LogoMark({ size = 38 }: { size?: number }) {
     >
       <Image
         src="/procapital/logo.jpg"
-        alt="Pro Capital"
+        alt="Logótipo Pro Capital — Distribuidora Editorial"
         fill
         sizes={`${size}px`}
         className="object-contain"

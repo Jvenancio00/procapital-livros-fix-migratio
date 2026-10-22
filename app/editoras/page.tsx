@@ -10,13 +10,23 @@ import {
 import EditoraCard from "@/components/EditoraCard";
 import PageHeader from "@/components/PageHeader";
 import { getAllCatalogBooks, getAllPublishers } from "@/lib/catalog";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Editoras & Chancelas Parceiras | Pro Capital",
+  title: "Editoras & Chancelas Parceiras",
   description:
     "Diretório de editoras representadas pela Pro Capital nos mercados de língua portuguesa: Angola, Moçambique, Portugal e Brasil.",
+  alternates: { canonical: `${SITE_URL}/editoras` },
+  openGraph: {
+    title: "Editoras & Chancelas Parceiras | Pro Capital",
+    description:
+      "Conheça as chancelas escolares, literárias, infantis e académicas representadas comercialmente pela Pro Capital.",
+    url: `${SITE_URL}/editoras`,
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
 const COMO_TRABALHAMOS = [

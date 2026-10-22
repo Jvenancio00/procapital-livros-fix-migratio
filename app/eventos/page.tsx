@@ -3,11 +3,21 @@ import { CalendarDays } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import EventoCard from "@/components/EventoCard";
 import PageHeader from "@/components/PageHeader";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Agenda & Eventos | Pro Capital",
+  title: "Agenda Cultural & Eventos",
   description:
     "Lançamentos editoriais, feiras do livro, sessões escolares e workshops da Pro Capital em Angola, Moçambique, Portugal e Brasil.",
+  alternates: { canonical: `${SITE_URL}/eventos` },
+  openGraph: {
+    title: "Agenda Cultural & Eventos | Pro Capital",
+    description:
+      "Lançamentos editoriais, feiras do livro, sessões escolares e workshops da Pro Capital nos mercados de língua portuguesa.",
+    url: `${SITE_URL}/eventos`,
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
 export const revalidate = 60;
@@ -41,14 +51,18 @@ export default async function EventosPage() {
   }
 
   return (
-    <main>
+    <div className="pb-20">
       <PageHeader
         eyebrow="Agenda Cultural & Editorial"
         title="Lançamentos, Feiras do Livro e Sessões Pedagógicas"
         description="Acompanhe as iniciativas da Pro Capital e das editoras parceiras nos mercados de língua portuguesa e confirme a sua presença online."
+        breadcrumbs={[
+          { label: "Início", href: "/" },
+          { label: "Eventos" },
+        ]}
       />
 
-      <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
+      <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
         <h2 className="font-serif text-xl font-semibold text-ink sm:text-2xl">
           Próximos Eventos
         </h2>
@@ -94,6 +108,6 @@ export default async function EventosPage() {
           </section>
         )}
       </div>
-    </main>
+    </div>
   );
 }

@@ -6,6 +6,12 @@ import BookCover from "@/components/BookCover";
 import BookPurchasePanel from "@/components/BookPurchasePanel";
 import BookReviews from "@/components/BookReviews";
 import { SITE_URL } from "@/lib/site";
+import {
+  DEFAULT_OG_IMAGE,
+  buildBreadcrumbJsonLd,
+  getCategorySlugForName,
+  getEditoraSlugForName,
+} from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { getFrequentlyBoughtTogether } from "@/lib/cross-sell";
 import { getAllCatalogBooks, getCatalogBookBySlug } from "@/lib/catalog";
@@ -22,23 +28,43 @@ export async function generateMetadata({
   const book = await getCatalogBookBySlug(slug);
 
   if (!book) {
-    return { title: "Livro não encontrado | Pro Capital" };
+    return {
+      title: "Livro não encontrado",
+      description:
+        "O livro procurado não está disponível. Explore outros títulos no catálogo editorial da Pro Capital.",
+      robots: { index: false, follow: true },
+    };
   }
 
+  const description =
+    book.description ??
+    `${book.title}, de ${book.author} (${book.editora}), disponível no catálogo editorial da Pro Capital para Moçambique, Angola, Portugal e Brasil.`;
+
   return {
-    title: `${book.title} | Pro Capital`,
-    description:
-      book.description ??
-      `${book.title}, de ${book.author}, disponível no catálogo editorial da Pro Capital.`,
-    alternates: { canonical: `/livro/${book.slug}` },
+    title: `${book.title} — ${book.author}`,
+    description,
+    alternates: { canonical: `${SITE_URL}/livro/${book.slug}` },
     openGraph: {
-      title: book.title,
-      description: book.description ?? `${book.title}, de ${book.author}.`,
+      title: `${book.title} — ${book.author} | Pro Capital`,
+      description,
       url: `${SITE_URL}/livro/${book.slug}`,
       siteName: "Pro Capital",
       type: "book",
       locale: "pt_MZ",
-      images: book.coverUrl ? [`${SITE_URL}${book.coverUrl}`] : undefined,
+      images: book.coverUrl
+        ? [
+            {
+              url: `${SITE_URL}${book.coverUrl}`,
+              alt: `Capa do livro ${book.title} — ${book.editora}`,
+            },
+          ]
+        : [DEFAULT_OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${book.title} — ${book.author} | Pro Capital`,
+      description,
+      images: book.coverUrl ? [`${SITE_URL}${book.coverUrl}`] : ["/og-image.jpg"],
     },
   };
 }
@@ -61,6 +87,9 @@ export default async function LivroPage({
   if (!book) {
     notFound();
   }
+
+  const categorySlug = getCategorySlugForName(book.category);
+  const editoraSlug = getEditoraSlugForName(book.editora);
 
   let crossSellSlugs: string[] = [];
   let soldLast30Days = 0;
@@ -90,6 +119,14 @@ export default async function LivroPage({
     .filter((b) => b.slug !== book.slug && b.category === book.category)
     .slice(0, 4);
 
+  const samePublisher = allBooks
+    .filter(
+      (b) =>
+        b.slug !== book.slug &&
+        b.editora.toLowerCase() === book.editora.toLowerCase(),
+    )
+    .slice(0, 4);
+
   const relatedBooks =
     crossSellSlugs.length > 0
       ? crossSellSlugs
@@ -100,10 +137,24 @@ export default async function LivroPage({
   const relatedHeading =
     crossSellSlugs.length > 0 ? "Compre também" : `Também em ${book.category}`;
 
+  const breadcrumbs = [
+    { label: "Início", href: "/" },
+    { label: "Catálogo", href: "/catalogo" },
+    { label: book.category, href: `/categoria/${categorySlug}` },
+    { label: book.title },
+  ];
+
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(
+    breadcrumbs,
+    `/livro/${book.slug}`,
+  );
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Book",
     name: book.title,
+    url: `${SITE_URL}/livro/${book.slug}`,
+    image: book.coverUrl ? `${SITE_URL}${book.coverUrl}` : undefined,
     author: { "@type": "Person", name: book.author },
     isbn: book.isbn,
     bookFormat: "https://schema.org/Paperback",
@@ -111,18 +162,28 @@ export default async function LivroPage({
     numberOfPages: book.pages,
     datePublished: book.year ? String(book.year) : undefined,
     description: book.description,
-    publisher: { "@type": "Organization", name: book.editora },
+    genre: book.category,
+    publisher: {
+      "@type": "Organization",
+      name: book.editora,
+      url: `${SITE_URL}/editoras/${editoraSlug}`,
+    },
     offers: {
       "@type": "Offer",
       price: book.free ? 0 : book.price,
       priceCurrency: "MZN",
       availability: "https://schema.org/InStock",
       url: `${SITE_URL}/livro/${book.slug}`,
+      seller: { "@id": `${SITE_URL}/#organization` },
     },
   };
 
   return (
     <div className="pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -139,6 +200,10 @@ export default async function LivroPage({
           <span aria-hidden="true">/</span>
           <Link href="/catalogo" className="hover:text-brand">
             Catálogo
+          </Link>
+          <span aria-hidden="true">/</span>
+          <Link href={`/categoria/${categorySlug}`} className="hover:text-brand">
+            {book.category}
           </Link>
           <span aria-hidden="true">/</span>
           <span className="text-ink/85" aria-current="page">
@@ -162,13 +227,19 @@ export default async function LivroPage({
 
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-ink">
+              <Link
+                href={`/categoria/${categorySlug}`}
+                className="rounded-full border border-line bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-ink transition-colors hover:border-brand hover:text-brand"
+              >
                 {book.category}
-              </span>
+              </Link>
               {book.educationLevel && (
-                <span className="rounded-full bg-cream-deep px-3 py-1 text-xs font-semibold text-brand">
+                <Link
+                  href={`/livros-escolares?nivelEnsino=${book.educationLevel}`}
+                  className="rounded-full bg-cream-deep px-3 py-1 text-xs font-semibold text-brand transition-opacity hover:opacity-85"
+                >
                   {EDUCATION_LEVEL_LABELS[book.educationLevel]}
-                </span>
+                </Link>
               )}
               {book.schoolGrade && (
                 <span className="rounded-full bg-cream-deep px-3 py-1 text-xs font-medium text-ink/80">
@@ -181,7 +252,13 @@ export default async function LivroPage({
               {book.title}
             </h1>
             <p className="mt-2 text-base font-medium text-ink/70">
-              {book.author} · <span className="text-brand">{book.editora}</span>
+              {book.author} ·{" "}
+              <Link
+                href={`/editoras/${editoraSlug}`}
+                className="text-brand underline-offset-4 hover:underline"
+              >
+                {book.editora}
+              </Link>
             </p>
 
             {book.description && (
@@ -204,7 +281,27 @@ export default async function LivroPage({
                 <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
                   Editora
                 </dt>
-                <dd className="mt-1 font-medium text-ink">{book.editora}</dd>
+                <dd className="mt-1 font-medium text-ink">
+                  <Link
+                    href={`/editoras/${editoraSlug}`}
+                    className="text-brand hover:underline"
+                  >
+                    {book.editora}
+                  </Link>
+                </dd>
+              </div>
+              <div>
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink/45">
+                  Categoria
+                </dt>
+                <dd className="mt-1 font-medium text-ink">
+                  <Link
+                    href={`/categoria/${categorySlug}`}
+                    className="hover:text-brand hover:underline"
+                  >
+                    {book.category}
+                  </Link>
+                </dd>
               </div>
               {book.isbn && (
                 <div>
@@ -271,18 +368,53 @@ export default async function LivroPage({
         <BookReviews slug={book.slug} />
       </div>
 
+      {samePublisher.length > 0 && (
+        <section className="mx-auto mt-16 max-w-7xl border-t border-line/80 px-5 pt-14 sm:px-8">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-brand">
+                Mesma Chancela Editorial
+              </span>
+              <h2 className="mt-1 font-serif text-2xl font-semibold text-ink sm:text-3xl">
+                Mais títulos de {book.editora}
+              </h2>
+            </div>
+            <Link
+              href={`/editoras/${editoraSlug}`}
+              className="text-sm font-semibold text-brand hover:underline"
+            >
+              Ver catálogo completo de {book.editora} →
+            </Link>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {samePublisher.map((item, idx) => (
+              <BookCard key={item.slug} book={item} index={idx} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {relatedBooks.length > 0 && (
         <section className="mx-auto mt-16 max-w-7xl border-t border-line/80 px-5 pt-14 sm:px-8">
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <h2 className="font-serif text-2xl font-semibold text-ink sm:text-3xl">
               {relatedHeading}
             </h2>
-            <Link
-              href="/catalogo"
-              className="text-sm font-semibold text-brand hover:underline"
-            >
-              Ver catálogo completo →
-            </Link>
+            <div className="flex flex-wrap items-center gap-4 text-sm font-semibold">
+              <Link
+                href={`/categoria/${categorySlug}`}
+                className="text-brand hover:underline"
+              >
+                Ver categoria {book.category} →
+              </Link>
+              <Link
+                href="/catalogo"
+                className="text-ink/70 hover:text-brand hover:underline"
+              >
+                Catálogo completo →
+              </Link>
+            </div>
           </div>
 
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">

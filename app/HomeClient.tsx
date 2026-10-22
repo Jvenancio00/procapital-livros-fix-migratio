@@ -21,6 +21,7 @@ import HeroSection, { type HeroStats } from "@/components/HeroSection";
 import AdvancedSearchBar from "@/components/AdvancedSearchBar";
 import CategoryGrid, { type CategorySummaryItem } from "@/components/CategoryGrid";
 import AudienceSection from "@/components/AudienceSection";
+import FaqSection from "@/components/FaqSection";
 import NewsletterForm from "@/components/NewsletterForm";
 import { useCurrency } from "@/context/CurrencyContext";
 import { MARKET_LIST, MARKETS } from "@/lib/markets";
@@ -404,7 +405,7 @@ export default function HomeClient({
                     {events.slice(0, 3).map((ev) => (
                       <Link
                         key={ev.slug}
-                        href="/eventos"
+                        href={`/eventos/${ev.slug}`}
                         className="group block rounded-2xl border border-line bg-white p-5 transition-all hover:border-ink/25 hover:shadow-sm"
                       >
                         <div className="flex flex-wrap items-center gap-3 text-xs text-ink/60">
@@ -489,6 +490,11 @@ export default function HomeClient({
           </div>
         </section>
       )}
+
+      {/* 9B. Perguntas Frequentes (SEO & AEO FAQPage) */}
+      <div className="border-t border-line/80">
+        <FaqSection />
+      </div>
 
       {/* 10. Contactos, Chamada para Parceria e Boletim Editorial */}
       <section className="mx-auto max-w-7xl px-5 py-18 sm:px-8">

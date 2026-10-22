@@ -1,19 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Compass } from "lucide-react";
+import { ArrowRight, BookOpen, Compass, Home } from "lucide-react";
 
-// Sem este ficheiro, qualquer endereço errado mostrava o ecrã 404 genérico
-// do Next.js, sem cabeçalho, marca ou caminho de saída — má primeira
-// impressão para quem chega ao site através de um link partilhado antigo.
 export const metadata: Metadata = {
   title: "Página não encontrada",
+  description:
+    "O endereço solicitado não foi encontrado. Volte à página inicial ou explore o catálogo editorial da Pro Capital.",
   robots: { index: false, follow: true },
 };
 
 const ATALHOS = [
+  { href: "/", label: "Voltar à página inicial" },
   { href: "/catalogo", label: "Ver o catálogo completo" },
-  { href: "/editoras", label: "Editoras que representamos" },
-  { href: "/eventos", label: "Próximos eventos" },
+  { href: "/livros-escolares", label: "Livros escolares por classe" },
   { href: "/contactos", label: "Falar connosco" },
 ];
 
@@ -34,16 +33,26 @@ export default function NotFound() {
 
       <p className="mt-4 max-w-md text-foreground/70">
         O endereço pode ter mudado ou o livro que procurava já não está
-        disponível. Use a pesquisa do catálogo ou siga um dos atalhos abaixo.
+        disponível. Volte à página inicial, pesquise no catálogo ou siga um dos
+        atalhos abaixo.
       </p>
 
-      <Link
-        href="/catalogo"
-        className="mt-8 inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-brand-dark"
-      >
-        <BookOpen size={16} />
-        Procurar no catálogo
-      </Link>
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <Link
+          href="/catalogo"
+          className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-cream transition-colors hover:bg-brand-dark"
+        >
+          <BookOpen size={16} />
+          Procurar no catálogo
+        </Link>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-6 py-3 text-sm font-semibold text-ink transition-colors hover:border-brand/40 hover:text-brand"
+        >
+          <Home size={16} />
+          Ir para a página inicial
+        </Link>
+      </div>
 
       <ul className="mt-10 grid w-full gap-2 sm:grid-cols-2">
         {ATALHOS.map((atalho) => (

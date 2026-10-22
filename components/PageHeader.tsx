@@ -1,10 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-
-interface BreadcrumbItem {
-  label: string;
-  href?: string;
-}
+import { buildBreadcrumbJsonLd, type BreadcrumbEntry } from "@/lib/seo";
 
 export default function PageHeader({
   eyebrow,
@@ -16,11 +12,23 @@ export default function PageHeader({
   eyebrow: string;
   title: string;
   description?: string;
-  breadcrumbs?: BreadcrumbItem[];
+  breadcrumbs?: BreadcrumbEntry[];
   actions?: ReactNode;
 }) {
+  const breadcrumbJsonLd =
+    breadcrumbs && breadcrumbs.length > 0
+      ? buildBreadcrumbJsonLd(breadcrumbs)
+      : null;
+
   return (
     <header className="mx-auto max-w-7xl px-5 pt-10 pb-8 sm:px-8 sm:pt-12 sm:pb-10">
+      {breadcrumbJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        />
+      )}
+
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav
           aria-label="Navegação estrutural"

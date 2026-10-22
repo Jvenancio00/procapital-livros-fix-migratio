@@ -3,7 +3,10 @@ import Link from "next/link";
 import {
   ArrowRight,
   BookMarked,
+  BookOpen,
+  Building2,
   Eye,
+  Globe2,
   GraduationCap,
   PenLine,
   Store,
@@ -11,11 +14,25 @@ import {
   Users,
 } from "lucide-react";
 import PageHeader from "@/components/PageHeader";
+import FaqSection from "@/components/FaqSection";
+import { getAllCatalogBooks, getAllPublishers } from "@/lib/catalog";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { SITE_URL } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Sobre a Pro Capital | Distribuição Editorial Lusófona",
+  title: "Sobre a Pro Capital — Distribuição Editorial Lusófona",
   description:
-    "Conheça a Pro Capital — Distribuidora de Livros, plataforma editorial e logística dedicada a Angola, Moçambique, Portugal e Brasil.",
+    "Conheça a Pro Capital — Distribuidora de Livros sediada em Maputo, com operação comercial e logística editorial para Moçambique, Angola, Portugal e Brasil.",
+  alternates: { canonical: `${SITE_URL}/sobre` },
+  openGraph: {
+    title: "Sobre a Pro Capital — Distribuição Editorial Lusófona | Pro Capital",
+    description:
+      "Distribuidora editorial de manuais escolares, literatura e obras académicas em Moçambique, Angola, Portugal e Brasil.",
+    url: `${SITE_URL}/sobre`,
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
 const PUBLICOS = [
@@ -69,16 +86,82 @@ const BENEFICIOS = [
   },
 ];
 
-export default function SobrePage() {
+export default async function SobrePage() {
+  const [books, publishers] = await Promise.all([
+    getAllCatalogBooks(),
+    getAllPublishers(),
+  ]);
+
+  const schoolCount = books.filter(
+    (b) => b.category === "Escolar" || Boolean(b.educationLevel),
+  ).length;
+
+  const aboutJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    name: "Sobre a Pro Capital — Distribuidora Editorial",
+    url: `${SITE_URL}/sobre`,
+    mainEntity: { "@id": `${SITE_URL}/#organization` },
+  };
+
   return (
-    <main>
+    <div className="pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutJsonLd) }}
+      />
+
       <PageHeader
         eyebrow="Institucional · Pro Capital"
         title="A distribuição editorial que aproxima editoras, escolas, livrarias e leitores"
-        description="Com raízes em Maputo e operação vocacionada para os mercados de Angola, Moçambique, Portugal e Brasil, unimos curadoria editorial, rigor logístico e soluções comerciais modernas."
+        description="Com sede operacional na Rua Almeida Garrett, n.º 366, em Maputo, e rede comercial vocacionada para Moçambique, Angola, Portugal e Brasil, unimos curadoria editorial, rigor logístico e soluções B2B modernas."
+        breadcrumbs={[
+          { label: "Início", href: "/" },
+          { label: "Sobre nós" },
+        ]}
       />
 
-      <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+      <section className="mx-auto max-w-6xl px-5 sm:px-8">
+        {/* Indicadores Reais Verificados da Rede Pro Capital */}
+        <dl className="mb-12 grid grid-cols-2 gap-4 rounded-3xl border border-line bg-white p-6 sm:grid-cols-4 sm:p-8">
+          <div>
+            <dt className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink/55">
+              <Building2 size={14} className="text-brand" aria-hidden="true" />
+              <span>Editoras parceiras</span>
+            </dt>
+            <dd className="mt-1.5 font-serif text-3xl font-semibold text-ink">
+              {publishers.length}
+            </dd>
+          </div>
+          <div>
+            <dt className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink/55">
+              <BookOpen size={14} className="text-brand" aria-hidden="true" />
+              <span>Títulos no catálogo</span>
+            </dt>
+            <dd className="mt-1.5 font-serif text-3xl font-semibold text-ink">
+              {books.length}
+            </dd>
+          </div>
+          <div>
+            <dt className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink/55">
+              <GraduationCap size={14} className="text-brand" aria-hidden="true" />
+              <span>Manuais escolares</span>
+            </dt>
+            <dd className="mt-1.5 font-serif text-3xl font-semibold text-ink">
+              {schoolCount}
+            </dd>
+          </div>
+          <div>
+            <dt className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-ink/55">
+              <Globe2 size={14} className="text-brand" aria-hidden="true" />
+              <span>Mercados CPLP</span>
+            </dt>
+            <dd className="mt-1.5 font-serif text-3xl font-semibold text-ink">
+              4 países
+            </dd>
+          </div>
+        </dl>
+
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-2xl border border-line bg-white p-8">
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand/10 text-brand">
@@ -167,7 +250,8 @@ export default function SobrePage() {
             </h2>
             <p className="mt-2 text-sm text-white/75">
               Fale diretamente com a nossa direção comercial para abertura de
-              conta parceira, tabelas por volume ou envio de catálogo PDF.
+              conta parceira, tabelas por volume ou envio de catálogo PDF —
+              respondemos em até 24 horas úteis.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -187,6 +271,9 @@ export default function SobrePage() {
           </div>
         </div>
       </section>
-    </main>
+
+      {/* Perguntas Frequentes com Schema FAQPage */}
+      <FaqSection />
+    </div>
   );
 }
