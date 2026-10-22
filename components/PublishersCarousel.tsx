@@ -20,7 +20,7 @@ function PublisherTile({
       {editora.logo ? (
         <Image
           src={editora.logo}
-          alt={editora.name}
+          alt={`Logótipo da editora ${editora.name}`}
           width={200}
           height={80}
           sizes="208px"

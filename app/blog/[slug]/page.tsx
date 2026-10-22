@@ -3,23 +3,28 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { SITE_URL } from "@/lib/site";
+import { DEFAULT_OG_IMAGE, buildBreadcrumbJsonLd } from "@/lib/seo";
 
-// Corrige a duplicação de rota que existia entre esta página dinâmica e
-// app/blog/distribuidora-de-livros-elo-essencial/page.tsx (uma página
-// "dentro" de outra área já coberta por esta rota, ambas capazes de
-// responder pelo mesmo URL). Em vez de manter as duas, o artigo antigo
-// passou a viver aqui como conteúdo de reserva (LEGACY_CONTENT), usado
-// apenas se a base de dados ainda não tiver sido semeada.
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
 const LEGACY_CONTENT: Record<
   string,
-  { title: string; publishedAt: string; readTime: string; body: string[] }
+  {
+    title: string;
+    excerpt: string;
+    publishedAt: string;
+    readTime: string;
+    body: string[];
+  }
 > = {
   "distribuidora-de-livros-elo-essencial": {
-    title: "Distribuidora de livros: o elo essencial entre autores, editoras e livrarias",
+    title:
+      "Distribuidora de livros: o elo essencial entre autores, editoras e livrarias",
+    excerpt:
+      "Como funciona uma distribuidora de livros, que vantagens traz a editoras, livrarias, escolas e autores, e como escolher o parceiro certo em Moçambique e na CPLP.",
     publishedAt: "13 de julho de 2026",
     readTime: "4 min de leitura",
     body: [
@@ -33,7 +38,9 @@ const LEGACY_CONTENT: Record<
 
 async function getPost(slug: string) {
   try {
-    return await prisma.blogPost.findUnique({ where: { slug, published: true } });
+    return await prisma.blogPost.findUnique({
+      where: { slug, published: true },
+    });
   } catch {
     return null;
   }
@@ -42,12 +49,43 @@ async function getPost(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPost(slug);
-  if (post) return { title: `${post.title} | Blog Pro Capital`, description: post.excerpt };
+  if (post) {
+    return {
+      title: `${post.title} — Blog Editorial`,
+      description: post.excerpt,
+      alternates: { canonical: `${SITE_URL}/blog/${post.slug}` },
+      openGraph: {
+        title: `${post.title} | Pro Capital`,
+        description: post.excerpt,
+        url: `${SITE_URL}/blog/${post.slug}`,
+        type: "article",
+        images: [DEFAULT_OG_IMAGE],
+      },
+    };
+  }
 
   const legacy = LEGACY_CONTENT[slug];
-  if (legacy) return { title: `${legacy.title} | Pro Capital` };
+  if (legacy) {
+    return {
+      title: `${legacy.title} — Blog Editorial`,
+      description: legacy.excerpt,
+      alternates: { canonical: `${SITE_URL}/blog/${slug}` },
+      openGraph: {
+        title: `${legacy.title} | Pro Capital`,
+        description: legacy.excerpt,
+        url: `${SITE_URL}/blog/${slug}`,
+        type: "article",
+        images: [DEFAULT_OG_IMAGE],
+      },
+    };
+  }
 
-  return {};
+  return {
+    title: "Artigo não encontrado",
+    description:
+      "O artigo editorial procurado não está disponível no Blog da Pro Capital.",
+    robots: { index: false, follow: true },
+  };
 }
 
 export default async function BlogPostPage({ params }: Props) {
@@ -55,16 +93,52 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await getPost(slug);
 
   if (post) {
+    const breadcrumbs = [
+      { label: "Início", href: "/" },
+      { label: "Blog", href: "/blog" },
+      { label: post.title },
+    ];
+    const breadcrumbJsonLd = buildBreadcrumbJsonLd(
+      breadcrumbs,
+      `/blog/${post.slug}`,
+    );
+
     return (
       <article className="mx-auto max-w-3xl px-5 py-16 sm:px-8">
-        <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-ink">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        />
+        <nav
+          aria-label="Navegação estrutural"
+          className="mb-4 flex flex-wrap items-center gap-1.5 text-xs font-medium text-ink/55"
+        >
+          <Link href="/" className="hover:text-brand">
+            Início
+          </Link>
+          <span aria-hidden="true">/</span>
+          <Link href="/blog" className="hover:text-brand">
+            Blog
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span className="text-ink/85" aria-current="page">
+            {post.title}
+          </span>
+        </nav>
+
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-ink"
+        >
           <ArrowLeft size={15} /> Voltar ao blog
         </Link>
         <p className="mt-6 text-xs uppercase tracking-wide text-foreground/45">
           {new Date(post.publishedAt).toLocaleDateString("pt-PT")}
           {post.authorName ? ` · ${post.authorName}` : ""}
         </p>
-        <h1 className="mt-3 font-serif text-3xl font-semibold text-ink">{post.title}</h1>
+        <h1 className="mt-3 font-serif text-3xl font-semibold text-ink">
+          {post.title}
+        </h1>
         <div className="prose prose-neutral mt-8 max-w-none whitespace-pre-wrap text-foreground/80">
           {post.content}
         </div>
@@ -72,16 +146,28 @@ export default async function BlogPostPage({ params }: Props) {
     );
   }
 
-  // Sem ligação à base de dados (ou ainda não semeada) — usa o conteúdo
-  // legado, só para o artigo que já existia como página estática.
   const legacy = LEGACY_CONTENT[slug];
   if (!legacy) notFound();
 
+  const breadcrumbs = [
+    { label: "Início", href: "/" },
+    { label: "Blog", href: "/blog" },
+    { label: legacy.title },
+  ];
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(breadcrumbs, `/blog/${slug}`);
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <section className="border-b border-line bg-cream-deep/60">
         <div className="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-24">
-          <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-ink">
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 text-sm font-medium text-foreground/60 hover:text-ink"
+          >
             <ArrowLeft size={15} /> Voltar ao blog
           </Link>
           <div className="mt-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-foreground/50">

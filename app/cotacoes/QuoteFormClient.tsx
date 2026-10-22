@@ -197,7 +197,7 @@ export default function QuoteFormClient({ books }: { books: Book[] }) {
             A equipa comercial Pro Capital validará disponibilidade por armazém,
             prazos de importação/expedição e condições para{" "}
             <strong>{MARKETS[market].name}</strong>, respondendo para{" "}
-            <strong>{email}</strong>.
+            <strong>{email}</strong> em até <strong>24 horas úteis</strong>.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
@@ -223,7 +223,7 @@ export default function QuoteFormClient({ books }: { books: Book[] }) {
       <PageHeader
         eyebrow="Canal B2B, Escolar & Institucional"
         title="Solicitar Cotação Comercial ou Proforma"
-        description="Ideal para encomendas em quantidade de livrarias, escolas, universidades, empresas, ONGs ou títulos sob consulta por ISBN."
+        description="Ideal para encomendas em quantidade de livrarias, escolas, universidades, empresas, ONGs ou títulos sob consulta por ISBN — respondemos em até 24 horas úteis."
         breadcrumbs={[
           { label: "Início", href: "/" },
           { label: "Pedidos de Cotação" },

@@ -25,7 +25,7 @@ export default function EditoraCard({
           {editora.logo ? (
             <Image
               src={editora.logo}
-              alt={editora.name}
+              alt={`Logótipo da editora ${editora.name}`}
               width={200}
               height={80}
               sizes="(max-width: 639px) 80vw, (max-width: 1023px) 40vw, 22vw"

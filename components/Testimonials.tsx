@@ -3,6 +3,10 @@
 import { Quote } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
+// AVISO DE CONTENÇÃO EDITORIAL (Secção 5.3 SEO/AEO):
+// Os textos em `dict.testimonials.items` são exemplos provisórios e NÃO
+// devem ser montados em páginas públicas como prova social até que a Pro
+// Capital forneça depoimentos reais atribuídos a clientes verificados.
 export default function Testimonials() {
   const { dict } = useLanguage();
 

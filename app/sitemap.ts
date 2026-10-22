@@ -1,81 +1,114 @@
 import type { MetadataRoute } from "next";
-import { BOOKS } from "@/data/books";
 import { SITE_URL } from "@/lib/site";
+import { getAllCatalogBooks, getAllPublishers } from "@/lib/catalog";
 import { getAllCategorySlugs } from "@/lib/categories";
 import { prisma } from "@/lib/prisma";
 
-// Só as páginas públicas e indexáveis entram aqui — a área de cliente,
-// carrinho e favoritos são específicas de cada utilizador e não devem
-// ser indexadas (ver app/robots.ts).
 const STATIC_ROUTES = [
   "",
+  "/livros-escolares",
   "/catalogo",
   "/editoras",
+  "/destaques",
+  "/mais-vendidos",
+  "/cotacoes",
+  "/convenios",
   "/sobre",
   "/blog",
-  "/contactos",
-  "/convenios",
   "/eventos",
   "/livro-digital",
+  "/contactos",
+  "/privacidade",
 ];
 
-// Corrige "Problema 4 – SEO perdido": as páginas de categoria e de
-// editora deixam de ter de ser adicionadas à mão aqui — são geradas a
-// partir da base de dados, tal como já acontecia com os livros.
+const FALLBACK_CATEGORY_SLUGS = ["escolar", "ficcao", "infantil", "nao-ficcao"];
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const now = new Date();
+
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({
     url: `${SITE_URL}${route}`,
-    lastModified: new Date(),
+    lastModified: now,
     changeFrequency: route === "" ? "daily" : "weekly",
-    priority: route === "" ? 1 : 0.7,
+    priority:
+      route === ""
+        ? 1
+        : route === "/livros-escolares" || route === "/catalogo"
+        ? 0.9
+        : 0.75,
   }));
 
-  const bookEntries: MetadataRoute.Sitemap = BOOKS.map((book) => ({
+  const [books, publishers] = await Promise.all([
+    getAllCatalogBooks(),
+    getAllPublishers(),
+  ]);
+
+  const bookEntries: MetadataRoute.Sitemap = books.map((book) => ({
     url: `${SITE_URL}/livro/${book.slug}`,
-    lastModified: new Date(),
+    lastModified: now,
     changeFrequency: "weekly",
-    priority: 0.6,
+    priority: 0.7,
   }));
 
-  let categoryEntries: MetadataRoute.Sitemap = [];
-  let editoraEntries: MetadataRoute.Sitemap = [];
-  let blogEntries: MetadataRoute.Sitemap = [];
+  const editoraEntries: MetadataRoute.Sitemap = publishers.map((editora) => ({
+    url: `${SITE_URL}/editoras/${editora.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.65,
+  }));
+
+  let categorySlugs = FALLBACK_CATEGORY_SLUGS;
+  let blogSlugs: { slug: string; updatedAt: Date }[] = [
+    { slug: "distribuidora-de-livros-elo-essencial", updatedAt: now },
+  ];
+  let eventSlugs: { slug: string; updatedAt: Date }[] = [];
 
   try {
-    const [categorySlugs, editoras, posts] = await Promise.all([
+    const [dbCategorySlugs, posts, eventos] = await Promise.all([
       getAllCategorySlugs(),
-      prisma.editora.findMany({ select: { slug: true } }),
       prisma.blogPost.findMany({
         where: { published: true },
         select: { slug: true, updatedAt: true },
       }),
+      prisma.evento.findMany({
+        select: { slug: true, updatedAt: true },
+      }),
     ]);
 
-    categoryEntries = categorySlugs.map((slug) => ({
-      url: `${SITE_URL}/categoria/${slug}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.65,
-    }));
-
-    editoraEntries = editoras.map((e) => ({
-      url: `${SITE_URL}/editoras/${e.slug}`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    }));
-
-    blogEntries = posts.map((p) => ({
-      url: `${SITE_URL}/blog/${p.slug}`,
-      lastModified: p.updatedAt,
-      changeFrequency: "monthly",
-      priority: 0.5,
-    }));
+    if (dbCategorySlugs.length > 0) categorySlugs = dbCategorySlugs;
+    if (posts.length > 0) blogSlugs = posts;
+    eventSlugs = eventos;
   } catch {
-    // Sem ligação à base de dados (ex.: build sem DATABASE_URL configurado)
-    // — o sitemap continua a funcionar apenas com as rotas estáticas e os
-    // livros do ficheiro local, em vez de rebentar o build.
+    // Fallback resiliente quando executado sem ligação ativa à base de dados
   }
 
-  return [...staticEntries, ...bookEntries, ...categoryEntries, ...editoraEntries, ...blogEntries];
+  const categoryEntries: MetadataRoute.Sitemap = categorySlugs.map((slug) => ({
+    url: `${SITE_URL}/categoria/${slug}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
+  const blogEntries: MetadataRoute.Sitemap = blogSlugs.map((p) => ({
+    url: `${SITE_URL}/blog/${p.slug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
+  const eventEntries: MetadataRoute.Sitemap = eventSlugs.map((ev) => ({
+    url: `${SITE_URL}/eventos/${ev.slug}`,
+    lastModified: ev.updatedAt,
+    changeFrequency: "weekly",
+    priority: 0.55,
+  }));
+
+  return [
+    ...staticEntries,
+    ...categoryEntries,
+    ...editoraEntries,
+    ...bookEntries,
+    ...blogEntries,
+    ...eventEntries,
+  ];
 }

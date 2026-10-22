@@ -8,7 +8,7 @@ import { getAllCatalogBooks } from "@/lib/catalog";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Destaques Editoriais | Pro Capital",
+  title: "Destaques Editoriais",
   description:
     "Seleção curada de manuais escolares, literatura lusófona e obras de referência em destaque na Pro Capital.",
 };

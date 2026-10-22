@@ -13,7 +13,7 @@ import ConvenioForm from "@/components/ConvenioForm";
 import PageHeader from "@/components/PageHeader";
 
 export const metadata: Metadata = {
-  title: "Convénios & Parcerias Institucionais | Pro Capital",
+  title: "Convénios & Parcerias Institucionais",
   description:
     "Condições comerciais dedicadas para escolas, universidades, livrarias, empresas e editoras em Angola, Moçambique, Portugal e Brasil.",
 };
@@ -91,6 +91,10 @@ export default function ConveniosPage() {
         eyebrow="Acordos & Parcerias B2B"
         title="Convénios Institucionais e Comerciais"
         description="Soluções estruturadas de fornecimento recorrente para escolas, universidades, livrarias, empresas públicas/privadas e editoras."
+        breadcrumbs={[
+          { label: "Início", href: "/" },
+          { label: "Convénios" },
+        ]}
       />
 
       <section className="mx-auto max-w-6xl px-5 py-16 sm:px-8">

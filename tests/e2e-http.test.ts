@@ -211,6 +211,135 @@ describe("Pro Capital — E2E HTTP, SSR, PDF, Cotações, Documentos & RBAC (Ser
         );
       }
     }
+  });
+
+  it("9. Validação SEO & AEO: robots.txt IA, sitemap.xml, títulos únicos, JSON-LD válido, alt text, privacidade, SLA 24h e Google Maps", async () => {
+    const robotsRes = await fetch(`${BASE}/robots.txt`);
+    assert.equal(robotsRes.status, 200);
+    const robotsTxt = await robotsRes.text();
+    assert.ok(robotsTxt.includes("GPTBot"));
+    assert.ok(robotsTxt.includes("ClaudeBot"));
+    assert.ok(robotsTxt.includes("PerplexityBot"));
+    assert.ok(robotsTxt.includes("Sitemap:"));
+
+    const sitemapRes = await fetch(`${BASE}/sitemap.xml`);
+    assert.equal(sitemapRes.status, 200);
+    const sitemapXml = await sitemapRes.text();
+    for (const expectedPath of [
+      "/catalogo",
+      "/livros-escolares",
+      "/editoras",
+      "/categoria/escolar",
+      "/livro/matematica-8a-classe",
+      "/privacidade",
+      "/contactos",
+      "/sobre",
+    ]) {
+      assert.ok(
+        sitemapXml.includes(expectedPath),
+        `sitemap.xml deveria conter ${expectedPath}`,
+      );
+    }
+
+    const seoRoutes = [
+      "/",
+      "/catalogo",
+      "/livros-escolares",
+      "/editoras",
+      "/editoras/plural-editores",
+      "/categoria/escolar",
+      "/livro/matematica-8a-classe",
+      "/sobre",
+      "/contactos",
+      "/privacidade",
+      "/obrigado?origem=contacto",
+      "/blog/distribuidora-de-livros-elo-essencial",
+    ];
+
+    const seenTitles = new Set<string>();
+    const ldJsonRegex =
+      /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+    const imgRegex = /<img\b[^>]*>/gi;
+
+    for (const route of seoRoutes) {
+      const res = await fetch(`${BASE}${route}`);
+      assert.equal(res.status, 200, `Rota SEO ${route} devolveu ${res.status}`);
+      const html = await res.text();
+
+      const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
+      const titleText = (titleMatch?.[1] ?? "").trim();
+      assert.ok(titleText, `Rota ${route} sem <title>`);
+      assert.ok(
+        !titleText.includes("| Pro Capital | Pro Capital"),
+        `Rota ${route} tem sufixo duplicado no <title>: ${titleText}`,
+      );
+      seenTitles.add(titleText);
+
+      assert.ok(
+        /<meta[^>]+name=["']description["'][^>]+content=["'][^"']{25,}["']/i.test(
+          html,
+        ),
+        `Rota ${route} sem meta description específica`,
+      );
+
+      const imgs = html.match(imgRegex) ?? [];
+      for (const imgTag of imgs) {
+        const altMatch = imgTag.match(/\balt=["']([^"']*)["']/i);
+        assert.ok(
+          altMatch && altMatch[1].trim().length > 0,
+          `Imagem sem alt descritivo em ${route}: ${imgTag}`,
+        );
+      }
+
+      const blocks = [...html.matchAll(ldJsonRegex)];
+      assert.ok(
+        blocks.length >= 1,
+        `Rota ${route} deveria emitir pelo menos o bloco JSON-LD Organization global`,
+      );
+      const parsedBlocks = blocks.map((b) => JSON.parse(b[1]));
+      const serialized = JSON.stringify(parsedBlocks);
+
+      assert.ok(serialized.includes("Rua Almeida Garrett"));
+      assert.ok(serialized.includes("+258 87 704 6220"));
+
+      if (route === "/" || route === "/sobre") {
+        assert.ok(
+          serialized.includes('"FAQPage"'),
+          `Rota ${route} deveria emitir schema FAQPage`,
+        );
+      }
+
+      if (
+        route === "/livro/matematica-8a-classe" ||
+        route === "/categoria/escolar" ||
+        route === "/editoras/plural-editores" ||
+        route === "/sobre" ||
+        route === "/contactos" ||
+        route === "/privacidade"
+      ) {
+        assert.ok(
+          serialized.includes('"BreadcrumbList"'),
+          `Rota ${route} deveria emitir schema BreadcrumbList`,
+        );
+      }
+
+      if (route === "/livro/matematica-8a-classe") {
+        assert.ok(html.includes('href="/categoria/escolar"'));
+        assert.ok(html.includes('href="/editoras/plural-editores"'));
+      }
+
+      if (route === "/contactos") {
+        assert.ok(html.includes("24 horas úteis"));
+        assert.ok(html.includes("Localização da Pro Capital em Maputo"));
+        assert.ok(html.includes("google.com/maps"));
+      }
+    }
+
+    assert.equal(
+      seenTitles.size,
+      seoRoutes.length,
+      "Todas as 12 rotas auditadas devem ter <title> único",
+    );
 
     await prisma.$disconnect();
   });

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -18,6 +19,13 @@ import {
 import PageHeader from "@/components/PageHeader";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Encomendas e Cotações",
+  description:
+    "Acompanhe o estado das suas encomendas, submeta comprovativos bancários, descarregue faturas proforma em PDF e consulte propostas de cotação na Pro Capital.",
+  robots: { index: false, follow: false },
+};
 
 export default async function MinhasEncomendasPage() {
   const session = await auth();

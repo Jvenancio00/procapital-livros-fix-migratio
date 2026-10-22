@@ -1,16 +1,47 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { SITE_URL } from "@/lib/site";
+import { DEFAULT_OG_IMAGE, buildBreadcrumbJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Distribuidora de livros: o elo essencial entre autores, editoras e livrarias | Pro Capital",
+  title:
+    "Distribuidora de livros: o elo essencial entre autores, editoras e livrarias",
   description:
     "Como funciona uma distribuidora de livros, que vantagens traz a editoras, livrarias, escolas e autores, e como escolher o parceiro certo em Moçambique e na CPLP.",
+  alternates: {
+    canonical: `${SITE_URL}/blog/distribuidora-de-livros-elo-essencial`,
+  },
+  openGraph: {
+    title:
+      "Distribuidora de livros: o elo essencial entre autores, editoras e livrarias | Pro Capital",
+    description:
+      "Como funciona uma distribuidora de livros e que vantagens traz a editoras, livrarias, escolas e autores em Moçambique e na CPLP.",
+    url: `${SITE_URL}/blog/distribuidora-de-livros-elo-essencial`,
+    type: "article",
+    images: [DEFAULT_OG_IMAGE],
+  },
 };
 
 export default function ArtigoDistribuidoraPage() {
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd(
+    [
+      { label: "Início", href: "/" },
+      { label: "Blog", href: "/blog" },
+      {
+        label:
+          "Distribuidora de livros: o elo essencial entre autores, editoras e livrarias",
+      },
+    ],
+    "/blog/distribuidora-de-livros-elo-essencial",
+  );
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <section className="border-b border-line bg-cream-deep/60">
         <div className="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-24">
           <Link

@@ -45,7 +45,7 @@ export default function PartnersGrid({
             {editora.logo ? (
               <Image
                 src={editora.logo}
-                alt={editora.name}
+                alt={`Logótipo da editora ${editora.name}`}
                 width={180}
                 height={72}
                 sizes="(max-width: 639px) 44vw, 180px"

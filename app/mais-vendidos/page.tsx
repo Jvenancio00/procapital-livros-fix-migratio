@@ -8,7 +8,7 @@ import { getAllCatalogBooks } from "@/lib/catalog";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Mais Vendidos | Pro Capital",
+  title: "Mais Vendidos",
   description:
     "Títulos com maior procura por livrarias, escolas, universidades e leitores nos mercados de língua portuguesa.",
 };

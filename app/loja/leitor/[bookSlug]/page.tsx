@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import ReaderClient from "./ReaderClient";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Leitor Digital Online",
+  description:
+    "Leitor integrado Pro Capital com marcadores e anotações sincronizadas na conta do leitor.",
+  robots: { index: false, follow: false },
+};
 
 export default async function LeitorPage({
   params,

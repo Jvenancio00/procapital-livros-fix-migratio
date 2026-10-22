@@ -62,7 +62,7 @@ export default function InscricaoForm({
         {qrCodeDataUrl && (
           <div className="mt-4 flex flex-col items-center gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrCodeDataUrl} alt="QR Code de check-in" width={140} height={140} />
+            <img src={qrCodeDataUrl} alt={`Código QR de check-in para inscrição no evento ${eventoSlug}`} width={140} height={140} />
             <p className="text-xs text-foreground/50">Mostre este código à chegada ao evento.</p>
           </div>
         )}

@@ -8,6 +8,8 @@ import BookCard from "@/components/BookCard";
 import EditoraMark from "@/components/EditoraMark";
 import PageHeader from "@/components/PageHeader";
 import { getAllCatalogBooks } from "@/lib/catalog";
+import { SITE_URL } from "@/lib/site";
+import { DEFAULT_OG_IMAGE, getCategorySlugForName } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -42,10 +44,32 @@ async function getEditora(slug: string) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const editora = await getEditora(slug);
-  if (!editora) return { title: "Editora não encontrada | Pro Capital" };
+  if (!editora) {
+    return {
+      title: "Editora não encontrada",
+      description:
+        "A editora solicitada não foi encontrada no diretório de chancelas representadas pela Pro Capital.",
+      robots: { index: false, follow: true },
+    };
+  }
+
+  const title = `${editora.name} — Editora Parceira`;
+  const description = `Catálogo de livros, manuais escolares e edições literárias da editora ${editora.name}${
+    editora.country ? ` (${editora.country})` : ""
+  } distribuídos comercialmente pela Pro Capital.`;
+
   return {
-    title: `${editora.name} | Editoras Pro Capital`,
-    description: `Catálogo editorial de ${editora.name} distribuído pela Pro Capital.`,
+    title,
+    description,
+    alternates: { canonical: `${SITE_URL}/editoras/${editora.slug}` },
+    openGraph: {
+      title: `${title} | Pro Capital`,
+      description,
+      url: `${SITE_URL}/editoras/${editora.slug}`,
+      images: editora.logo
+        ? [{ url: `${SITE_URL}${editora.logo}`, alt: `Logótipo da editora ${editora.name}` }]
+        : [DEFAULT_OG_IMAGE],
+    },
   };
 }
 
@@ -62,8 +86,39 @@ export default async function EditoraPage({ params }: Props) {
     (b) => b.editora.toLowerCase() === editora.name.toLowerCase(),
   );
 
+  const publisherCategories = Array.from(
+    new Map(
+      publisherBooks.map((b) => [
+        b.category,
+        { name: b.category, slug: getCategorySlugForName(b.category) },
+      ]),
+    ).values(),
+  );
+
+  const publisherJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: editora.name,
+    url: `${SITE_URL}/editoras/${editora.slug}`,
+    logo: editora.logo ? `${SITE_URL}${editora.logo}` : undefined,
+    telephone: editora.phone ?? undefined,
+    email: editora.email ?? undefined,
+    address: editora.address
+      ? {
+          "@type": "PostalAddress",
+          streetAddress: editora.address,
+          addressCountry: editora.country ?? undefined,
+        }
+      : undefined,
+  };
+
   return (
     <div className="pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(publisherJsonLd) }}
+      />
+
       <PageHeader
         eyebrow={`Editora Parceira${editora.country ? ` · ${editora.country}` : ""}`}
         title={editora.name}
@@ -85,7 +140,7 @@ export default async function EditoraPage({ params }: Props) {
               <span>Exportar Catálogo PDF</span>
             </a>
             <Link
-              href={`/cotacoes`}
+              href="/cotacoes"
               className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-xs font-semibold text-white hover:bg-brand-dark"
             >
               <FileSpreadsheet size={14} />
@@ -96,13 +151,13 @@ export default async function EditoraPage({ params }: Props) {
       />
 
       <section className="mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="mb-10 flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-line bg-white p-6">
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-line bg-white p-6">
           <div className="flex items-center gap-5">
             <div className="flex h-20 w-40 items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-3">
               {editora.logo ? (
                 <Image
                   src={editora.logo}
-                  alt={editora.name}
+                  alt={`Logótipo da editora ${editora.name}`}
                   width={180}
                   height={72}
                   className="max-h-14 w-auto object-contain"
@@ -155,6 +210,31 @@ export default async function EditoraPage({ params }: Props) {
             </p>
           </div>
         </div>
+
+        {publisherCategories.length > 0 && (
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-white px-5 py-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-ink/55">
+                Categorias publicadas:
+              </span>
+              {publisherCategories.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/categoria/${cat.slug}`}
+                  className="rounded-full border border-line bg-cream/60 px-3.5 py-1 text-xs font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+            <Link
+              href="/editoras"
+              className="text-xs font-semibold text-brand hover:underline"
+            >
+              Ver todas as editoras representadas →
+            </Link>
+          </div>
+        )}
 
         {publisherBooks.length === 0 ? (
           <div className="rounded-2xl border border-line bg-white p-10 text-center">

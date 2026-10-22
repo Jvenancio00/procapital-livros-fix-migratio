@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -16,6 +17,13 @@ import SignOutButton from "@/components/SignOutButton";
 import ProfileFormClient from "./ProfileFormClient";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "A Minha Conta & Perfil Comercial",
+  description:
+    "Gira os dados fiscais da sua conta Pro Capital, encomendas recentes, cotações B2B e Biblioteca Digital.",
+  robots: { index: false, follow: false },
+};
 
 export default async function ContaPage() {
   const session = await auth();
