@@ -1,5 +1,9 @@
 import { BOOKS, CATEGORIES, type Book } from "@/data/books";
-import { EDITORAS, type Editora } from "@/data/editoras";
+import {
+  EDITORAS,
+  type Editora,
+  type RepresentationGroup,
+} from "@/data/editoras";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   cleanIsbnInput,
@@ -190,6 +194,20 @@ export async function getCatalogBookBySlug(slug: string): Promise<Book | undefin
   return staticBook;
 }
 
+export function bookMatchesPublisherEntry(
+  book: Pick<Book, "editora" | "author">,
+  targetName: string,
+  representationGroup?: RepresentationGroup | null,
+): boolean {
+  const needle = targetName.trim().toLowerCase();
+  if (!needle) return true;
+  if (book.editora.trim().toLowerCase() === needle) return true;
+  if (representationGroup === "AUTOR" && book.author.toLowerCase().includes(needle)) {
+    return true;
+  }
+  return false;
+}
+
 export async function getAllPublishers(): Promise<(Editora & { id?: string; bookCount?: number })[]> {
   if (!isDatabaseConfigured()) {
     return EDITORAS;
@@ -197,19 +215,22 @@ export async function getAllPublishers(): Promise<(Editora & { id?: string; book
   try {
     const rows = await prisma.editora.findMany({
       include: { _count: { select: { books: true } } },
-      orderBy: [{ logo: { sort: "asc", nulls: "last" } }, { name: "asc" }],
+      orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
     });
     if (rows.length === 0) return EDITORAS;
     return rows.map((e) => ({
       id: e.id,
       slug: e.slug,
       name: e.name,
+      representationGroup: e.representationGroup as RepresentationGroup,
+      sortOrder: e.sortOrder,
       country: e.country ?? undefined,
       logo: e.logo ?? undefined,
       phone: e.phone ?? undefined,
       email: e.email ?? undefined,
       address: e.address ?? undefined,
       website: e.website ?? undefined,
+      description: e.description ?? undefined,
       bookCount: e._count.books,
     }));
   } catch {
@@ -344,9 +365,18 @@ export function filterAndSortBooks(
       }
     }
 
-    // 3. Editora
+    // 3. Editora / Autor representado
     if (params.editora && params.editora !== "Todas") {
-      if (book.editora.toLowerCase() !== params.editora.toLowerCase()) {
+      const staticMatch = EDITORAS.find(
+        (ed) =>
+          ed.slug === params.editora!.toLowerCase() ||
+          ed.name.toLowerCase() === params.editora!.toLowerCase(),
+      );
+      const targetName = staticMatch?.name ?? params.editora;
+      if (
+        book.editora.toLowerCase() !== targetName.toLowerCase() &&
+        !book.author.toLowerCase().includes(targetName.toLowerCase())
+      ) {
         return false;
       }
     }

@@ -30,6 +30,12 @@ enum MarketCode {
   BR
 }
 
+enum RepresentationGroup {
+  EXCLUSIVO
+  NAO_EXCLUSIVO
+  AUTOR
+}
+
 enum EducationLevel {
   ENSINO_PRIMARIO
   ENSINO_SECUNDARIO
@@ -231,16 +237,18 @@ model Category {
 }
 
 model Editora {
-  id          String  @id @default(cuid())
-  slug        String  @unique
-  name        String  @unique
-  country     String?
-  logo        String?
-  phone       String?
-  email       String?
-  address     String?
-  website     String?
-  description String?
+  id                  String              @id @default(cuid())
+  slug                String              @unique
+  name                String              @unique
+  representationGroup RepresentationGroup @default(NAO_EXCLUSIVO)
+  sortOrder           Int                 @default(100)
+  country             String?
+  logo                String?
+  phone               String?
+  email               String?
+  address             String?
+  website             String?
+  description         String?
 
   books Book[]
 }

@@ -79,11 +79,14 @@ export default function CatalogClient({
       const selectedPub = publishers.find(
         (p) => p.slug === publisher || p.name.toLowerCase() === publisher.toLowerCase(),
       );
-      if (
-        publisher &&
-        book.editora.toLowerCase() !== (selectedPub?.name ?? publisher).toLowerCase()
-      ) {
-        return false;
+      if (publisher) {
+        const target = (selectedPub?.name ?? publisher).toLowerCase();
+        if (
+          book.editora.toLowerCase() !== target &&
+          !book.author.toLowerCase().includes(target)
+        ) {
+          return false;
+        }
       }
       if (educationLevel && book.educationLevel !== educationLevel) return false;
 

@@ -80,12 +80,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  return {
-    title: "Artigo não encontrado",
-    description:
-      "O artigo editorial procurado não está disponível no Blog da Pro Capital.",
-    robots: { index: false, follow: true },
-  };
+  notFound();
 }
 
 export default async function BlogPostPage({ params }: Props) {

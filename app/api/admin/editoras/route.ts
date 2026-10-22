@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { RepresentationGroup } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { recordAuditLog, requireAdminApi } from "@/lib/admin-auth";
 
@@ -12,13 +13,20 @@ function slugify(input: string): string {
     .slice(0, 80);
 }
 
+function normalizeRepresentationGroup(raw: unknown): RepresentationGroup {
+  if (raw === "EXCLUSIVO" || raw === "NAO_EXCLUSIVO" || raw === "AUTOR") {
+    return raw;
+  }
+  return "NAO_EXCLUSIVO";
+}
+
 export async function GET() {
   const guard = await requireAdminApi();
   if (guard.error) return guard.error;
 
   const editoras = await prisma.editora.findMany({
     include: { _count: { select: { books: true } } },
-    orderBy: { name: "asc" },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
   });
   return NextResponse.json({ editoras });
 }
@@ -33,6 +41,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nome da editora é obrigatório." }, { status: 400 });
   }
 
+  const representationGroup = normalizeRepresentationGroup(body?.representationGroup);
   const slug = slugify(body?.slug ? String(body.slug) : name);
   const existing = await prisma.editora.findFirst({
     where: { OR: [{ slug }, { name: { equals: name, mode: "insensitive" } }] },
@@ -40,7 +49,7 @@ export async function POST(request: Request) {
   if (existing && !body?.id) {
     return NextResponse.json(
       { error: `A editora "${existing.name}" já existe na base de dados.` },
-      { status: 409 }
+      { status: 409 },
     );
   }
 
@@ -49,6 +58,7 @@ export async function POST(request: Request) {
         where: { id: String(body.id) },
         data: {
           name,
+          representationGroup,
           country: body.country ? String(body.country).trim() : null,
           logo: body.logo ? String(body.logo).trim() : null,
           phone: body.phone ? String(body.phone).trim() : null,
@@ -62,6 +72,7 @@ export async function POST(request: Request) {
         data: {
           slug,
           name,
+          representationGroup,
           country: body.country ? String(body.country).trim() : null,
           logo: body.logo ? String(body.logo).trim() : null,
           phone: body.phone ? String(body.phone).trim() : null,
@@ -78,8 +89,65 @@ export async function POST(request: Request) {
     entityId: saved.id,
     actorId: guard.actor.id,
     actorEmail: guard.actor.email,
-    details: { name: saved.name, country: saved.country },
+    details: {
+      name: saved.name,
+      country: saved.country,
+      representationGroup: saved.representationGroup,
+    },
   });
 
   return NextResponse.json({ ok: true, editora: saved });
+}
+
+export async function DELETE(request: Request) {
+  const guard = await requireAdminApi();
+  if (guard.error) return guard.error;
+
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id")?.trim();
+  if (!id) {
+    return NextResponse.json({ error: "Identificador da editora em falta." }, { status: 400 });
+  }
+
+  const target = await prisma.editora.findUnique({ where: { id } });
+  if (!target) {
+    return NextResponse.json({ error: "Editora não encontrada." }, { status: 404 });
+  }
+
+  // Remove livros associados que não tenham encomendas históricas e desativa os restantes
+  const deletedBooks = await prisma.book.deleteMany({
+    where: {
+      OR: [
+        { editoraId: target.id },
+        { editora: { equals: target.name, mode: "insensitive" } },
+      ],
+      orderItems: { none: {} },
+    },
+  });
+
+  await prisma.book.updateMany({
+    where: {
+      OR: [
+        { editoraId: target.id },
+        { editora: { equals: target.name, mode: "insensitive" } },
+      ],
+    },
+    data: { active: false, featured: false, editoraId: null },
+  });
+
+  await prisma.editora.delete({ where: { id: target.id } });
+
+  await recordAuditLog({
+    action: "EDITORA_DELETED_WITH_BOOKS",
+    entityType: "Editora",
+    entityId: target.id,
+    actorId: guard.actor.id,
+    actorEmail: guard.actor.email,
+    details: { name: target.name, deletedBooks: deletedBooks.count },
+  });
+
+  return NextResponse.json({
+    ok: true,
+    deletedBooks: deletedBooks.count,
+  });
 }

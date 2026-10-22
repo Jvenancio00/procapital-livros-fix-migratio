@@ -25,15 +25,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  if (slug === "livro-gratuito") {
+    redirect("/livro-digital");
+  }
   const book = await getCatalogBookBySlug(slug);
 
   if (!book) {
-    return {
-      title: "Livro não encontrado",
-      description:
-        "O livro procurado não está disponível. Explore outros títulos no catálogo editorial da Pro Capital.",
-      robots: { index: false, follow: true },
-    };
+    notFound();
   }
 
   const description =

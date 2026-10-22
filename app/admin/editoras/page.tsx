@@ -1,12 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, Plus } from "lucide-react";
+import { CheckCircle2, Plus, Trash2 } from "lucide-react";
+
+type AdminRepresentationGroup = "EXCLUSIVO" | "NAO_EXCLUSIVO" | "AUTOR";
+
+const GROUP_LABELS: Record<AdminRepresentationGroup, string> = {
+  EXCLUSIVO: "Título Exclusivo",
+  NAO_EXCLUSIVO: "Não Exclusivo",
+  AUTOR: "Autor",
+};
 
 interface AdminEditoraRow {
   id: string;
   slug: string;
   name: string;
+  representationGroup?: AdminRepresentationGroup;
   country: string | null;
   logo: string | null;
   email: string | null;
@@ -17,6 +26,8 @@ interface AdminEditoraRow {
 export default function AdminEditorasPage() {
   const [editoras, setEditoras] = useState<AdminEditoraRow[]>([]);
   const [name, setName] = useState("");
+  const [representationGroup, setRepresentationGroup] =
+    useState<AdminRepresentationGroup>("NAO_EXCLUSIVO");
   const [country, setCountry] = useState("Moçambique");
   const [logo, setLogo] = useState("");
   const [email, setEmail] = useState("");
@@ -42,18 +53,47 @@ export default function AdminEditorasPage() {
     const res = await fetch("/api/admin/editoras", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, country, logo, email, phone }),
+      body: JSON.stringify({
+        name,
+        representationGroup,
+        country,
+        logo,
+        email,
+        phone,
+      }),
     });
     const json = await res.json();
     if (!res.ok) {
       setError(json.error ?? "Erro ao guardar editora.");
       return;
     }
-    setFeedback(`Editora "${name}" guardada com sucesso.`);
+    setFeedback(`Registo "${name}" guardado com sucesso.`);
     setName("");
     setLogo("");
     setEmail("");
     setPhone("");
+    await load();
+  }
+
+  async function handleDelete(row: AdminEditoraRow) {
+    const confirmed = window.confirm(
+      `Confirmar remoção de "${row.name}"? Os respetivos livros associados serão igualmente removidos do catálogo.`,
+    );
+    if (!confirmed) return;
+
+    setFeedback("");
+    setError("");
+    const res = await fetch(`/api/admin/editoras?id=${encodeURIComponent(row.id)}`, {
+      method: "DELETE",
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      setError(json.error ?? "Erro ao remover editora.");
+      return;
+    }
+    setFeedback(
+      `"${row.name}" removida com sucesso (${json.deletedBooks ?? 0} livros removidos).`,
+    );
     await load();
   }
 
@@ -64,7 +104,7 @@ export default function AdminEditorasPage() {
           Rede de Representação Editorial
         </span>
         <h1 className="mt-1 font-serif text-3xl font-semibold text-ink">
-          Gestão de Editoras e Logótipos ({editoras.length})
+          Gestão de Editoras, Autores e Logótipos ({editoras.length})
         </h1>
       </div>
 
@@ -74,18 +114,30 @@ export default function AdminEditorasPage() {
       >
         <h2 className="inline-flex items-center gap-2 font-serif text-lg font-semibold text-ink">
           <Plus size={16} className="text-brand" />
-          <span>Adicionar Editora Parceira</span>
+          <span>Adicionar Editora ou Autor Representado</span>
         </h2>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
           <input
             type="text"
             required
-            placeholder="Nome oficial da editora *"
+            placeholder="Nome oficial da editora ou autor *"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="rounded-xl border border-line bg-cream/40 px-3 py-2 text-xs"
           />
+          <select
+            aria-label="Modalidade de representação"
+            value={representationGroup}
+            onChange={(e) =>
+              setRepresentationGroup(e.target.value as AdminRepresentationGroup)
+            }
+            className="rounded-xl border border-line bg-cream/40 px-3 py-2 text-xs font-semibold text-ink"
+          >
+            <option value="EXCLUSIVO">Título Exclusivo</option>
+            <option value="NAO_EXCLUSIVO">Não Exclusivo</option>
+            <option value="AUTOR">Autor</option>
+          </select>
           <input
             type="text"
             placeholder="País (Moçambique, Angola, Portugal, Brasil)"
@@ -129,7 +181,7 @@ export default function AdminEditorasPage() {
             type="submit"
             className="rounded-full bg-brand px-6 py-2.5 text-xs font-semibold text-white hover:bg-brand-dark"
           >
-            Guardar Editora
+            Guardar Registo
           </button>
         </div>
       </form>
@@ -139,11 +191,13 @@ export default function AdminEditorasPage() {
           <table className="w-full text-left text-xs">
             <thead className="border-b border-line bg-cream/70 uppercase text-ink/60">
               <tr>
-                <th className="px-3 py-2.5">Editora</th>
+                <th className="px-3 py-2.5">Editora / Autor</th>
+                <th className="px-3 py-2.5">Regime</th>
                 <th className="px-3 py-2.5">País</th>
                 <th className="px-3 py-2.5">Logótipo</th>
                 <th className="px-3 py-2.5">Contactos</th>
                 <th className="px-3 py-2.5">Títulos Associados</th>
+                <th className="px-3 py-2.5 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line/70">
@@ -151,6 +205,9 @@ export default function AdminEditorasPage() {
                 <tr key={ed.id}>
                   <td className="px-3 py-2.5 font-semibold text-ink">
                     {ed.name}
+                  </td>
+                  <td className="px-3 py-2.5 font-medium text-brand">
+                    {GROUP_LABELS[ed.representationGroup ?? "NAO_EXCLUSIVO"]}
                   </td>
                   <td className="px-3 py-2.5">{ed.country ?? "—"}</td>
                   <td className="px-3 py-2.5 font-mono text-[11px]">
@@ -161,6 +218,17 @@ export default function AdminEditorasPage() {
                   </td>
                   <td className="px-3 py-2.5 font-semibold">
                     {ed._count?.books ?? 0}
+                  </td>
+                  <td className="px-3 py-2.5 text-right">
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(ed)}
+                      title={`Remover ${ed.name} e livros associados`}
+                      className="inline-flex items-center gap-1 rounded-lg border border-red-200 px-2.5 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 size={12} />
+                      <span>Remover</span>
+                    </button>
                   </td>
                 </tr>
               ))}
