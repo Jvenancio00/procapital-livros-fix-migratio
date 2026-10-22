@@ -340,6 +340,73 @@ describe("Pro Capital — E2E HTTP, SSR, PDF, Cotações, Documentos & RBAC (Ser
       seoRoutes.length,
       "Todas as 12 rotas auditadas devem ter <title> único",
     );
+  });
+
+  it("10. Diretório atualizado de Editoras & Catálogo: remove Ndjira/Diname/Nzila (+ livros) e organiza Título Exclusivo, Não Exclusivo e Autores", async () => {
+    const dirRes = await fetch(`${BASE}/editoras`);
+    assert.equal(dirRes.status, 200);
+    const dirVisible = (await dirRes.text()).replace(
+      /<script[\s\S]*?<\/script>/gi,
+      "",
+    );
+
+    assert.ok(dirVisible.includes("Título Exclusivo"));
+    assert.ok(dirVisible.includes("Não Exclusivo"));
+    assert.ok(dirVisible.includes("Autores"));
+
+    for (const expectedName of [
+      "Alcance Editores",
+      "Moçambique Editora",
+      "Plural Editores",
+      "FFLC — Fundação Fernando Leite Couto",
+      "Gala-Gala Edições",
+      "Ethale",
+      "Renato Matusse",
+    ]) {
+      assert.ok(
+        dirVisible.includes(expectedName),
+        `/editoras deveria listar "${expectedName}"`,
+      );
+    }
+
+    for (const removedName of ["Ndjira", "Diname", "Nzila"]) {
+      assert.ok(
+        !dirVisible.includes(removedName),
+        `/editoras não deve conter "${removedName}"`,
+      );
+    }
+
+    for (const removedRoute of [
+      "/editoras/ndjira",
+      "/editoras/diname",
+      "/editoras/nzila",
+      "/livro/portugues-6a-classe",
+      "/livro/niketche-uma-historia-de-poligamia",
+    ]) {
+      const r = await fetch(`${BASE}${removedRoute}`);
+      assert.equal(
+        r.status,
+        404,
+        `Rota removida ${removedRoute} deveria devolver 404, mas devolveu ${r.status}`,
+      );
+    }
+
+    for (const activeSlug of [
+      "alcance-editores",
+      "mocambique-editora",
+      "plural-editores",
+      "fundacao-fernando-leite-couto",
+      "gala-gala-edicoes",
+      "ethale",
+      "renato-matusse",
+    ]) {
+      const r = await fetch(`${BASE}/editoras/${activeSlug}`);
+      assert.equal(
+        r.status,
+        200,
+        `/editoras/${activeSlug} deveria devolver 200 OK`,
+      );
+    }
 
     await prisma.$disconnect();
   });

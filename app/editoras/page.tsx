@@ -7,23 +7,29 @@ import {
   PackageCheck,
   Truck,
 } from "lucide-react";
-import EditoraCard from "@/components/EditoraCard";
 import PageHeader from "@/components/PageHeader";
-import { getAllCatalogBooks, getAllPublishers } from "@/lib/catalog";
+import {
+  bookMatchesPublisherEntry,
+  getAllCatalogBooks,
+  getAllPublishers,
+} from "@/lib/catalog";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { SITE_URL } from "@/lib/site";
+import EditorasDirectoryClient, {
+  type PublisherWithCount,
+} from "./EditorasDirectoryClient";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Editoras & Chancelas Parceiras",
+  title: "Editoras, Chancelas & Autores Representados",
   description:
-    "Diretório de editoras representadas pela Pro Capital nos mercados de língua portuguesa: Angola, Moçambique, Portugal e Brasil.",
+    "Diretório oficial de editoras em Título Exclusivo, Não Exclusivo e Autores representados pela Pro Capital nos mercados de língua portuguesa.",
   alternates: { canonical: `${SITE_URL}/editoras` },
   openGraph: {
-    title: "Editoras & Chancelas Parceiras | Pro Capital",
+    title: "Editoras, Chancelas & Autores Representados | Pro Capital",
     description:
-      "Conheça as chancelas escolares, literárias, infantis e académicas representadas comercialmente pela Pro Capital.",
+      "Conheça as editoras exclusivas, não exclusivas e autores representados comercialmente pela Pro Capital.",
     url: `${SITE_URL}/editoras`,
     images: [DEFAULT_OG_IMAGE],
   },
@@ -62,12 +68,22 @@ export default async function EditorasPage() {
     getAllCatalogBooks(),
   ]);
 
+  const enriched: PublisherWithCount[] = publishers.map((editora) => {
+    const matchedBooks = books.filter((b) =>
+      bookMatchesPublisherEntry(b, editora.name, editora.representationGroup),
+    ).length;
+    return {
+      ...editora,
+      resolvedCount: Math.max(editora.bookCount ?? 0, matchedBooks),
+    };
+  });
+
   return (
     <div className="pb-20">
       <PageHeader
-        eyebrow="Representação Editorial"
-        title="Editoras e chancelas representadas"
-        description="Conetamos editoras escolares, universitárias, infantis e literárias às livrarias, escolas, universidades e leitores nos mercados de língua portuguesa."
+        eyebrow="Representação Editorial & Autoral"
+        title="Editoras, chancelas e autores representados"
+        description="Diretório comercial organizado por modalidade de representação — Título Exclusivo, Não Exclusivo e Autores — ligando editoras e escritores às livrarias, escolas, universidades e leitores."
         breadcrumbs={[
           { label: "Início", href: "/" },
           { label: "Editoras" },
@@ -84,22 +100,7 @@ export default async function EditorasPage() {
       />
 
       <section className="mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {publishers.map((editora) => {
-            const count =
-              editora.bookCount ??
-              books.filter(
-                (b) => b.editora.toLowerCase() === editora.name.toLowerCase(),
-              ).length;
-            return (
-              <EditoraCard
-                key={editora.slug}
-                editora={editora}
-                bookCount={count}
-              />
-            );
-          })}
-        </div>
+        <EditorasDirectoryClient items={enriched} />
       </section>
 
       <section className="mx-auto mt-20 max-w-7xl px-5 sm:px-8">
@@ -109,7 +110,7 @@ export default async function EditorasPage() {
               Modelo de Distribuição
             </span>
             <h2 className="mt-2 font-serif text-3xl font-semibold text-ink">
-              Como operamos com as editoras parceiras
+              Como operamos com as editoras e autores parceiros
             </h2>
           </div>
 

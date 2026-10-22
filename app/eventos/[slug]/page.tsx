@@ -51,12 +51,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const evento = await getEvento(slug);
   if (!evento) {
-    return {
-      title: "Evento não encontrado",
-      description:
-        "O evento consultado não está disponível. Consulte a agenda cultural e editorial da Pro Capital.",
-      robots: { index: false, follow: true },
-    };
+    notFound();
   }
 
   return {

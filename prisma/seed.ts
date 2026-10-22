@@ -167,13 +167,54 @@ async function seedCategories() {
 }
 
 async function seedEditoras() {
+  const removedNames = ["ndjira", "diname", "nzila"];
+  await prisma.book.deleteMany({
+    where: {
+      OR: [
+        { slug: { in: ["portugues-6a-classe", "niketche-uma-historia-de-poligamia"] } },
+        { editora: { in: ["Ndjira", "Diname", "Nzila"], mode: "insensitive" } },
+        { editoraRef: { slug: { in: removedNames } } },
+      ],
+      orderItems: { none: {} },
+    },
+  });
+  await prisma.book.updateMany({
+    where: {
+      OR: [
+        { slug: { in: ["portugues-6a-classe", "niketche-uma-historia-de-poligamia"] } },
+        { editora: { in: ["Ndjira", "Diname", "Nzila"], mode: "insensitive" } },
+        { editoraRef: { slug: { in: removedNames } } },
+      ],
+    },
+    data: { active: false, featured: false, editoraId: null },
+  });
+  await prisma.editora.deleteMany({
+    where: {
+      OR: [
+        { slug: { in: removedNames } },
+        { name: { in: ["Ndjira", "Diname", "Nzila"], mode: "insensitive" } },
+      ],
+    },
+  });
+
   const idByName = new Map<string, string>();
-  for (const e of EDITORAS) {
+  for (let i = 0; i < EDITORAS.length; i += 1) {
+    const e = EDITORAS[i];
+    const country =
+      e.country ??
+      (e.address?.includes("Maputo") || e.address?.includes("Coop")
+        ? "Moçambique"
+        : null);
+    const representationGroup = e.representationGroup ?? "NAO_EXCLUSIVO";
+    const sortOrder = e.sortOrder ?? i + 1;
+
     const created = await prisma.editora.upsert({
       where: { slug: e.slug },
       update: {
         name: e.name,
-        country: e.country ?? (e.address?.includes("Maputo") || e.address?.includes("Coop") ? "Moçambique" : null),
+        representationGroup,
+        sortOrder,
+        country,
         logo: e.logo,
         phone: e.phone,
         email: e.email,
@@ -183,7 +224,9 @@ async function seedEditoras() {
       create: {
         slug: e.slug,
         name: e.name,
-        country: e.country ?? (e.address?.includes("Maputo") || e.address?.includes("Coop") ? "Moçambique" : null),
+        representationGroup,
+        sortOrder,
+        country,
         logo: e.logo,
         phone: e.phone,
         email: e.email,

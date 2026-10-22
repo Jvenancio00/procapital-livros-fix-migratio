@@ -7,7 +7,11 @@ import { prisma } from "@/lib/prisma";
 import BookCard from "@/components/BookCard";
 import EditoraMark from "@/components/EditoraMark";
 import PageHeader from "@/components/PageHeader";
-import { getAllCatalogBooks } from "@/lib/catalog";
+import {
+  bookMatchesPublisherEntry,
+  getAllCatalogBooks,
+} from "@/lib/catalog";
+import type { RepresentationGroup } from "@/data/editoras";
 import { SITE_URL } from "@/lib/site";
 import { DEFAULT_OG_IMAGE, getCategorySlugForName } from "@/lib/seo";
 
@@ -31,32 +35,42 @@ async function getEditora(slug: string) {
     id: fb.slug,
     slug: fb.slug,
     name: fb.name,
+    representationGroup: fb.representationGroup ?? "NAO_EXCLUSIVO",
+    sortOrder: fb.sortOrder ?? 100,
     country: fb.country ?? null,
     logo: fb.logo ?? null,
     phone: fb.phone ?? null,
     email: fb.email ?? null,
     address: fb.address ?? null,
     website: fb.website ?? null,
-    description: null,
+    description: fb.description ?? null,
   };
+}
+
+function roleLabelForGroup(group: RepresentationGroup): string {
+  if (group === "EXCLUSIVO") return "Título Exclusivo";
+  if (group === "AUTOR") return "Autor Representado";
+  return "Não Exclusivo";
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const editora = await getEditora(slug);
   if (!editora) {
-    return {
-      title: "Editora não encontrada",
-      description:
-        "A editora solicitada não foi encontrada no diretório de chancelas representadas pela Pro Capital.",
-      robots: { index: false, follow: true },
-    };
+    notFound();
   }
 
-  const title = `${editora.name} — Editora Parceira`;
-  const description = `Catálogo de livros, manuais escolares e edições literárias da editora ${editora.name}${
-    editora.country ? ` (${editora.country})` : ""
-  } distribuídos comercialmente pela Pro Capital.`;
+  const group = (editora.representationGroup ?? "NAO_EXCLUSIVO") as RepresentationGroup;
+  const suffix = roleLabelForGroup(group);
+  const title = `${editora.name} — ${suffix}`;
+  const description =
+    group === "AUTOR"
+      ? `Obras e edições de ${editora.name}${
+          editora.country ? ` (${editora.country})` : ""
+        } distribuídas comercialmente pela Pro Capital.`
+      : `Catálogo de livros, manuais escolares e edições literárias de ${editora.name}${
+          editora.country ? ` (${editora.country})` : ""
+        } (${suffix}) distribuídos pela Pro Capital.`;
 
   return {
     title,
@@ -67,7 +81,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url: `${SITE_URL}/editoras/${editora.slug}`,
       images: editora.logo
-        ? [{ url: `${SITE_URL}${editora.logo}`, alt: `Logótipo da editora ${editora.name}` }]
+        ? [{ url: `${SITE_URL}${editora.logo}`, alt: `Identidade visual de ${editora.name}` }]
         : [DEFAULT_OG_IMAGE],
     },
   };
@@ -82,8 +96,12 @@ export default async function EditoraPage({ params }: Props) {
 
   if (!editora) notFound();
 
-  const publisherBooks = allBooks.filter(
-    (b) => b.editora.toLowerCase() === editora.name.toLowerCase(),
+  const group = (editora.representationGroup ?? "NAO_EXCLUSIVO") as RepresentationGroup;
+  const isAuthor = group === "AUTOR";
+  const badgeText = roleLabelForGroup(group);
+
+  const publisherBooks = allBooks.filter((b) =>
+    bookMatchesPublisherEntry(b, editora.name, group),
   );
 
   const publisherCategories = Array.from(
@@ -95,22 +113,30 @@ export default async function EditoraPage({ params }: Props) {
     ).values(),
   );
 
-  const publisherJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: editora.name,
-    url: `${SITE_URL}/editoras/${editora.slug}`,
-    logo: editora.logo ? `${SITE_URL}${editora.logo}` : undefined,
-    telephone: editora.phone ?? undefined,
-    email: editora.email ?? undefined,
-    address: editora.address
-      ? {
-          "@type": "PostalAddress",
-          streetAddress: editora.address,
-          addressCountry: editora.country ?? undefined,
-        }
-      : undefined,
-  };
+  const publisherJsonLd = isAuthor
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        name: editora.name,
+        url: `${SITE_URL}/editoras/${editora.slug}`,
+        nationality: editora.country ?? undefined,
+      }
+    : {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: editora.name,
+        url: `${SITE_URL}/editoras/${editora.slug}`,
+        logo: editora.logo ? `${SITE_URL}${editora.logo}` : undefined,
+        telephone: editora.phone ?? undefined,
+        email: editora.email ?? undefined,
+        address: editora.address
+          ? {
+              "@type": "PostalAddress",
+              streetAddress: editora.address,
+              addressCountry: editora.country ?? undefined,
+            }
+          : undefined,
+      };
 
   return (
     <div className="pb-20">
@@ -120,9 +146,13 @@ export default async function EditoraPage({ params }: Props) {
       />
 
       <PageHeader
-        eyebrow={`Editora Parceira${editora.country ? ` · ${editora.country}` : ""}`}
+        eyebrow={`${badgeText}${editora.country ? ` · ${editora.country}` : ""}`}
         title={editora.name}
-        description="Obras, manuais escolares e edições literárias distribuídas comercialmente pela Pro Capital."
+        description={
+          isAuthor
+            ? "Obras e edições de autor representadas comercialmente pela Pro Capital."
+            : "Obras, manuais escolares e edições literárias distribuídas comercialmente pela Pro Capital."
+        }
         breadcrumbs={[
           { label: "Início", href: "/" },
           { label: "Editoras", href: "/editoras" },
@@ -144,7 +174,7 @@ export default async function EditoraPage({ params }: Props) {
               className="inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-xs font-semibold text-white hover:bg-brand-dark"
             >
               <FileSpreadsheet size={14} />
-              <span>Pedir Cotação desta Editora</span>
+              <span>{isAuthor ? "Pedir Cotação deste Autor" : "Pedir Cotação desta Editora"}</span>
             </Link>
           </>
         }
@@ -157,7 +187,11 @@ export default async function EditoraPage({ params }: Props) {
               {editora.logo ? (
                 <Image
                   src={editora.logo}
-                  alt={`Logótipo da editora ${editora.name}`}
+                  alt={
+                    isAuthor
+                      ? `Retrato editorial de ${editora.name}`
+                      : `Logótipo da editora ${editora.name}`
+                  }
                   width={180}
                   height={72}
                   className="max-h-14 w-auto object-contain"
@@ -167,6 +201,9 @@ export default async function EditoraPage({ params }: Props) {
               )}
             </div>
             <div className="space-y-1.5 text-xs text-ink/70">
+              <p className="inline-flex rounded-full bg-cream-deep px-3 py-0.5 text-[11px] font-semibold text-brand">
+                {badgeText}
+              </p>
               {editora.address && (
                 <p className="flex items-center gap-2">
                   <MapPin size={14} className="text-brand" />
@@ -231,7 +268,7 @@ export default async function EditoraPage({ params }: Props) {
               href="/editoras"
               className="text-xs font-semibold text-brand hover:underline"
             >
-              Ver todas as editoras representadas →
+              Ver todas as editoras e autores representados →
             </Link>
           </div>
         )}
@@ -239,7 +276,9 @@ export default async function EditoraPage({ params }: Props) {
         {publisherBooks.length === 0 ? (
           <div className="rounded-2xl border border-line bg-white p-10 text-center">
             <p className="font-serif text-xl font-semibold text-ink">
-              Catálogo desta chancela em preparação para venda online
+              {isAuthor
+                ? "Obras deste autor em preparação para venda online"
+                : "Catálogo desta chancela em preparação para venda online"}
             </p>
             <p className="mt-2 text-sm text-ink/65">
               Pode solicitar desde já cotação ou reposição por lista ISBN junto da

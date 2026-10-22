@@ -3,10 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, FileDown } from "lucide-react";
-import type { Editora } from "@/data/editoras";
+import type { Editora, RepresentationGroup } from "@/data/editoras";
 import EditoraMark from "./EditoraMark";
-import { useLanguage } from "@/context/LanguageContext";
 import { useCurrency } from "@/context/CurrencyContext";
+
+const BADGE_LABEL: Record<RepresentationGroup, string> = {
+  EXCLUSIVO: "Título Exclusivo",
+  NAO_EXCLUSIVO: "Não Exclusivo",
+  AUTOR: "Autor",
+};
 
 export default function EditoraCard({
   editora,
@@ -15,8 +20,10 @@ export default function EditoraCard({
   editora: Editora;
   bookCount: number;
 }) {
-  const { dict } = useLanguage();
   const { market } = useCurrency();
+  const group: RepresentationGroup = editora.representationGroup ?? "NAO_EXCLUSIVO";
+  const isAuthor = group === "AUTOR";
+  const isExclusive = group === "EXCLUSIVO";
 
   return (
     <article className="group flex h-full flex-col justify-between rounded-2xl border border-line/90 bg-white p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-md motion-reduce:transform-none">
@@ -25,7 +32,11 @@ export default function EditoraCard({
           {editora.logo ? (
             <Image
               src={editora.logo}
-              alt={`Logótipo da editora ${editora.name}`}
+              alt={
+                isAuthor
+                  ? `Retrato editorial de ${editora.name}`
+                  : `Logótipo da editora ${editora.name}`
+              }
               width={200}
               height={80}
               sizes="(max-width: 639px) 80vw, (max-width: 1023px) 40vw, 22vw"
@@ -36,11 +47,22 @@ export default function EditoraCard({
           )}
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-ink/50">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wider text-ink/55">
           <span>{editora.country ?? "Lusofonia"}</span>
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide ${
+              isExclusive
+                ? "bg-brand/12 text-brand"
+                : isAuthor
+                ? "bg-accent/20 text-ink"
+                : "bg-cream-deep/80 text-ink/65"
+            }`}
+          >
+            {BADGE_LABEL[group]}
+          </span>
         </div>
 
-        <Link href={`/editoras/${editora.slug}`} className="mt-1.5 block">
+        <Link href={`/editoras/${editora.slug}`} className="mt-2 block">
           <h3 className="font-serif text-xl font-semibold text-ink transition-colors group-hover:text-brand">
             {editora.name}
           </h3>
@@ -77,7 +99,7 @@ export default function EditoraCard({
             href={`/editoras/${editora.slug}`}
             className="inline-flex items-center gap-1 text-brand transition-colors hover:text-brand-dark"
           >
-            <span>Ver editora</span>
+            <span>{isAuthor ? "Ver autor" : "Ver editora"}</span>
             <ArrowUpRight size={14} aria-hidden="true" />
           </Link>
         </div>

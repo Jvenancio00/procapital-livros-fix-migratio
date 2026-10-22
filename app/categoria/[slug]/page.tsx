@@ -27,12 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategoryBySlug(slug);
   if (!category) {
-    return {
-      title: "Categoria não encontrada",
-      description:
-        "A categoria solicitada não foi encontrada no catálogo editorial da Pro Capital.",
-      robots: { index: false, follow: true },
-    };
+    notFound();
   }
 
   const title = `${category.name} — Catálogo Editorial`;
