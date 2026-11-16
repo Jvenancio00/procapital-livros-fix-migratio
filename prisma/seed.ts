@@ -300,6 +300,9 @@ async function seedBooks(
       },
     });
 
+    // Títulos sem preços confirmados ficam apenas sob cotação, sem criar stock fictício.
+    if ([book.price, book.priceKZ, book.priceEUR, book.priceBRL].every((price) => price === 0)) continue;
+
     const prices: { currency: "KZ" | "MT" | "EUR" | "BRL"; amount: number }[] = [
       { currency: "KZ", amount: book.priceKZ },
       { currency: "MT", amount: book.price },
