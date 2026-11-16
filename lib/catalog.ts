@@ -123,7 +123,9 @@ function mapDbRecordToBook(
     allowQuote: record.allowQuote,
     active: record.active,
     stockByMarket,
-    activeMarkets,
+    // Sem qualquer preço registado, o título continua visível para cotação.
+    // Preços existentes (incluindo mercados desativados) mantêm os seus filtros.
+    activeMarkets: record.prices.length === 0 && record.allowQuote ? undefined : activeMarkets,
   };
 }
 
