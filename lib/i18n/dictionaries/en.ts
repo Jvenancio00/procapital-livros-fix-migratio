@@ -32,6 +32,10 @@ export const en: Dictionary = {
   hero: {
     badge: "EDITORIAL DISTRIBUTION • CPLP",
     tagline: "Knowledge that connects markets.",
+    statTitles: "Titles in the catalog",
+    statPublishers: "Publishers in the directory",
+    statSchool: "Titles classified by education level",
+    statMarkets: "Configured markets",
     pauseAnimations: "Pause animations",
     resumeAnimations: "Resume animations",
     title: "Books for schools and bookshops, from Maputo",

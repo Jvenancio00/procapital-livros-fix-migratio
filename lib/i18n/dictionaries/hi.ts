@@ -32,6 +32,10 @@ export const hi: Dictionary = {
   hero: {
     badge: "प्रकाशन वितरण • सीपीएलपी",
     tagline: "ज्ञान जो बाज़ारों को जोड़ता है।",
+    statTitles: "कैटलॉग में शीर्षक",
+    statPublishers: "निर्देशिका में प्रकाशक",
+    statSchool: "शिक्षा स्तर से वर्गीकृत शीर्षक",
+    statMarkets: "कॉन्फ़िगर किए गए बाजार",
     pauseAnimations: "एनिमेशन रोकें",
     resumeAnimations: "एनिमेशन फिर शुरू करें",
     title: "मापुतो से स्कूलों और किताबों की दुकानों तक पुस्तकें",

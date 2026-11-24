@@ -32,6 +32,10 @@ export const zh: Dictionary = {
   hero: {
     badge: "出版分销 • 葡语国家共同体",
     tagline: "知识连接市场。",
+    statTitles: "目录中的图书",
+    statPublishers: "名录中的出版社",
+    statSchool: "按教育阶段分类的图书",
+    statMarkets: "已配置的市场",
     pauseAnimations: "暂停动画",
     resumeAnimations: "继续动画",
     title: "从马普托为学校和书店提供图书",

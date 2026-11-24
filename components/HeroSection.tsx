@@ -76,7 +76,7 @@ export default function HeroSection({ featuredBooks, stats }: { featuredBooks: B
               <Link href="/contactos?motivo=PARCERIA" className="inline-flex min-h-11 items-center text-white/80 hover:text-white">{dict.hero.ctaPartnership}</Link>
             </div>
             <dl className="hero-stats mt-12 grid grid-cols-2 gap-6 border-t border-white/20 pt-6 sm:grid-cols-4">
-              {[[stats.totalBooks, 'Títulos em catálogo'], [stats.totalPublishers, 'Editoras representadas'], [stats.schoolBooks, 'Manuais escolares'], [stats.activeMarkets, 'Mercados lusófonos']].map(([value, label]) => (
+              {[[stats.totalBooks, dict.hero.statTitles], [stats.totalPublishers, dict.hero.statPublishers], [stats.schoolBooks, dict.hero.statSchool], [stats.activeMarkets, dict.hero.statMarkets]].map(([value, label]) => (
                 <div key={label}><dt className="text-xs leading-relaxed text-white/65">{label}</dt><dd className="mt-1 font-serif text-2xl font-semibold">{value}</dd></div>
               ))}
             </dl>

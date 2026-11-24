@@ -17,6 +17,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { MARKET_LIST, MARKETS } from "@/lib/markets";
+import { knownMarketStock } from "@/lib/availability";
 
 export default function BookPurchasePanel({ book }: { book: Book }) {
   const { addItem } = useCart();
@@ -27,9 +28,8 @@ export default function BookPurchasePanel({ book }: { book: Book }) {
 
   const favorite = isFavorite(book.slug);
   const activePrice = getPriceInCurrency(book, currency);
-  const availableStock = book.stockByMarket
-    ? (book.stockByMarket[market] ?? 0)
-    : 20;
+  const knownStock = knownMarketStock(book, market);
+  const availableStock = knownStock ?? 0;
   const isMarketActive =
     book.free ||
     (activePrice > 0 &&
@@ -85,6 +85,8 @@ export default function BookPurchasePanel({ book }: { book: Book }) {
         >
           {book.free
             ? "Disponível imediatamente"
+            : knownStock === null
+            ? "Disponibilidade sob consulta"
             : availableStock > 0
             ? `Em stock em ${MARKETS[market].capitalHub} (${availableStock} un.)`
             : book.allowPreorder

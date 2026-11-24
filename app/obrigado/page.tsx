@@ -17,12 +17,12 @@ const CONTENT_BY_ORIGIN: Record<
   contacto: {
     eyebrow: "Contacto Registado",
     title: "Obrigado pelo seu contacto",
-    body: "A sua mensagem foi registada junto da equipa comercial e editorial da Pro Capital. Respondemos em até 24 horas úteis (segunda a sexta-feira).",
+    body: "A sua mensagem foi registada junto da equipa comercial e editorial da Pro Capital.",
   },
   cotacao: {
     eyebrow: "Cotação B2B Registada",
     title: "Pedido de cotação em análise comercial",
-    body: "Recebemos a sua lista e validaremos stock por armazém, prazos e proposta proforma em até 24 horas úteis (segunda a sexta-feira).",
+    body: "Recebemos a sua lista e validaremos stock por armazém, prazos e proposta proforma após análise do pedido.",
   },
   encomenda: {
     eyebrow: "Encomenda Registada",
@@ -69,7 +69,7 @@ export default async function ObrigadoPage({
               </h2>
               <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-ink/75">
                 <Clock size={14} className="text-brand" />
-                <span>Respondemos em até 24 horas úteis (segunda a sexta-feira).</span>
+                <span>Respondemos após análise do pedido.</span>
               </p>
             </div>
           </div>

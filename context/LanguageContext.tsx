@@ -11,7 +11,6 @@ import type { Dictionary } from "@/lib/i18n/types";
 import {
   DEFAULT_LANGUAGE,
   DICTIONARIES,
-  detectBrowserLanguage,
   type LanguageCode,
 } from "@/lib/i18n/languages";
 
@@ -27,16 +26,13 @@ const STORAGE_KEY = "procapital-language";
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>(DEFAULT_LANGUAGE);
 
-  // Hidratação única: usa a preferência guardada, ou deteta o idioma do
-  // navegador no primeiro acesso (quando ainda não há nada guardado).
+  // Português por defeito; respeita uma escolha explícita guardada.
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY) as LanguageCode | null;
       if (stored && stored in DICTIONARIES) {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- hidratação única a partir do localStorage
         setLanguageState(stored);
-      } else {
-        setLanguageState(detectBrowserLanguage());
       }
     } catch {
       // localStorage indisponível — mantém o idioma padrão
