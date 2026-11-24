@@ -40,6 +40,8 @@ export interface Dictionary {
   hero: {
     badge: string;
     tagline: string;
+    pauseAnimations: string;
+    resumeAnimations: string;
     title: string;
     subtitle: string;
     ctaSchool: string;

@@ -57,3 +57,43 @@ body {
 .bg-ink :focus-visible {
   outline-color: var(--accent);
 }
+
+/* Experimental hero motion. The static first paint is always complete. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes hero-enter {
+    from { opacity: .85; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes hero-poster-zoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+  }
+  @keyframes hero-cover-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .hero-banner[data-enter="true"] .hero-heading { animation: hero-enter .55s cubic-bezier(.2,.7,.2,1) both; }
+  .hero-banner[data-enter="true"] .hero-tagline,
+  .hero-banner[data-enter="true"] .hero-description { animation: hero-enter .55s .25s cubic-bezier(.2,.7,.2,1) both; }
+  .hero-banner[data-enter="true"] .hero-actions { animation: hero-enter .5s .38s cubic-bezier(.2,.7,.2,1) both; }
+  .hero-banner[data-enter="true"] .hero-showcase { animation: hero-enter .6s .5s cubic-bezier(.2,.7,.2,1) both; }
+  .hero-banner.hero-zoom .hero-poster { transform-origin: right center; animation: hero-poster-zoom 22s ease-in-out infinite alternate; animation-play-state: paused; }
+  .hero-banner.hero-zoom[data-running="true"]:not(:focus-within) .hero-poster { animation-play-state: running; will-change: transform; }
+  .hero-interactions .hero-actions a { transition: background-color 160ms, border-color 160ms, color 160ms; }
+  .hero-interactions .hero-actions a:first-child svg { transition: transform 160ms; }
+  .hero-interactions .hero-actions a:first-child:hover svg,
+  .hero-interactions .hero-actions a:first-child:focus-visible svg { transform: translateX(3px); }
+  @media (min-width: 1024px) {
+    .hero-banner.hero-float .hero-cover { animation: hero-cover-float 9s ease-in-out infinite; animation-play-state: paused; }
+    .hero-banner.hero-float .hero-cover:nth-child(2) { animation-duration: 11s; animation-delay: -3s; }
+    .hero-banner.hero-float .hero-cover:nth-child(3) { animation-duration: 8s; animation-delay: -5s; }
+    .hero-banner.hero-float[data-running="true"]:not(:focus-within):not(:hover) .hero-cover { animation-play-state: running; }
+  }
+  @media (max-width: 767px) {
+    .hero-banner[data-enter="true"] .hero-heading,
+    .hero-banner[data-enter="true"] .hero-tagline,
+    .hero-banner[data-enter="true"] .hero-description,
+    .hero-banner[data-enter="true"] .hero-actions,
+    .hero-banner[data-enter="true"] .hero-showcase { animation: none; }
+  }
+}
