@@ -251,7 +251,7 @@ export default async function SobrePage() {
             <p className="mt-2 text-sm text-white/75">
               Fale diretamente com a nossa direção comercial para abertura de
               conta parceira, tabelas por volume ou envio de catálogo PDF —
-              respondemos em até 24 horas úteis.
+              a equipa comercial analisará o pedido.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">

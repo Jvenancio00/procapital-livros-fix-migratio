@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Pedidos de Cotação & Volume B2B | Pro Capital",
     description:
-      "Receba proposta comercial por volume em até 24 horas úteis para escolas, livrarias e instituições na CPLP.",
+      "Solicite uma proposta comercial por volume para escolas, livrarias e instituições na CPLP.",
     url: `${SITE_URL}/cotacoes`,
     images: [DEFAULT_OG_IMAGE],
   },

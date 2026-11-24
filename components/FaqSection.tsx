@@ -16,18 +16,18 @@ export const PROCAPITAL_FAQ_ITEMS: FaqItem[] = [
     question:
       "Como pode uma escola, colégio ou universidade encomendar manuais escolares em quantidade?",
     answer:
-      "As instituições de ensino podem pesquisar por nível de ensino, classe e disciplina na secção Livros Escolares ou submeter a lista completa por ISBN na Central de Cotações B2B (/cotacoes). A equipa comercial valida stock e envia proposta formal ou fatura proforma em até 24 horas úteis.",
+      "As instituições de ensino podem pesquisar por nível de ensino, classe e disciplina na secção Livros Escolares ou submeter a lista completa por ISBN na Central de Cotações B2B (/cotacoes). A equipa comercial analisa o pedido e confirma a disponibilidade e as condições da proposta.",
   },
   {
     question: "Quais são os prazos estimados de expedição e entrega?",
     answer:
-      "Para títulos com stock ativo nos armazéns locais, a expedição estimada é de 1 a 3 dias úteis nos principais centros urbanos (Maputo, Luanda, Lisboa e São Paulo) e de 3 a 10 dias úteis para as restantes províncias e regiões, conforme indicado em cada mercado no checkout.",
+      "Os prazos dependem da disponibilidade, do destino e das condições acordadas. Contacte a equipa comercial para confirmação.",
   },
   {
     question:
       "Como pode uma editora ou livraria tornar-se parceira comercial da Pro Capital?",
     answer:
-      "Editoras interessadas em representação comercial na CPLP e livrarias que pretendam conta de revenda podem submeter proposta em /contactos ou /convenios, ou contactar diretamente comercial@procapitalmz.com e +258 87 704 6220. Respondemos em até 24 horas úteis.",
+      "Editoras interessadas em representação comercial na CPLP e livrarias que pretendam conta de revenda podem submeter proposta em /contactos ou /convenios, ou contactar diretamente comercial@procapitalmz.com e +258 87 704 6220.",
   },
   {
     question:
@@ -87,7 +87,7 @@ export default function FaqSection({
           href="/contactos"
           className="text-xs font-semibold text-brand hover:underline"
         >
-          Tem outra questão? Fale connosco (resposta até 24h úteis) →
+          Tem outra questão? Fale connosco →
         </Link>
       </div>
 

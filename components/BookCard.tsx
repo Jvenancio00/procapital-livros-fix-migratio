@@ -19,6 +19,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { MARKETS } from "@/lib/markets";
+import { knownMarketStock } from "@/lib/availability";
 
 export default function BookCard({
   book,
@@ -35,9 +36,8 @@ export default function BookCard({
 
   const favorite = isFavorite(book.slug);
   const marketPrice = getPriceInCurrency(book, currency);
-  const availableStock = book.stockByMarket
-    ? (book.stockByMarket[market] ?? 0)
-    : 20;
+  const knownStock = knownMarketStock(book, market);
+  const availableStock = knownStock ?? 0;
   const isMarketEnabled =
     book.free ||
     (marketPrice > 0 && (!book.activeMarkets || book.activeMarkets.includes(market)));
@@ -54,6 +54,8 @@ export default function BookCard({
     ? { label: "Acesso digital gratuito", tone: "text-emerald-700 bg-emerald-50 border-emerald-200" }
     : !isMarketEnabled
     ? { label: "Sob cotação comercial", tone: "text-amber-800 bg-amber-50 border-amber-200" }
+    : knownStock === null
+    ? { label: "Disponibilidade sob consulta", tone: "text-ink/70 bg-cream-deep border-line" }
     : availableStock > 10
     ? { label: `Disponível · ${MARKETS[market].shortName}`, tone: "text-emerald-800 bg-emerald-50/90 border-emerald-200" }
     : availableStock > 0

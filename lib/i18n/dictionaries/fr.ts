@@ -32,6 +32,10 @@ export const fr: Dictionary = {
   hero: {
     badge: "DISTRIBUTION ÉDITORIALE • CPLP",
     tagline: "Le savoir qui relie les marchés.",
+    statTitles: "Titres du catalogue",
+    statPublishers: "Éditeurs dans le répertoire",
+    statSchool: "Titres classés par niveau scolaire",
+    statMarkets: "Marchés configurés",
     pauseAnimations: "Mettre les animations en pause",
     resumeAnimations: "Reprendre les animations",
     title: "Des livres pour les écoles et librairies, depuis Maputo",

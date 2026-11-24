@@ -322,7 +322,7 @@ export function getBookPriceForMarket(book: Book, currency: Currency): number {
 }
 
 export function getBookAvailableStock(book: Book, market?: MarketCode | "ALL"): number {
-  if (!book.stockByMarket) return 20;
+  if (!book.stockByMarket) return 0;
   if (!market || market === "ALL") {
     return (
       (book.stockByMarket.AO ?? 0) +

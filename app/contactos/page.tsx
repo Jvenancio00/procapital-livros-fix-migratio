@@ -8,12 +8,12 @@ import { SITE_URL } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Contactos & Parcerias",
   description:
-    "Fale com a Pro Capital em Maputo (+258 87 704 6220 · comercial@procapitalmz.com). Atendimento para editoras, livrarias, escolas e leitores com resposta em até 24h úteis.",
+    "Fale com a Pro Capital em Maputo (+258 87 704 6220 · comercial@procapitalmz.com). Atendimento para editoras, livrarias, escolas e leitores para pedidos e apoio comercial.",
   alternates: { canonical: `${SITE_URL}/contactos` },
   openGraph: {
     title: "Contactos & Parcerias | Pro Capital",
     description:
-      "Rua Almeida Garrett, Bairro da Coop, n.º 366, Maputo — resposta comercial em até 24 horas úteis para Moçambique, Angola, Portugal e Brasil.",
+      "Rua Almeida Garrett, Bairro da Coop, n.º 366, Maputo — apoio comercial para Moçambique, Angola, Portugal e Brasil.",
     url: `${SITE_URL}/contactos`,
     images: [DEFAULT_OG_IMAGE],
   },
@@ -40,7 +40,7 @@ export default function ContactosPage() {
       <PageHeader
         eyebrow="Contactos & Parcerias"
         title="Fale com a equipa comercial e editorial"
-        description="Editoras, livrarias, escolas, universidades, empresas ou leitores — respondemos em até 24 horas úteis para pedidos de parceria, fornecimento em volume e apoio a encomendas."
+        description="Editoras, livrarias, escolas, universidades, empresas ou leitores — contacte-nos para pedidos de parceria, fornecimento em volume e apoio a encomendas."
         breadcrumbs={[
           { label: "Início", href: "/" },
           { label: "Contactos" },
@@ -74,10 +74,10 @@ export default function ContactosPage() {
                   </span>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-ink/50">
-                      Prazo Oficial de Resposta
+                      Atendimento comercial
                     </p>
                     <p className="mt-0.5 font-medium text-ink">
-                      Até 24 horas úteis (segunda a sexta-feira)
+                      Prazos de resposta a confirmar pela equipa comercial
                     </p>
                   </div>
                 </li>

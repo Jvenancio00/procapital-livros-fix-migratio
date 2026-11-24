@@ -32,6 +32,10 @@ export const pt: Dictionary = {
   hero: {
     badge: "PRO CAPITAL · PLATAFORMA EDITORIAL & B2B",
     tagline: "Conhecimento que conecta mercados.",
+    statTitles: "Títulos no catálogo",
+    statPublishers: "Editoras no diretório",
+    statSchool: "Títulos com classificação de ensino",
+    statMarkets: "Mercados configurados",
     pauseAnimations: "Pausar animações",
     resumeAnimations: "Retomar animações",
     title: "Livros para escolas e livrarias, a partir de Maputo",

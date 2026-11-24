@@ -57,9 +57,7 @@ export default function ContactForm() {
           Obrigado pelo seu contacto
         </h3>
         <p className="mx-auto mt-2.5 max-w-md text-sm leading-relaxed text-ink/75">
-          A equipa comercial e editorial da Pro Capital recebeu o seu pedido.{" "}
-          <strong>Respondemos em até 24 horas úteis</strong> (segunda a
-          sexta-feira).
+          O seu pedido foi registado. Para acompanhamento, contacte a equipa comercial.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Link
@@ -172,7 +170,7 @@ export default function ContactForm() {
 
         <p className="inline-flex items-center gap-1.5 text-xs font-medium text-ink/65">
           <Clock size={14} className="text-brand" aria-hidden="true" />
-          <span>Respondemos em até 24 horas úteis.</span>
+          <span>O prazo de resposta será confirmado pela equipa comercial.</span>
         </p>
       </div>
 

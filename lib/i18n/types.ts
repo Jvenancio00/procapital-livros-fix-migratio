@@ -40,6 +40,10 @@ export interface Dictionary {
   hero: {
     badge: string;
     tagline: string;
+    statTitles: string;
+    statPublishers: string;
+    statSchool: string;
+    statMarkets: string;
     pauseAnimations: string;
     resumeAnimations: string;
     title: string;

@@ -33,11 +33,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
       if (storedMarket && ["AO", "MZ", "PT", "BR"].includes(storedMarket)) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setMarketState(storedMarket);
-        if (storedCurrency && ["KZ", "MT", "EUR", "BRL"].includes(storedCurrency)) {
-          setCurrencyState(storedCurrency);
-        } else {
-          setCurrencyState(currencyForMarket(storedMarket));
-        }
+        setCurrencyState(currencyForMarket(storedMarket));
       } else if (storedCurrency && ["KZ", "MT", "EUR", "BRL"].includes(storedCurrency)) {
         setCurrencyState(storedCurrency);
         setMarketState(marketForCurrency(storedCurrency));
