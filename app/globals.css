@@ -97,3 +97,31 @@ body {
     .hero-banner[data-enter="true"] .hero-showcase { animation: none; }
   }
 }
+
+/* A quiet mount around each cover makes varied source proportions feel coherent
+   without cropping the artwork. Motion is limited to deliberate interaction. */
+.book-card-cover {
+  background: #f2ede4;
+}
+.book-card-cover img {
+  padding: 8%;
+}
+.hero-book-cover {
+  background: rgba(255, 255, 255, .1);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, .22);
+}
+.hero-book-cover img {
+  padding: 5%;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .book-card-cover, .hero-book-cover {
+    transition: transform 220ms cubic-bezier(.2,.7,.2,1), box-shadow 220ms ease;
+  }
+  .book-card:focus-within .book-card-cover,
+  .book-card:hover .book-card-cover,
+  .hero-cover:focus-visible .hero-book-cover,
+  .hero-cover:hover .hero-book-cover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 26px rgba(15, 23, 42, .16);
+  }
+}

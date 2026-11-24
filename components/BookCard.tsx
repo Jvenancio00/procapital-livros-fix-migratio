@@ -63,14 +63,14 @@ export default function BookCard({
     : { label: "Sem stock imediato · Cotação", tone: "text-ink/70 bg-cream-deep border-line" };
 
   return (
-    <article className="group flex h-full flex-col border-b border-line bg-transparent pb-5 transition-colors hover:border-ink/40">
+    <article className="book-card group flex h-full min-w-0 flex-col rounded-2xl border border-line/80 bg-white p-3.5 shadow-sm transition-colors hover:border-ink/25 sm:p-4">
       <div className="relative">
-        <Link href={`/livro/${book.slug}`} className="block overflow-hidden">
+        <Link href={`/livro/${book.slug}`} className="block rounded-xl focus-visible:outline-offset-4">
           <BookCover
             book={book}
             index={index}
             preload={index < 2}
-            className=""
+            className="book-card-cover rounded-xl"
           />
         </Link>
 
@@ -82,7 +82,7 @@ export default function BookCard({
               : dict.bookCard.addToFavorites
           }
           onClick={() => toggle(book.slug)}
-          className="absolute right-2.5 top-2.5 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-line/70 bg-white/95 text-ink shadow-2xs transition-colors hover:border-brand/40 hover:text-brand"
+          className="absolute right-2.5 top-2.5 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-line/70 bg-white/95 text-ink shadow-2xs transition-colors hover:border-brand/40 hover:text-brand"
         >
           <Heart
             size={15}

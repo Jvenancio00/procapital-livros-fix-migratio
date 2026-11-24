@@ -82,12 +82,12 @@ export default function HeroSection({ featuredBooks, stats }: { featuredBooks: B
               ))}
             </dl>
           </div>
-          {showcase.length > 0 && <div className="hero-showcase lg:col-span-5">
-            <div className="flex items-center justify-between border-b border-white/20 pb-3 text-xs"><span className="font-semibold uppercase tracking-[0.16em] text-accent">{dict.hero.highlightsLabel}</span><span className="text-white/65">{dict.hero.deliveryNote}</span></div>
+          {showcase.length > 0 && <div className="hero-showcase min-w-0 rounded-2xl border border-white/15 bg-ink/55 p-4 sm:p-6 lg:col-span-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/20 pb-3 text-xs"><span className="font-semibold uppercase tracking-[0.16em] text-accent">{dict.hero.highlightsLabel}</span><span className="text-white/65">{dict.hero.deliveryNote}</span></div>
             <div className="mt-6 grid grid-cols-3 items-start gap-3 sm:gap-5">
-              {showcase.map((book, index) => <Link key={book.slug} href={`/livro/${book.slug}`} className={`hero-cover group ${index === 1 ? 'mt-8' : ''}`}>
-                <BookCover book={book} preload={index === 0} showCategory={false} sizes="(max-width: 1024px) 30vw, 14vw" />
-                <p className="mt-3 line-clamp-2 text-xs font-medium leading-relaxed text-white group-hover:text-accent">{book.title}</p><p className="mt-1 line-clamp-1 text-xs text-white/60">{book.editora}</p>
+              {showcase.map((book, index) => <Link key={book.slug} href={`/livro/${book.slug}`} className={`hero-cover group min-w-0 rounded-xl ${index === 1 ? 'mt-6 sm:mt-8' : ''}`}>
+                <BookCover book={book} preload={index === 0} showCategory={false} sizes="(max-width: 1024px) 30vw, 14vw" className="hero-book-cover rounded-lg" />
+                <p className="mt-3 line-clamp-2 break-words text-xs font-medium leading-relaxed text-white group-hover:text-accent group-focus-visible:text-accent">{book.title}</p><p className="mt-1 line-clamp-1 text-xs text-white/75">{book.editora}</p>
               </Link>)}
             </div>
           </div>}
