@@ -27,7 +27,7 @@ export default function MarketSelector({
         aria-label="Mercado comercial"
         value={market}
         onChange={(e) => setMarket(e.target.value as MarketCode)}
-        className="cursor-pointer bg-transparent pr-1 font-medium focus:outline-none [&>option]:bg-ink [&>option]:text-white"
+        className="cursor-pointer bg-transparent pr-1 font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [&>option]:bg-ink [&>option]:text-white"
       >
         {MARKET_LIST.map((m) => (
           <option key={m.code} value={m.code}>

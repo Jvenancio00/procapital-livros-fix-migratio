@@ -66,12 +66,11 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-line/80 bg-white">
       <div className="bg-ink text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-2 text-xs sm:px-8">
-          <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap">
+          <div className="flex min-w-0 items-center gap-3 whitespace-nowrap">
             <MarketSelector variant="dark" />
-            <nav
-              aria-label="Acesso rápido institucional"
-              className="hidden items-center gap-4 text-white/75 xl:flex"
-            >
+            <details className="relative hidden lg:block">
+              <summary className="cursor-pointer rounded px-2 py-1 font-medium text-white/80 hover:text-white">{dict.nav.solutions}</summary>
+              <nav aria-label="Acesso rápido institucional" className="absolute left-0 top-full z-50 mt-2 grid min-w-52 gap-1 rounded-lg border border-line bg-white p-2 text-ink shadow-lg">
               {utilityLinks.map((link) =>
                 link.external ? (
                   <a
@@ -79,7 +78,7 @@ export default function Header() {
                     href={link.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 transition-colors hover:text-accent"
+                    className="inline-flex items-center gap-1 rounded px-3 py-2 transition-colors hover:bg-cream hover:text-brand"
                   >
                     <FileDown size={12} aria-hidden="true" />
                     {link.label}
@@ -88,13 +87,14 @@ export default function Header() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className="transition-colors hover:text-white"
+                    className="rounded px-3 py-2 transition-colors hover:bg-cream hover:text-brand"
                   >
                     {link.label}
                   </Link>
                 ),
               )}
-            </nav>
+              </nav>
+            </details>
           </div>
 
           <div className="flex shrink-0 items-center gap-2.5">

@@ -48,7 +48,7 @@ function BookCoverContent({
             preload={preload}
             onLoad={() => setLoaded(true)}
             onError={() => setFailed(true)}
-            className={`object-contain transition-opacity duration-300 ${
+            className={`object-cover transition-opacity duration-300 ${
               loaded ? "opacity-100" : "opacity-0"
             }`}
           />

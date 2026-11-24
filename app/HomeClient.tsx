@@ -16,6 +16,7 @@ import {
 import type { Book } from "@/data/books";
 import type { Editora } from "@/data/editoras";
 import BookCard from "@/components/BookCard";
+import BookCover from "@/components/BookCover";
 import PublishersCarousel from "@/components/PublishersCarousel";
 import HeroSection, { type HeroStats } from "@/components/HeroSection";
 import AdvancedSearchBar from "@/components/AdvancedSearchBar";
@@ -83,12 +84,12 @@ export default function HomeClient({
     schoolLevel === "ALL"
       ? schoolBooks
       : schoolBooks.filter((b) => b.educationLevel === schoolLevel)
-  ).slice(0, 8);
+  ).slice(0, 4);
 
   const activeShowcase =
     showcaseTab === "featured"
-      ? featuredBooks.slice(0, 8)
-      : bestsellerBooks.slice(0, 8);
+      ? featuredBooks.slice(0, 4)
+      : bestsellerBooks.slice(0, 4);
 
   return (
     <div>
@@ -97,7 +98,7 @@ export default function HomeClient({
 
       {/* 2. Destaque Prioritário para Livros Escolares */}
       <div className="border-b border-line/80 bg-white">
-        <section className="mx-auto max-w-7xl px-5 py-18 sm:px-8">
+        <section className="mx-auto max-w-7xl px-5 home-editorial-section sm:px-8">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2">
@@ -187,20 +188,20 @@ export default function HomeClient({
       </div>
 
       {/* 3. Pesquisa Avançada de Livros */}
-      <section className="border-b border-line/80 bg-cream-deep/55 py-8">
+      <section className="bg-cream py-8">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <AdvancedSearchBar categories={categories.map((c) => c.name)} />
         </div>
       </section>
 
       {/* 4. Categorias e Níveis de Ensino */}
-      <div className="border-t border-line/70 bg-cream-deep/35">
+      <div className="bg-cream">
         <CategoryGrid categories={categories} />
       </div>
 
       {/* 5. Livros em Destaque e Mais Vendidos */}
       {activeShowcase.length > 0 && (
-        <section className="mx-auto max-w-7xl px-5 py-18 sm:px-8">
+        <section className="mx-auto max-w-7xl px-5 home-editorial-section sm:px-8">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
               <div className="inline-flex items-center gap-2">
@@ -251,11 +252,23 @@ export default function HomeClient({
             </div>
           </div>
 
-          <div className="mt-9 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {activeShowcase.map((book, idx) => (
-              <BookCard key={book.slug} book={book} index={idx} />
-            ))}
+          <div className="mt-9 grid gap-8 rounded-xl bg-cream-deep/60 p-6 sm:p-9 md:grid-cols-[minmax(0,14rem)_1fr] md:items-center lg:gap-14">
+            <Link href={`/livro/${activeShowcase[0].slug}`} className="mx-auto block w-full max-w-52 overflow-hidden rounded-lg shadow-lg md:max-w-none">
+              <BookCover book={activeShowcase[0]} showCategory={false} sizes="(max-width: 768px) 208px, 224px" />
+            </Link>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand">{dict.hero.highlightsLabel}</p>
+              <h3 className="mt-3 font-serif text-3xl font-semibold leading-tight text-ink sm:text-4xl">{activeShowcase[0].title}</h3>
+              <p className="mt-3 text-sm font-medium text-ink/70">{activeShowcase[0].author} · {activeShowcase[0].editora}</p>
+              {activeShowcase[0].description && <p className="mt-5 max-w-2xl font-serif text-base leading-relaxed text-ink/75 sm:text-lg">{activeShowcase[0].description}</p>}
+              <Link href={`/livro/${activeShowcase[0].slug}`} className="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-brand hover:text-brand-dark">{dict.bookCard.viewDetails} <ArrowRight size={16} aria-hidden="true" /></Link>
+            </div>
           </div>
+          {activeShowcase.length > 1 && <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {activeShowcase.slice(1).map((book, idx) => (
+              <BookCard key={book.slug} book={book} index={idx + 1} />
+            ))}
+          </div>}
         </section>
       )}
 
@@ -268,7 +281,7 @@ export default function HomeClient({
       <AudienceSection />
 
       {/* 8. Destaques Comerciais, Mercados Lusófonos e Oportunidades de Cotação */}
-      <section className="mx-auto max-w-7xl px-5 py-18 sm:px-8">
+      <section className="mx-auto max-w-7xl px-5 home-editorial-section sm:px-8">
         <div className="grid items-stretch gap-8 lg:grid-cols-12">
           {/* Seletor Interativo de Catálogos Nacionais */}
           <div className="flex flex-col justify-between rounded-sm border border-line bg-white p-7 sm:p-8 lg:col-span-7">
@@ -507,7 +520,7 @@ export default function HomeClient({
       </div>
 
       {/* 10. Contactos, Chamada para Parceria e Boletim Editorial */}
-      <section className="mx-auto max-w-7xl px-5 py-18 sm:px-8">
+      <section className="mx-auto max-w-7xl px-5 home-editorial-section sm:px-8">
         <div className="overflow-hidden rounded-sm bg-ink p-8 text-white sm:p-12">
           <div className="grid items-center gap-10 lg:grid-cols-12">
             <div className="lg:col-span-7">

@@ -104,12 +104,12 @@ export default function BookCard({
         </div>
 
         <Link href={`/livro/${book.slug}`} className="mt-1">
-          <h3 className="line-clamp-2 font-serif text-[15px] font-semibold leading-snug text-ink transition-colors group-hover:text-brand">
+          <h3 className="line-clamp-2 min-h-[2.6em] font-serif text-[15px] font-semibold leading-snug text-ink transition-colors group-hover:text-brand">
             {book.title}
           </h3>
         </Link>
 
-        <p className="mt-1 line-clamp-1 text-xs text-ink/60">{book.author}</p>
+        <p className="mt-1 min-h-[1.25rem] line-clamp-1 text-xs text-ink/60">{book.author}</p>
 
         {/* ISBN real quando disponível */}
         {book.isbn && (
@@ -127,14 +127,14 @@ export default function BookCard({
 
         {/* Espaçador empurra disponibilidade, preço e botões para o fundo alinhado */}
         <div className="mt-auto pt-3">
-          <div className="flex items-center justify-between gap-2 border-t border-line/70 pt-2.5">
+          <div className="flex min-h-12 flex-wrap items-center justify-between gap-2 border-t border-line/70 pt-2.5">
             <span
               className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${availabilityBadge.tone}`}
             >
               {availabilityBadge.label}
             </span>
 
-            <span className="shrink-0 font-serif text-base font-bold text-ink">
+            <span className="shrink-0 font-sans text-base font-bold text-ink">
               {book.free
                 ? dict.bookCard.free
                 : isMarketEnabled
