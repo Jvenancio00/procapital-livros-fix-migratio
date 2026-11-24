@@ -13,9 +13,11 @@ import ConvenioForm from "@/components/ConvenioForm";
 import PageHeader from "@/components/PageHeader";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/convenios" },
   title: "Convénios & Parcerias Institucionais",
   description:
     "Condições comerciais dedicadas para escolas, universidades, livrarias, empresas e editoras em Angola, Moçambique, Portugal e Brasil.",
+  openGraph: { title: "Convénios & Parcerias Institucionais | Pro Capital", description: "Condições comerciais dedicadas para escolas, universidades, livrarias, empresas e editoras em Angola, Moçambique, Portugal e Brasil.", url: "/convenios", images: ["/og-image.jpg"] },
 };
 
 const PUBLICOS = [
