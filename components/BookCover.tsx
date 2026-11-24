@@ -57,9 +57,6 @@ function BookCoverContent({
         <div className="absolute inset-0 z-10 flex flex-col justify-between bg-ink p-4 text-center text-white">
           <div className="flex flex-col items-center gap-1.5">
             <span className="h-0.5 w-8 bg-accent" aria-hidden="true" />
-            <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-accent">
-              Edição Editorial
-            </span>
           </div>
           <div className="px-1">
             <p className="line-clamp-4 font-serif text-sm font-semibold leading-snug text-white">
