@@ -8,9 +8,11 @@ import { getAllCatalogBooks } from "@/lib/catalog";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/destaques" },
   title: "Destaques Editoriais",
   description:
     "Seleção curada de manuais escolares, literatura lusófona e obras de referência em destaque na Pro Capital.",
+  openGraph: { title: "Destaques Editoriais | Pro Capital", description: "Seleção curada de manuais escolares, literatura lusófona e obras de referência em destaque na Pro Capital.", url: "/destaques", images: ["/og-image.jpg"] },
 };
 
 export default async function DestaquesPage() {

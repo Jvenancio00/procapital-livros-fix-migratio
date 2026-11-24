@@ -4,6 +4,8 @@ import { getAllCatalogBooks, getAllPublishers } from "@/lib/catalog";
 import { getAllCategorySlugs } from "@/lib/categories";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 const STATIC_ROUTES = [
   "",
   "/livros-escolares",
@@ -24,11 +26,9 @@ const STATIC_ROUTES = [
 const FALLBACK_CATEGORY_SLUGS = ["escolar", "ficcao", "infantil", "nao-ficcao"];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
 
   const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({
     url: `${SITE_URL}${route}`,
-    lastModified: now,
     changeFrequency: route === "" ? "daily" : "weekly",
     priority:
       route === ""
@@ -45,21 +45,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const bookEntries: MetadataRoute.Sitemap = books.map((book) => ({
     url: `${SITE_URL}/livro/${book.slug}`,
-    lastModified: now,
     changeFrequency: "weekly",
     priority: 0.7,
   }));
 
   const editoraEntries: MetadataRoute.Sitemap = publishers.map((editora) => ({
     url: `${SITE_URL}/editoras/${editora.slug}`,
-    lastModified: now,
     changeFrequency: "monthly",
     priority: 0.65,
   }));
 
   let categorySlugs = FALLBACK_CATEGORY_SLUGS;
-  let blogSlugs: { slug: string; updatedAt: Date }[] = [
-    { slug: "distribuidora-de-livros-elo-essencial", updatedAt: now },
+  let blogSlugs: { slug: string; updatedAt?: Date }[] = [
+    { slug: "distribuidora-de-livros-elo-essencial" },
   ];
   let eventSlugs: { slug: string; updatedAt: Date }[] = [];
 
@@ -84,7 +82,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const categoryEntries: MetadataRoute.Sitemap = categorySlugs.map((slug) => ({
     url: `${SITE_URL}/categoria/${slug}`,
-    lastModified: now,
     changeFrequency: "weekly",
     priority: 0.7,
   }));

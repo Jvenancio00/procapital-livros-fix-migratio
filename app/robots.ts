@@ -1,24 +1,11 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 
+export const dynamic = "force-dynamic";
+
 const PRIVATE_PATHS = [
-  "/carrinho",
-  "/checkout",
-  "/favoritos",
-  "/obrigado",
-  "/cliente/",
-  "/admin/",
-  "/loja/entrar",
-  "/loja/registo",
-  "/loja/recuperar-senha",
-  "/loja/redefinir-senha",
-  "/loja/verificar-email",
-  "/loja/conta",
-  "/loja/encomendas",
-  "/loja/biblioteca",
-  "/loja/leitor",
-  "/loja/seguranca",
-  "/api/",
+  "/admin", "/api", "/cliente", "/carrinho", "/checkout",
+  "/favoritos", "/loja", "/obrigado",
 ];
 
 const AI_AND_SEARCH_AGENTS = [
@@ -34,6 +21,10 @@ const AI_AND_SEARCH_AGENTS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
+  if (process.env.VERCEL_ENV !== "production") {
+    return { rules: { userAgent: "*", disallow: "/" } };
+  }
+
   return {
     rules: [
       {

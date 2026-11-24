@@ -8,9 +8,11 @@ import { getAllCatalogBooks } from "@/lib/catalog";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/mais-vendidos" },
   title: "Mais Vendidos",
   description:
     "Títulos com maior procura por livrarias, escolas, universidades e leitores nos mercados de língua portuguesa.",
+  openGraph: { title: "Mais Vendidos | Pro Capital", description: "Títulos com maior procura por livrarias, escolas, universidades e leitores nos mercados de língua portuguesa.", url: "/mais-vendidos", images: ["/og-image.jpg"] },
 };
 
 export default async function MaisVendidosPage() {

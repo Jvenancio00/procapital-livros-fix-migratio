@@ -22,9 +22,11 @@ import DigitalWorkspaceClient, {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/livro-digital" },
   title: "Livro Digital & Biblioteca Online",
   description:
     "Aceda à Biblioteca Digital Pro Capital, consulte edições digitais e catálogos oficiais em PDF com leitor integrado, marcadores e notas de estudo.",
+  openGraph: { title: "Livro Digital & Biblioteca Online | Pro Capital", description: "Aceda à Biblioteca Digital Pro Capital, consulte edições digitais e catálogos oficiais em PDF com leitor integrado, marcadores e notas de estudo.", url: "/livro-digital", images: ["/og-image.jpg"] },
 };
 
 const STEPS = [

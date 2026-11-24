@@ -7,9 +7,11 @@ import PageHeader from "@/components/PageHeader";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/blog" },
   title: "Blog & Caderno Editorial",
   description:
     "Artigos da Pro Capital sobre distribuição de livros, ensino, mercado editorial e o setor livreiro em Angola, Moçambique, Portugal e Brasil.",
+  openGraph: { title: "Blog & Caderno Editorial | Pro Capital", description: "Artigos da Pro Capital sobre distribuição de livros, ensino, mercado editorial e o setor livreiro em Angola, Moçambique, Portugal e Brasil.", url: "/blog", images: ["/og-image.jpg"] },
 };
 
 const LEGACY_POSTS = [
