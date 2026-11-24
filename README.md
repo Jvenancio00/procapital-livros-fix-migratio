@@ -28,3 +28,9 @@ Site institucional e loja de livros da Pro Capital, com Next.js, Prisma e NextAu
 - [ ] Confirmar propriedade e estado do sitemap no Search Console e no Bing; testar pedidos de indexação.
 - [ ] Executar Lighthouse mobile e registar resultados reais de Performance, SEO e Acessibilidade; investigar valores abaixo de 90.
 - [ ] Consultar `site:procapitalmz.com` mais tarde: rastreio e indexação não são garantidos nem imediatos; podem demorar dias ou semanas.
+
+### Testes de navegador (Playwright)
+
+Instale Chromium com `npx playwright install chromium` e inicie o site num servidor separado. `BASE_URL=http://127.0.0.1:3000 npm run test:e2e` corre testes de leitura; também aceita uma URL de preview. Os testes atuais são uma cobertura **parcial**, não uma validação de todos os fluxos críticos.
+
+O teste de contacto é ignorado por defeito e só pode correr com site e `DATABASE_URL` locais. Use uma BD descartável, inicie o servidor local com `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS` e `RESEND_API_KEY` vazios para impedir emails reais, e depois execute `E2E_LOCAL_WRITE=1 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/template1?sslmode=disable npm run test:e2e`. O teste cria um endereço `example.invalid` único e elimina os registos criados. Não o execute apontado para produção ou com fornecedor de email ativo.
