@@ -123,7 +123,7 @@ export default function HomeClient({
                   key={tab.code}
                   type="button"
                   onClick={() => setSchoolLevel(tab.code)}
-                  className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
+                  className={`rounded-sm px-4 py-2 text-xs font-semibold transition-colors ${
                     schoolLevel === tab.code
                       ? "bg-ink text-white"
                       : "border border-line bg-white text-ink/75 hover:border-ink/35"
@@ -141,7 +141,7 @@ export default function HomeClient({
             ))}
           </div>
 
-          <div className="mt-9 flex flex-col items-start justify-between gap-4 rounded-2xl border border-line bg-white p-6 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="mt-9 flex flex-col items-start justify-between gap-4 rounded-sm border border-line bg-white p-6 sm:flex-row sm:flex-wrap sm:items-center">
             <div className="flex min-w-0 items-start gap-3.5">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ink text-accent">
                 <GraduationCap size={20} aria-hidden="true" />
@@ -162,21 +162,21 @@ export default function HomeClient({
                 href={`/api/catalogo/pdf?categoria=Escolar&pais=${market}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-ink/40"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-line px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-ink/40"
               >
                 <FileDown size={14} aria-hidden="true" />
                 <span>PDF Escolar ({MARKETS[market].currency})</span>
               </a>
               <Link
                 href="/cotacoes"
-                className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-brand/40 hover:text-brand"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-line px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-brand/40 hover:text-brand"
               >
                 <FileSpreadsheet size={14} aria-hidden="true" />
                 <span>{dict.schoolPriority.quote}</span>
               </Link>
               <Link
                 href="/livros-escolares"
-                className="inline-flex items-center gap-1.5 rounded-full bg-brand px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
+                className="inline-flex items-center gap-1.5 rounded-sm bg-brand px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
               >
                 <span>Ver todos os livros escolares</span>
                 <ArrowRight size={14} aria-hidden="true" />
@@ -217,11 +217,11 @@ export default function HomeClient({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <div className="inline-flex rounded-full border border-line bg-white p-1">
+              <div className="inline-flex rounded-sm border border-line bg-white p-1">
                 <button
                   type="button"
                   onClick={() => setShowcaseTab("featured")}
-                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`rounded-sm px-4 py-1.5 text-xs font-semibold transition-colors ${
                     showcaseTab === "featured"
                       ? "bg-ink text-white"
                       : "text-ink/70 hover:text-ink"
@@ -232,7 +232,7 @@ export default function HomeClient({
                 <button
                   type="button"
                   onClick={() => setShowcaseTab("bestsellers")}
-                  className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`rounded-sm px-4 py-1.5 text-xs font-semibold transition-colors ${
                     showcaseTab === "bestsellers"
                       ? "bg-ink text-white"
                       : "text-ink/70 hover:text-ink"
@@ -271,7 +271,7 @@ export default function HomeClient({
       <section className="mx-auto max-w-7xl px-5 py-18 sm:px-8">
         <div className="grid items-stretch gap-8 lg:grid-cols-12">
           {/* Seletor Interativo de Catálogos Nacionais */}
-          <div className="flex flex-col justify-between rounded-3xl border border-line bg-white p-7 sm:p-8 lg:col-span-7">
+          <div className="flex flex-col justify-between rounded-sm border border-line bg-white p-7 sm:p-8 lg:col-span-7">
             <div>
               <div className="inline-flex items-center gap-2">
                 <span className="h-0.5 w-6 bg-accent" aria-hidden="true" />
@@ -296,7 +296,7 @@ export default function HomeClient({
                       key={m.code}
                       type="button"
                       onClick={() => setMarket(m.code)}
-                      className={`flex flex-col items-start rounded-2xl border p-4 text-left transition-all ${
+                      className={`flex flex-col items-start rounded-sm border p-4 text-left transition-all ${
                         selected
                           ? "border-brand bg-cream/80 ring-1 ring-brand"
                           : "border-line bg-cream/30 hover:border-ink/30"
@@ -306,7 +306,7 @@ export default function HomeClient({
                         <span className="font-serif text-base font-semibold text-ink">
                           {m.name}
                         </span>
-                        <span className="rounded-full bg-ink px-2.5 py-0.5 text-[11px] font-semibold text-white">
+                        <span className="rounded-sm bg-ink px-2.5 py-0.5 text-[11px] font-semibold text-white">
                           {m.currency} ({m.isoCurrency})
                         </span>
                       </div>
@@ -320,7 +320,7 @@ export default function HomeClient({
             <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-line/70 pt-5">
               <Link
                 href={`/catalogo?pais=${market}`}
-                className="inline-flex items-center gap-1.5 rounded-full bg-ink px-5 py-2.5 text-xs font-semibold text-white hover:bg-ink/90"
+                className="inline-flex items-center gap-1.5 rounded-sm bg-ink px-5 py-2.5 text-xs font-semibold text-white hover:bg-ink/90"
               >
                 <span>Abrir catálogo de {MARKETS[market].name}</span>
                 <ArrowRight size={14} aria-hidden="true" />
@@ -329,7 +329,7 @@ export default function HomeClient({
                 href={`/api/catalogo/pdf?pais=${market}`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2.5 text-xs font-semibold text-ink hover:border-brand/40 hover:text-brand"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-line px-4 py-2.5 text-xs font-semibold text-ink hover:border-brand/40 hover:text-brand"
               >
                 <FileDown size={14} aria-hidden="true" />
                 <span>Exportar PDF ({MARKETS[market].name})</span>
@@ -338,9 +338,9 @@ export default function HomeClient({
           </div>
 
           {/* Cartão Comercial de Cotação B2B & Reposição */}
-          <div className="flex flex-col justify-between rounded-3xl bg-ink p-7 text-white sm:p-8 lg:col-span-5">
+          <div className="flex flex-col justify-between rounded-sm bg-ink p-7 text-white sm:p-8 lg:col-span-5">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
+              <span className="inline-flex items-center gap-2 rounded-sm border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
                 <FileSpreadsheet size={13} aria-hidden="true" />
                 Canal B2B &amp; Cotação Direta
               </span>
@@ -370,14 +370,14 @@ export default function HomeClient({
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href="/cotacoes"
-                className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+                className="inline-flex items-center gap-2 rounded-sm bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
               >
                 <span>Solicitar cotação comercial</span>
                 <ArrowRight size={15} aria-hidden="true" />
               </Link>
               <Link
                 href="/cliente/catalogo"
-                className="inline-flex items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-sm font-semibold text-white hover:border-accent"
+                className="inline-flex items-center gap-2 rounded-sm border border-white/25 px-5 py-3 text-sm font-semibold text-white hover:border-accent"
               >
                 <span>Tabela B2B rápida</span>
               </Link>
@@ -416,7 +416,7 @@ export default function HomeClient({
                       <Link
                         key={ev.slug}
                         href={`/eventos/${ev.slug}`}
-                        className="group block rounded-2xl border border-line bg-white p-5 transition-all hover:border-ink/25 hover:shadow-sm"
+                        className="group block rounded-sm border border-line bg-white p-5 transition-all hover:border-ink/25 "
                       >
                         <div className="flex flex-wrap items-center gap-3 text-xs text-ink/60">
                           <span className="inline-flex items-center gap-1 font-semibold text-brand">
@@ -469,10 +469,10 @@ export default function HomeClient({
                       <Link
                         key={post.slug}
                         href={`/blog/${post.slug}`}
-                        className="group flex flex-col justify-between rounded-2xl border border-line bg-white p-5 transition-all hover:border-ink/25 hover:shadow-sm"
+                        className="group flex flex-col justify-between rounded-sm border border-line bg-white p-5 transition-all hover:border-ink/25 "
                       >
                         <div>
-                          <span className="rounded-full bg-cream-deep px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand">
+                          <span className="rounded-sm bg-cream-deep px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand">
                             {post.category}
                           </span>
                           <h3 className="mt-3 line-clamp-3 font-serif text-base font-semibold leading-snug text-ink group-hover:text-brand">
@@ -508,7 +508,7 @@ export default function HomeClient({
 
       {/* 10. Contactos, Chamada para Parceria e Boletim Editorial */}
       <section className="mx-auto max-w-7xl px-5 py-18 sm:px-8">
-        <div className="overflow-hidden rounded-3xl bg-ink p-8 text-white sm:p-12">
+        <div className="overflow-hidden rounded-sm bg-ink p-8 text-white sm:p-12">
           <div className="grid items-center gap-10 lg:grid-cols-12">
             <div className="lg:col-span-7">
               <div className="inline-flex items-center gap-2">
@@ -529,21 +529,21 @@ export default function HomeClient({
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   href="/contactos?motivo=PARCERIA"
-                  className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+                  className="inline-flex items-center gap-2 rounded-sm bg-brand px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
                 >
                   <span>Solicitar parceria</span>
                   <ArrowRight size={15} aria-hidden="true" />
                 </Link>
                 <Link
                   href="/contactos"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-accent"
+                  className="inline-flex items-center gap-2 rounded-sm border border-white/25 px-6 py-3 text-sm font-semibold text-white transition-colors hover:border-accent"
                 >
                   <span>Contactar equipa comercial</span>
                 </Link>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/12 bg-white/[0.04] p-6 lg:col-span-5">
+            <div className="rounded-sm border border-white/12 bg-white/[0.04] p-6 lg:col-span-5">
               <h3 className="font-serif text-lg font-semibold text-white">
                 Receber lançamentos e catálogos sazonais
               </h3>

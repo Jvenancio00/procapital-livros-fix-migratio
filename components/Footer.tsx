@@ -25,7 +25,7 @@ export default function Footer() {
                   href={`/api/catalogo/pdf?pais=${m.code}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-medium text-white/85 transition-colors hover:border-accent/60 hover:text-accent"
+                  className="inline-flex items-center gap-1.5 rounded-sm border border-white/15 bg-transparent px-3 py-1 text-xs font-medium text-white/85 transition-colors hover:border-accent/60 hover:text-accent"
                 >
                   <FileDown size={12} aria-hidden="true" />
                   <span>

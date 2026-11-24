@@ -31,6 +31,7 @@ export const pt: Dictionary = {
   },
   hero: {
     badge: "PRO CAPITAL · PLATAFORMA EDITORIAL & B2B",
+    tagline: "Conhecimento que conecta mercados.",
     title: "Livros para escolas e livrarias, a partir de Maputo",
     subtitle: "Distribuímos livros escolares e outras obras para leitores, escolas e livrarias em Moçambique, Angola, Portugal e Brasil.",
     ctaSchool: "Livros escolares",

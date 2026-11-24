@@ -1,17 +1,10 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties } from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Building2, Globe2, GraduationCap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { Book } from "@/data/books";
 import BookCover from "./BookCover";
 import { useLanguage } from "@/context/LanguageContext";
-
-const COVER_MOTION = [
-  { delay: "0s", tilt: "-1.5deg", offset: "sm:mt-6" },
-  { delay: "0.08s", tilt: "0deg", offset: "" },
-  { delay: "0.16s", tilt: "1.5deg", offset: "sm:mt-10" },
-];
 
 export interface HeroStats {
   totalBooks: number;
@@ -20,178 +13,39 @@ export interface HeroStats {
   activeMarkets: number;
 }
 
-export default function HeroSection({
-  featuredBooks,
-  stats,
-}: {
-  featuredBooks: Book[];
-  stats: HeroStats;
-}) {
+export default function HeroSection({ featuredBooks, stats }: { featuredBooks: Book[]; stats: HeroStats }) {
   const { dict } = useLanguage();
-  const heroRef = useRef<HTMLElement>(null);
-
-  // O conteúdo permanece legível mesmo sem JavaScript ou com movimento reduzido.
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let frame = 0;
-    const start = () => {
-      frame = window.requestAnimationFrame(() => { hero.dataset.motion = "ready"; });
-    };
-    if (document.readyState === "complete") start();
-    else window.addEventListener("load", start, { once: true });
-    return () => {
-      window.removeEventListener("load", start);
-      window.cancelAnimationFrame(frame);
-    };
-  }, []);
   const showcase = featuredBooks.slice(0, 3);
 
   return (
-    <section ref={heroRef} className="hero-editorial relative overflow-hidden bg-ink text-white">
-      {/* Textura editorial subtil sem gradientes berrantes */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
-        }}
-      />
-
-      <div className="relative mx-auto max-w-7xl px-5 pt-14 pb-16 sm:px-8 lg:pt-20 lg:pb-22">
-        <div className="grid items-center gap-12 lg:grid-cols-12">
-          {/* Coluna Editorial Principal */}
+    <section className="bg-ink text-white">
+      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:py-24">
+        <div className="grid gap-14 lg:grid-cols-12 lg:items-center lg:gap-16">
           <div className="lg:col-span-7">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-amber-200/95">
-                {dict.hero.badge}
-              </span>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">{dict.hero.badge}</p>
+            <h1 className="mt-6 max-w-3xl font-serif text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl xl:text-6xl">{dict.hero.title}</h1>
+            <p className="mt-6 font-serif text-xl text-white sm:text-2xl">{dict.hero.tagline}</p>
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">{dict.hero.subtitle}</p>
+            <div className="mt-8 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm font-semibold">
+              <Link href="/livros-escolares" className="inline-flex min-h-11 items-center gap-2 bg-brand px-5 text-white hover:bg-brand-dark">{dict.hero.ctaSchool}<ArrowRight size={16} aria-hidden="true" /></Link>
+              <Link href="/catalogo" className="inline-flex min-h-11 items-center border-b border-white/40 hover:border-accent">{dict.hero.ctaCatalog}</Link>
+              <Link href="/contactos?motivo=PARCERIA" className="inline-flex min-h-11 items-center text-white/80 hover:text-white">{dict.hero.ctaPartnership}</Link>
             </div>
-
-            <h1 className="hero-title mt-6 font-serif text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-5xl xl:text-[3.5rem]">
-              {dict.hero.title}
-            </h1>
-
-            <p className="hero-subtitle mt-5 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
-              {dict.hero.subtitle}
-            </p>
-
-            {/* Botões Principais Exatos */}
-            <div className="hero-actions mt-8 flex flex-wrap items-center gap-3.5">
-              <Link
-                href="/livros-escolares"
-                className="inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark"
-              >
-                <GraduationCap size={16} aria-hidden="true" />
-                <span>{dict.hero.ctaSchool}</span>
-              </Link>
-              <Link
-                href="/catalogo"
-                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/[0.04] px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:border-accent hover:bg-white/[0.09]"
-              >
-                <span>{dict.hero.ctaCatalog}</span>
-                <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-              <Link
-                href="/contactos?motivo=PARCERIA"
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent transition-opacity hover:opacity-85"
-              >
-                <span>{dict.hero.ctaPartnership}</span>
-              </Link>
-            </div>
-
-            {/* Indicadores Reais da Rede Editorial */}
-            <dl className="mt-12 grid grid-cols-2 gap-6 border-t border-white/12 pt-7 sm:grid-cols-4">
-              <div>
-                <dt className="flex items-center gap-1.5 text-xs text-white/60">
-                  <BookOpen size={13} className="text-accent" aria-hidden="true" />
-                  <span>Títulos em catálogo</span>
-                </dt>
-                <dd className="mt-1 font-serif text-2xl font-semibold text-white">
-                  {stats.totalBooks}
-                </dd>
-              </div>
-              <div>
-                <dt className="flex items-center gap-1.5 text-xs text-white/60">
-                  <Building2 size={13} className="text-accent" aria-hidden="true" />
-                  <span>Editoras representadas</span>
-                </dt>
-                <dd className="mt-1 font-serif text-2xl font-semibold text-white">
-                  {stats.totalPublishers}
-                </dd>
-              </div>
-              <div>
-                <dt className="flex items-center gap-1.5 text-xs text-white/60">
-                  <GraduationCap size={13} className="text-accent" aria-hidden="true" />
-                  <span>Manuais escolares</span>
-                </dt>
-                <dd className="mt-1 font-serif text-2xl font-semibold text-white">
-                  {stats.schoolBooks}
-                </dd>
-              </div>
-              <div>
-                <dt className="flex items-center gap-1.5 text-xs text-white/60">
-                  <Globe2 size={13} className="text-accent" aria-hidden="true" />
-                  <span>Mercados lusófonos</span>
-                </dt>
-                <dd className="mt-1 font-serif text-2xl font-semibold text-white">
-                  {stats.activeMarkets} países
-                </dd>
-              </div>
+            <dl className="mt-12 grid grid-cols-2 gap-6 border-t border-white/20 pt-6 sm:grid-cols-4">
+              {[[stats.totalBooks, 'Títulos em catálogo'], [stats.totalPublishers, 'Editoras representadas'], [stats.schoolBooks, 'Manuais escolares'], [stats.activeMarkets, 'Mercados lusófonos']].map(([value, label]) => (
+                <div key={label}><dt className="text-xs leading-relaxed text-white/65">{label}</dt><dd className="mt-1 font-serif text-2xl font-semibold">{value}</dd></div>
+              ))}
             </dl>
           </div>
-
-          {/* Vitrine Editorial com Capas Reais */}
-          <div className="lg:col-span-5">
-            <div className="rounded-3xl border border-white/12 bg-white/[0.03] p-5 sm:p-6">
-              <div className="mb-4 flex items-center justify-between text-xs">
-                <span className="font-semibold uppercase tracking-[0.16em] text-accent">
-                  {dict.hero.highlightsLabel}
-                </span>
-                <span className="text-white/60">{dict.hero.deliveryNote}</span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                {showcase.map((book, index) => {
-                  const motion = COVER_MOTION[index] ?? COVER_MOTION[1];
-                  return (
-                    <Link
-                      key={book.slug}
-                      href={`/livro/${book.slug}`}
-                      className={`group flex flex-col ${motion.offset}`}
-                    >
-                      <div
-                        className="hero-cover-item overflow-hidden rounded-xl border border-white/20 bg-white/5 shadow-xl transition-transform duration-300 group-hover:scale-[1.03]"
-                        style={
-                          {
-                            "--hero-delay": motion.delay,
-                            "--hero-tilt": motion.tilt,
-                          } as CSSProperties
-                        }
-                      >
-                        <BookCover
-                          book={book}
-                          preload={index === 1}
-                          showCategory={false}
-                          sizes="(max-width: 1024px) 30vw, 14vw"
-                          className="rounded-xl"
-                        />
-                      </div>
-                      <p className="mt-2.5 line-clamp-1 text-[11px] font-medium text-white/85 group-hover:text-accent">
-                        {book.title}
-                      </p>
-                      <p className="line-clamp-1 text-[10px] text-white/50">
-                        {book.editora}
-                      </p>
-                    </Link>
-                  );
-                })}
-              </div>
+          {showcase.length > 0 && <div className="lg:col-span-5">
+            <div className="flex items-center justify-between border-b border-white/20 pb-3 text-xs"><span className="font-semibold uppercase tracking-[0.16em] text-accent">{dict.hero.highlightsLabel}</span><span className="text-white/65">{dict.hero.deliveryNote}</span></div>
+            <div className="mt-6 grid grid-cols-3 items-start gap-3 sm:gap-5">
+              {showcase.map((book, index) => <Link key={book.slug} href={`/livro/${book.slug}`} className={index === 1 ? 'mt-8 group' : 'group'}>
+                <BookCover book={book} preload={index === 0} showCategory={false} sizes="(max-width: 1024px) 30vw, 14vw" />
+                <p className="mt-3 line-clamp-2 text-xs font-medium leading-relaxed text-white group-hover:text-accent">{book.title}</p><p className="mt-1 line-clamp-1 text-xs text-white/60">{book.editora}</p>
+              </Link>)}
             </div>
-          </div>
+          </div>}
         </div>
       </div>
     </section>

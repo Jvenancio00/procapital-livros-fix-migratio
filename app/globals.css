@@ -48,76 +48,12 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-@keyframes publishers-marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+/* Keyboard focus remains visible across navigation, filters and forms. */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
 }
 
-.publishers-marquee {
-  animation: publishers-marquee 44s linear infinite;
-}
-
-.publishers-marquee:hover,
-.publishers-marquee:focus-within {
-  animation-play-state: paused;
-}
-
-.publishers-marquee__group {
-  flex: none;
-  gap: clamp(1rem, 3vw, 2rem);
-  padding-right: clamp(1rem, 3vw, 2rem);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .publishers-marquee-window {
-    overflow: visible;
-  }
-
-  .publishers-marquee {
-    display: block;
-    width: 100%;
-    animation: none;
-  }
-
-  .publishers-marquee__group {
-    display: flex;
-    width: 100%;
-    flex: initial;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.875rem;
-    padding-right: 0;
-  }
-
-  .publishers-marquee__group[aria-hidden="true"] {
-    display: none;
-  }
-}
-
-/* Movimento de entrada curto, aplicado apenas depois do carregamento. O
-   estado inicial não oculta conteúdo; movimento reduzido fica estático. */
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes hero-settle {
-    from { transform: translateY(0.65rem); }
-    to { transform: translateY(0); }
-  }
-  @keyframes hero-cover-settle {
-    from { transform: translateX(1rem) rotate(0deg); }
-    to { transform: translateX(0) rotate(var(--hero-tilt, 0deg)); }
-  }
-  .hero-editorial[data-motion="ready"] .hero-title,
-  .hero-editorial[data-motion="ready"] .hero-subtitle,
-  .hero-editorial[data-motion="ready"] .hero-actions {
-    animation: hero-settle 600ms ease-out both;
-  }
-  .hero-editorial[data-motion="ready"] .hero-subtitle { animation-delay: 80ms; }
-  .hero-editorial[data-motion="ready"] .hero-actions { animation-delay: 160ms; }
-  .hero-editorial[data-motion="ready"] .hero-cover-item {
-    animation: hero-cover-settle 800ms ease-out both;
-    animation-delay: var(--hero-delay, 0s);
-  }
+.bg-ink :focus-visible {
+  outline-color: var(--accent);
 }
