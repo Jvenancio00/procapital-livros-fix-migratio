@@ -36,6 +36,8 @@ test("novos textos estão preenchidos nos seis idiomas", () => {
   assert.equal(Object.keys(DICTIONARIES).length, 6);
   for (const dict of Object.values(DICTIONARIES)) {
     assert.ok(dict.hero.tagline.trim());
+    assert.ok(dict.hero.pauseAnimations.trim());
+    assert.ok(dict.hero.resumeAnimations.trim());
     assert.ok(dict.hero.ctaSchool.trim());
     assert.ok(dict.publisherMark.provisional.trim());
     assert.ok(dict.schoolPriority.count.trim());
@@ -48,4 +50,14 @@ test("logo da BD tem prioridade e catálogo estático supre campo vazio", () => 
   assert.equal(resolveEditoraLogo("alcance-editores", null), "/editoras/alcance.jpg");
   assert.equal(resolveEditoraLogo("alcance-editores", "/editoras/outro.png"), "/editoras/outro.png");
   assert.equal(resolveEditoraLogo("plural-editores", null), undefined);
+});
+
+
+test("hero mantém o conteúdo e cartaz acessíveis no HTML inicial", () => {
+  const html = render(createElement(HeroSection, { featuredBooks: [], stats: { totalBooks: 42, totalPublishers: 18, schoolBooks: 7, activeMarkets: 4 } }));
+  assert.match(html, /hero-poster\.webp/);
+  assert.match(html, /hero-poster\.jpg/);
+  assert.match(html, /Conhecimento que conecta mercados/);
+  assert.match(html, />42</);
+  assert.match(html, /Pausar animações/);
 });

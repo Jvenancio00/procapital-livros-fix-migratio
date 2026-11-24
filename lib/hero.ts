@@ -64,3 +64,11 @@ export const HERO_VIDEO_URL = envUrl(process.env.NEXT_PUBLIC_HERO_VIDEO_URL);
 
 /** Há camada de vídeo para mostrar? */
 export const HERO_VIDEO_ENABLED = HERO_VIDEO_URL.length > 0;
+
+/** Experimental effects: set an individual flag to false to disable it. */
+export const HERO_EFFECTS = {
+  entrance: true,
+  posterZoom: true,
+  coverFloat: true,
+  interactions: true,
+} as const;
