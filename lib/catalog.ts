@@ -1,6 +1,7 @@
 import { BOOKS, CATEGORIES, type Book } from "@/data/books";
 import {
   EDITORAS,
+  resolveEditoraLogo,
   type Editora,
   type RepresentationGroup,
 } from "@/data/editoras";
@@ -227,7 +228,7 @@ export async function getAllPublishers(): Promise<(Editora & { id?: string; book
       representationGroup: e.representationGroup as RepresentationGroup,
       sortOrder: e.sortOrder,
       country: e.country ?? undefined,
-      logo: e.logo ?? undefined,
+      logo: resolveEditoraLogo(e.slug, e.logo),
       phone: e.phone ?? undefined,
       email: e.email ?? undefined,
       address: e.address ?? undefined,

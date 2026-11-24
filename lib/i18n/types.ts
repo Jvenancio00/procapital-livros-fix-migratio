@@ -41,6 +41,7 @@ export interface Dictionary {
     badge: string;
     title: string;
     subtitle: string;
+    ctaSchool: string;
     ctaCatalog: string;
     ctaClientArea: string;
     ctaAbout: string;
@@ -54,6 +55,8 @@ export interface Dictionary {
       readers: string;
     };
   };
+  publisherMark: { provisional: string };
+  schoolPriority: { count: string; quote: string };
   /** Secção institucional de métricas ("10 parceiros", "1000+ títulos", ...), logo abaixo do Hero */
   metrics: {
     eyebrow: string;

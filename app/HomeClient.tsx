@@ -24,6 +24,7 @@ import AudienceSection from "@/components/AudienceSection";
 import FaqSection from "@/components/FaqSection";
 import NewsletterForm from "@/components/NewsletterForm";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { MARKET_LIST, MARKETS } from "@/lib/markets";
 
 interface EventSummary {
@@ -72,6 +73,7 @@ export default function HomeClient({
   posts: BlogSummary[];
 }) {
   const { market, setMarket } = useCurrency();
+  const { dict } = useLanguage();
   const [schoolLevel, setSchoolLevel] = useState("ALL");
   const [showcaseTab, setShowcaseTab] = useState<"featured" | "bestsellers">(
     "featured",
@@ -93,15 +95,8 @@ export default function HomeClient({
       {/* 1. Banner Institucional */}
       <HeroSection featuredBooks={featuredBooks} stats={stats} />
 
-      {/* 2. Pesquisa Avançada de Livros */}
-      <section className="border-b border-line/80 bg-cream-deep/55 py-8">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <AdvancedSearchBar categories={categories.map((c) => c.name)} />
-        </div>
-      </section>
-
-      {/* 3. Destaque Prioritário para Livros Escolares */}
-      {schoolBooks.length > 0 && (
+      {/* 2. Destaque Prioritário para Livros Escolares */}
+      <div className="border-b border-line/80 bg-white">
         <section className="mx-auto max-w-7xl px-5 py-18 sm:px-8">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <div className="max-w-2xl">
@@ -114,6 +109,7 @@ export default function HomeClient({
               <h2 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
                 Livros escolares e académicos em destaque
               </h2>
+              <p className="mt-2 text-sm font-semibold text-brand">{schoolBooks.length} {dict.schoolPriority.count}</p>
               <p className="mt-2.5 text-base leading-relaxed text-ink/70">
                 Manuais curriculares, gramáticas e obras de apoio filtráveis por
                 país, nível de ensino, classe, disciplina e editora — com encomenda
@@ -145,8 +141,8 @@ export default function HomeClient({
             ))}
           </div>
 
-          <div className="mt-9 flex flex-col items-start justify-between gap-4 rounded-2xl border border-line bg-white p-6 sm:flex-row sm:items-center">
-            <div className="flex items-start gap-3.5">
+          <div className="mt-9 flex flex-col items-start justify-between gap-4 rounded-2xl border border-line bg-white p-6 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="flex min-w-0 items-start gap-3.5">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ink text-accent">
                 <GraduationCap size={20} aria-hidden="true" />
               </div>
@@ -161,7 +157,7 @@ export default function HomeClient({
               </div>
             </div>
 
-            <div className="flex shrink-0 flex-wrap items-center gap-3">
+            <div className="flex w-full min-w-0 flex-wrap items-center gap-3 sm:w-auto">
               <a
                 href={`/api/catalogo/pdf?categoria=Escolar&pais=${market}`}
                 target="_blank"
@@ -172,6 +168,13 @@ export default function HomeClient({
                 <span>PDF Escolar ({MARKETS[market].currency})</span>
               </a>
               <Link
+                href="/cotacoes"
+                className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-brand/40 hover:text-brand"
+              >
+                <FileSpreadsheet size={14} aria-hidden="true" />
+                <span>{dict.schoolPriority.quote}</span>
+              </Link>
+              <Link
                 href="/livros-escolares"
                 className="inline-flex items-center gap-1.5 rounded-full bg-brand px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
               >
@@ -181,7 +184,14 @@ export default function HomeClient({
             </div>
           </div>
         </section>
-      )}
+      </div>
+
+      {/* 3. Pesquisa Avançada de Livros */}
+      <section className="border-b border-line/80 bg-cream-deep/55 py-8">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <AdvancedSearchBar categories={categories.map((c) => c.name)} />
+        </div>
+      </section>
 
       {/* 4. Categorias e Níveis de Ensino */}
       <div className="border-t border-line/70 bg-cream-deep/35">

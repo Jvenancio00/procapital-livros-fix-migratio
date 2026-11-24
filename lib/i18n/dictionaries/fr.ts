@@ -34,6 +34,7 @@ export const fr: Dictionary = {
     title: "Nous construisons la prochaine génération de la distribution éditoriale dans la CPLP.",
     subtitle:
       "Nous connectons éditeurs, librairies, écoles et lecteurs grâce à un réseau de distribution conçu pour se développer au Mozambique, en Angola, au Portugal, au Brésil et dans d'autres marchés de la CPLP.",
+    ctaSchool: "Livres scolaires",
     ctaCatalog: "Explorer le catalogue",
     ctaClientArea: "Espace Client",
     ctaAbout: "Découvrir Pro Capital",
@@ -47,6 +48,8 @@ export const fr: Dictionary = {
       readers: "Lecteurs",
     },
   },
+  publisherMark: { provisional: "Symbole provisoire" },
+  schoolPriority: { count: "titres scolaires", quote: "Demander un devis scolaire" },
   metrics: {
     eyebrow: "Pro Capital en chiffres",
     title: "Un réseau conçu pour grandir",

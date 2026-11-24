@@ -15,12 +15,12 @@ function PublisherTile({
       href={`/editoras/${editora.slug}`}
       aria-label={editora.name}
       tabIndex={tabIndex}
-      className="group flex h-24 w-56 shrink-0 items-center justify-center rounded-2xl border border-line/90 bg-white px-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-sm motion-reduce:transform-none"
+      className="group flex min-h-28 w-72 shrink-0 items-center justify-center rounded-2xl border border-line/90 bg-white px-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-sm motion-reduce:transform-none"
     >
       {editora.logo ? (
         <Image
           src={editora.logo}
-          alt={`Logótipo da editora ${editora.name}`}
+          alt={editora.representationGroup === "AUTOR" ? `Retrato de ${editora.name}` : `Logótipo da editora ${editora.name}`}
           width={200}
           height={80}
           sizes="208px"

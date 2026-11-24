@@ -34,6 +34,7 @@ export const pt: Dictionary = {
     title: "A distribuição editorial que conecta mercados",
     subtitle:
       "Livros, editoras e soluções comerciais para os mercados de língua portuguesa.",
+    ctaSchool: "Livros escolares",
     ctaCatalog: "Explorar catálogo",
     ctaClientArea: "Área de Cliente",
     ctaAbout: "Conhecer a Pro Capital",
@@ -47,6 +48,8 @@ export const pt: Dictionary = {
       readers: "Leitores",
     },
   },
+  publisherMark: { provisional: "Símbolo provisório" },
+  schoolPriority: { count: "títulos escolares", quote: "Pedir cotação escolar" },
   metrics: {
     eyebrow: "Rede Editorial",
     title: "Catálogo real ligado à base de dados",

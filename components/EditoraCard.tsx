@@ -28,13 +28,13 @@ export default function EditoraCard({
   return (
     <article className="group flex h-full flex-col justify-between rounded-2xl border border-line/90 bg-white p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-md motion-reduce:transform-none">
       <div>
-        <div className="flex h-20 items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-4">
+        <div className="flex min-h-24 items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-4">
           {editora.logo ? (
             <Image
               src={editora.logo}
               alt={
                 isAuthor
-                  ? `Retrato editorial de ${editora.name}`
+                  ? `Retrato de ${editora.name}`
                   : `Logótipo da editora ${editora.name}`
               }
               width={200}
