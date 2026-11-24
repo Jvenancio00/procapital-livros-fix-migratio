@@ -11,7 +11,7 @@ import {
   bookMatchesPublisherEntry,
   getAllCatalogBooks,
 } from "@/lib/catalog";
-import type { RepresentationGroup } from "@/data/editoras";
+import { resolveEditoraLogo, type RepresentationGroup } from "@/data/editoras";
 import { SITE_URL } from "@/lib/site";
 import { DEFAULT_OG_IMAGE, getCategorySlugForName } from "@/lib/seo";
 
@@ -24,7 +24,7 @@ interface Props {
 async function getEditora(slug: string) {
   try {
     const dbRow = await prisma.editora.findUnique({ where: { slug } });
-    if (dbRow) return dbRow;
+    if (dbRow) return { ...dbRow, logo: resolveEditoraLogo(slug, dbRow.logo) ?? null };
   } catch {
     // Fallback para lista de editoras de catálogo
   }
@@ -182,14 +182,14 @@ export default async function EditoraPage({ params }: Props) {
 
       <section className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="mb-8 flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-line bg-white p-6">
-          <div className="flex items-center gap-5">
-            <div className="flex h-20 w-40 items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-3">
+          <div className="flex flex-wrap items-center gap-5">
+            <div className="flex min-h-24 w-64 max-w-full items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-3 py-3">
               {editora.logo ? (
                 <Image
                   src={editora.logo}
                   alt={
                     isAuthor
-                      ? `Retrato editorial de ${editora.name}`
+                      ? `Retrato de ${editora.name}`
                       : `Logótipo da editora ${editora.name}`
                   }
                   width={180}

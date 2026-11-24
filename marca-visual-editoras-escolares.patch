@@ -1,0 +1,646 @@
+diff --git a/app/HomeClient.tsx b/app/HomeClient.tsx
+index 716bc41..3e72799 100644
+--- a/app/HomeClient.tsx
++++ b/app/HomeClient.tsx
+@@ -24,6 +24,7 @@ import AudienceSection from "@/components/AudienceSection";
+ import FaqSection from "@/components/FaqSection";
+ import NewsletterForm from "@/components/NewsletterForm";
+ import { useCurrency } from "@/context/CurrencyContext";
++import { useLanguage } from "@/context/LanguageContext";
+ import { MARKET_LIST, MARKETS } from "@/lib/markets";
+ 
+ interface EventSummary {
+@@ -72,6 +73,7 @@ export default function HomeClient({
+   posts: BlogSummary[];
+ }) {
+   const { market, setMarket } = useCurrency();
++  const { dict } = useLanguage();
+   const [schoolLevel, setSchoolLevel] = useState("ALL");
+   const [showcaseTab, setShowcaseTab] = useState<"featured" | "bestsellers">(
+     "featured",
+@@ -93,15 +95,8 @@ export default function HomeClient({
+       {/* 1. Banner Institucional */}
+       <HeroSection featuredBooks={featuredBooks} stats={stats} />
+ 
+-      {/* 2. Pesquisa Avançada de Livros */}
+-      <section className="border-b border-line/80 bg-cream-deep/55 py-8">
+-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+-          <AdvancedSearchBar categories={categories.map((c) => c.name)} />
+-        </div>
+-      </section>
+-
+-      {/* 3. Destaque Prioritário para Livros Escolares */}
+-      {schoolBooks.length > 0 && (
++      {/* 2. Destaque Prioritário para Livros Escolares */}
++      <div className="border-b border-line/80 bg-white">
+         <section className="mx-auto max-w-7xl px-5 py-18 sm:px-8">
+           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+             <div className="max-w-2xl">
+@@ -114,6 +109,7 @@ export default function HomeClient({
+               <h2 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+                 Livros escolares e académicos em destaque
+               </h2>
++              <p className="mt-2 text-sm font-semibold text-brand">{schoolBooks.length} {dict.schoolPriority.count}</p>
+               <p className="mt-2.5 text-base leading-relaxed text-ink/70">
+                 Manuais curriculares, gramáticas e obras de apoio filtráveis por
+                 país, nível de ensino, classe, disciplina e editora — com encomenda
+@@ -145,8 +141,8 @@ export default function HomeClient({
+             ))}
+           </div>
+ 
+-          <div className="mt-9 flex flex-col items-start justify-between gap-4 rounded-2xl border border-line bg-white p-6 sm:flex-row sm:items-center">
+-            <div className="flex items-start gap-3.5">
++          <div className="mt-9 flex flex-col items-start justify-between gap-4 rounded-2xl border border-line bg-white p-6 sm:flex-row sm:flex-wrap sm:items-center">
++            <div className="flex min-w-0 items-start gap-3.5">
+               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-ink text-accent">
+                 <GraduationCap size={20} aria-hidden="true" />
+               </div>
+@@ -161,7 +157,7 @@ export default function HomeClient({
+               </div>
+             </div>
+ 
+-            <div className="flex shrink-0 flex-wrap items-center gap-3">
++            <div className="flex w-full min-w-0 flex-wrap items-center gap-3 sm:w-auto">
+               <a
+                 href={`/api/catalogo/pdf?categoria=Escolar&pais=${market}`}
+                 target="_blank"
+@@ -171,6 +167,13 @@ export default function HomeClient({
+                 <FileDown size={14} aria-hidden="true" />
+                 <span>PDF Escolar ({MARKETS[market].currency})</span>
+               </a>
++              <Link
++                href="/cotacoes"
++                className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2.5 text-xs font-semibold text-ink transition-colors hover:border-brand/40 hover:text-brand"
++              >
++                <FileSpreadsheet size={14} aria-hidden="true" />
++                <span>{dict.schoolPriority.quote}</span>
++              </Link>
+               <Link
+                 href="/livros-escolares"
+                 className="inline-flex items-center gap-1.5 rounded-full bg-brand px-5 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-brand-dark"
+@@ -181,7 +184,14 @@ export default function HomeClient({
+             </div>
+           </div>
+         </section>
+-      )}
++      </div>
++
++      {/* 3. Pesquisa Avançada de Livros */}
++      <section className="border-b border-line/80 bg-cream-deep/55 py-8">
++        <div className="mx-auto max-w-7xl px-5 sm:px-8">
++          <AdvancedSearchBar categories={categories.map((c) => c.name)} />
++        </div>
++      </section>
+ 
+       {/* 4. Categorias e Níveis de Ensino */}
+       <div className="border-t border-line/70 bg-cream-deep/35">
+diff --git a/app/editoras/[slug]/page.tsx b/app/editoras/[slug]/page.tsx
+index 0a635fe..5f1737f 100644
+--- a/app/editoras/[slug]/page.tsx
++++ b/app/editoras/[slug]/page.tsx
+@@ -11,7 +11,7 @@ import {
+   bookMatchesPublisherEntry,
+   getAllCatalogBooks,
+ } from "@/lib/catalog";
+-import type { RepresentationGroup } from "@/data/editoras";
++import { resolveEditoraLogo, type RepresentationGroup } from "@/data/editoras";
+ import { SITE_URL } from "@/lib/site";
+ import { DEFAULT_OG_IMAGE, getCategorySlugForName } from "@/lib/seo";
+ 
+@@ -24,7 +24,7 @@ interface Props {
+ async function getEditora(slug: string) {
+   try {
+     const dbRow = await prisma.editora.findUnique({ where: { slug } });
+-    if (dbRow) return dbRow;
++    if (dbRow) return { ...dbRow, logo: resolveEditoraLogo(slug, dbRow.logo) ?? null };
+   } catch {
+     // Fallback para lista de editoras de catálogo
+   }
+@@ -182,14 +182,14 @@ export default async function EditoraPage({ params }: Props) {
+ 
+       <section className="mx-auto max-w-7xl px-5 sm:px-8">
+         <div className="mb-8 flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-line bg-white p-6">
+-          <div className="flex items-center gap-5">
+-            <div className="flex h-20 w-40 items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-3">
++          <div className="flex flex-wrap items-center gap-5">
++            <div className="flex min-h-24 w-64 max-w-full items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-3 py-3">
+               {editora.logo ? (
+                 <Image
+                   src={editora.logo}
+                   alt={
+                     isAuthor
+-                      ? `Retrato editorial de ${editora.name}`
++                      ? `Retrato de ${editora.name}`
+                       : `Logótipo da editora ${editora.name}`
+                   }
+                   width={180}
+diff --git a/components/EditoraCard.tsx b/components/EditoraCard.tsx
+index 7a5e971..576d87a 100644
+--- a/components/EditoraCard.tsx
++++ b/components/EditoraCard.tsx
+@@ -28,13 +28,13 @@ export default function EditoraCard({
+   return (
+     <article className="group flex h-full flex-col justify-between rounded-2xl border border-line/90 bg-white p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-md motion-reduce:transform-none">
+       <div>
+-        <div className="flex h-20 items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-4">
++        <div className="flex min-h-24 items-center justify-center rounded-xl border border-line/70 bg-cream/60 px-4">
+           {editora.logo ? (
+             <Image
+               src={editora.logo}
+               alt={
+                 isAuthor
+-                  ? `Retrato editorial de ${editora.name}`
++                  ? `Retrato de ${editora.name}`
+                   : `Logótipo da editora ${editora.name}`
+               }
+               width={200}
+diff --git a/components/EditoraMark.tsx b/components/EditoraMark.tsx
+index db1754f..011faac 100644
+--- a/components/EditoraMark.tsx
++++ b/components/EditoraMark.tsx
+@@ -1,3 +1,7 @@
++"use client";
++
++import { useLanguage } from "@/context/LanguageContext";
++
+ const STOP_WORDS = new Set([
+   "de",
+   "da",
+@@ -27,33 +31,34 @@ export function editoraInitials(name: string): string {
+     .toUpperCase();
+ }
+ 
+-/**
+- * Apresentação tipográfica editorial para editoras sem ficheiro de logótipo:
+- * exibe sempre o nome real da editora com hierarquia de chancela editorial e
+- * filete dourado discreto, sem substituir o nome por círculos de iniciais.
+- */
++// A cor é estável por nome e usa exclusivamente as cores da identidade.
++const MARK_COLORS = ["bg-ink", "bg-wine", "bg-brand", "bg-ink-dark"] as const;
++
+ export default function EditoraMark({
+   name,
+   country,
+   className = "",
++  stacked = false,
+ }: {
+   name: string;
+   country?: string;
+   className?: string;
++  stacked?: boolean;
+ }) {
++  const { dict } = useLanguage();
++  const colorIndex = Array.from(name).reduce((hash, char) => (hash * 31 + char.codePointAt(0)!) >>> 0, 0) % MARK_COLORS.length;
++
+   return (
+-    <div
+-      className={`flex flex-col items-center justify-center px-2 text-center ${className}`}
+-    >
+-      <span className="mb-1.5 h-0.5 w-6 bg-accent/85" aria-hidden="true" />
+-      <span className="line-clamp-2 font-serif text-sm font-semibold leading-snug tracking-tight text-ink">
+-        {name}
++    <div className={`flex min-w-0 items-center gap-2.5 ${stacked ? "flex-col text-center" : "text-left"} ${className}`}>
++      <span aria-hidden="true" className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg ${MARK_COLORS[colorIndex]} text-white`}>
++        <span className="font-serif text-sm font-semibold leading-none">{editoraInitials(name)}</span>
++        <span className="mt-1.5 h-0.5 w-5 bg-accent" />
++      </span>
++      <span className="min-w-0 break-words leading-snug">
++        <span className="block font-serif text-sm font-semibold text-ink">{name}</span>
++        {country && <span className="mt-0.5 block text-[10px] font-medium text-ink/60">{country}</span>}
++        <span className="mt-0.5 block text-[10px] text-ink/60">{dict.publisherMark.provisional}</span>
+       </span>
+-      {country && (
+-        <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-ink/45">
+-          {country}
+-        </span>
+-      )}
+     </div>
+   );
+ }
+diff --git a/components/HeroSection.tsx b/components/HeroSection.tsx
+index 2b50a63..d85d044 100644
+--- a/components/HeroSection.tsx
++++ b/components/HeroSection.tsx
+@@ -65,26 +65,24 @@ export default function HeroSection({
+             {/* Botões Principais Exatos */}
+             <div className="mt-8 flex flex-wrap items-center gap-3.5">
+               <Link
+-                href="/catalogo"
++                href="/livros-escolares"
+                 className="inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark"
+               >
+-                <span>{dict.hero.ctaCatalog}</span>
+-                <ArrowRight size={16} aria-hidden="true" />
++                <GraduationCap size={16} aria-hidden="true" />
++                <span>{dict.hero.ctaSchool}</span>
+               </Link>
+-
+               <Link
+-                href="/contactos?motivo=PARCERIA"
++                href="/catalogo"
+                 className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/[0.04] px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:border-accent hover:bg-white/[0.09]"
+               >
+-                <span>{dict.hero.ctaPartnership}</span>
++                <span>{dict.hero.ctaCatalog}</span>
++                <ArrowRight size={16} aria-hidden="true" />
+               </Link>
+-
+               <Link
+-                href="/livros-escolares"
++                href="/contactos?motivo=PARCERIA"
+                 className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent transition-opacity hover:opacity-85"
+               >
+-                <GraduationCap size={15} aria-hidden="true" />
+-                <span>Área Escolar Prioritária</span>
++                <span>{dict.hero.ctaPartnership}</span>
+               </Link>
+             </div>
+ 
+diff --git a/components/MobileStickyCta.tsx b/components/MobileStickyCta.tsx
+index ba2455a..dde746a 100644
+--- a/components/MobileStickyCta.tsx
++++ b/components/MobileStickyCta.tsx
+@@ -3,6 +3,7 @@
+ import Link from "next/link";
+ import { usePathname } from "next/navigation";
+ import { BookOpen, FileSpreadsheet, MessageSquare, ShoppingCart } from "lucide-react";
++import { useLanguage } from "@/context/LanguageContext";
+ import { useCart } from "@/context/CartContext";
+ 
+ const HIDDEN_PREFIXES = [
+@@ -20,6 +21,7 @@ const HIDDEN_PREFIXES = [
+ export default function MobileStickyCta() {
+   const pathname = usePathname() || "/";
+   const { totalItems } = useCart();
++  const { dict } = useLanguage();
+ 
+   const shouldHide = HIDDEN_PREFIXES.some(
+     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+@@ -42,14 +44,14 @@ export default function MobileStickyCta() {
+       ? "/carrinho"
+       : isCatalogOrBookPage
+       ? "/cotacoes"
+-      : "/catalogo";
++      : pathname === "/" ? "/livros-escolares" : "/catalogo";
+ 
+   const primaryLabel =
+     totalItems > 0
+       ? `Encomendar (${totalItems})`
+       : isCatalogOrBookPage
+       ? "Pedir Cotação"
+-      : "Explorar Catálogo";
++      : pathname === "/" ? dict.hero.ctaSchool : "Explorar Catálogo";
+ 
+   const PrimaryIcon =
+     totalItems > 0
+diff --git a/components/PartnersGrid.tsx b/components/PartnersGrid.tsx
+index e2c47a8..f66631a 100644
+--- a/components/PartnersGrid.tsx
++++ b/components/PartnersGrid.tsx
+@@ -4,14 +4,12 @@ import Image from "next/image";
+ import Link from "next/link";
+ import type { Editora } from "@/data/editoras";
+ import EditoraMark from "./EditoraMark";
+-import { useLanguage } from "@/context/LanguageContext";
+ 
+ export default function PartnersGrid({
+   publishers,
+ }: {
+   publishers?: Editora[];
+ }) {
+-  const { dict } = useLanguage();
+   const list = publishers ?? [];
+ 
+   if (list.length === 0) return null;
+@@ -40,19 +38,19 @@ export default function PartnersGrid({
+           <Link
+             key={editora.slug}
+             href={`/editoras/${editora.slug}`}
+-            className="group flex h-28 flex-col items-center justify-center rounded-2xl border border-line bg-white p-4 text-center transition-all hover:border-ink/30 hover:shadow-sm"
++            className="group flex min-h-40 flex-col items-center justify-center rounded-2xl border border-line bg-white p-4 text-center transition-all hover:border-ink/30 hover:shadow-sm"
+           >
+             {editora.logo ? (
+               <Image
+                 src={editora.logo}
+-                alt={`Logótipo da editora ${editora.name}`}
++                alt={editora.representationGroup === "AUTOR" ? `Retrato de ${editora.name}` : `Logótipo da editora ${editora.name}`}
+                 width={180}
+                 height={72}
+                 sizes="(max-width: 639px) 44vw, 180px"
+                 className="max-h-13 w-auto object-contain"
+               />
+             ) : (
+-              <EditoraMark name={editora.name} country={editora.country} />
++              <EditoraMark name={editora.name} country={editora.country} stacked />
+             )}
+           </Link>
+         ))}
+diff --git a/components/PublishersCarousel.tsx b/components/PublishersCarousel.tsx
+index 533f23f..baa6736 100644
+--- a/components/PublishersCarousel.tsx
++++ b/components/PublishersCarousel.tsx
+@@ -15,12 +15,12 @@ function PublisherTile({
+       href={`/editoras/${editora.slug}`}
+       aria-label={editora.name}
+       tabIndex={tabIndex}
+-      className="group flex h-24 w-56 shrink-0 items-center justify-center rounded-2xl border border-line/90 bg-white px-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-sm motion-reduce:transform-none"
++      className="group flex min-h-28 w-72 shrink-0 items-center justify-center rounded-2xl border border-line/90 bg-white px-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-sm motion-reduce:transform-none"
+     >
+       {editora.logo ? (
+         <Image
+           src={editora.logo}
+-          alt={`Logótipo da editora ${editora.name}`}
++          alt={editora.representationGroup === "AUTOR" ? `Retrato de ${editora.name}` : `Logótipo da editora ${editora.name}`}
+           width={200}
+           height={80}
+           sizes="208px"
+diff --git a/data/editoras.ts b/data/editoras.ts
+index 32d25b6..de389d7 100644
+--- a/data/editoras.ts
++++ b/data/editoras.ts
+@@ -169,3 +169,8 @@ export const EDITORAS: Editora[] = [
+     country: "Angola",
+   },
+ ];
++
++/** Dá prioridade ao logo configurado na BD; se estiver vazio, usa o ficheiro do catálogo estático. */
++export function resolveEditoraLogo(slug: string, databaseLogo?: string | null): string | undefined {
++  return databaseLogo?.trim() || EDITORAS.find((editora) => editora.slug === slug)?.logo;
++}
+diff --git a/docs/LOGOTIPOS-EDITORAS.md b/docs/LOGOTIPOS-EDITORAS.md
+new file mode 100644
+index 0000000..4c7cd95
+--- /dev/null
++++ b/docs/LOGOTIPOS-EDITORAS.md
+@@ -0,0 +1,47 @@
++# Inventário de marcas editoriais
++
++Diagnóstico do catálogo estático `data/editoras.ts`. A base de dados de produção pode conter dados diferentes e não foi consultada. “—” significa que não existe logo configurado; nenhum ficheiro foi criado ou descarregado.
++
++| Slug | Nome | País | Grupo | Logo configurado | Ficheiro existe |
++|---|---|---|---|---|---|
++| alcance-editores | Alcance Editores | Moçambique | EXCLUSIVO | /editoras/alcance.jpg | Sim |
++| mocambique-editora | Moçambique Editora | Moçambique | EXCLUSIVO | /editoras/mocambique-editora.jpg | Sim |
++| plural-editores | Plural Editores | Moçambique | NAO_EXCLUSIVO | — | — |
++| fundacao-fernando-leite-couto | FFLC — Fundação Fernando Leite Couto | Moçambique | NAO_EXCLUSIVO | — | — |
++| gala-gala-edicoes | Gala-Gala Edições | Moçambique | NAO_EXCLUSIVO | — | — |
++| ethale | Ethale | Moçambique | NAO_EXCLUSIVO | — | — |
++| renato-matusse | Renato Matusse | Moçambique | AUTOR | — | — |
++| editora-das-letras | Editora das Letras | Angola | NAO_EXCLUSIVO | — | — |
++| editorial-caminho | Editorial Caminho | Portugal | NAO_EXCLUSIVO | — | — |
++| dom-quixote | Dom Quixote | Portugal | NAO_EXCLUSIVO | — | — |
++| paz-e-terra | Paz e Terra | Brasil | NAO_EXCLUSIVO | — | — |
++| sa-da-costa-editora | Sá da Costa Editora | Portugal | NAO_EXCLUSIVO | — | — |
++| alta-life | Alta Life | Brasil | NAO_EXCLUSIVO | — | — |
++| editora-moderna | Editora Moderna | Angola | NAO_EXCLUSIVO | — | — |
++| estudo-didactico | Estudo Didáctico | Portugal | NAO_EXCLUSIVO | — | — |
++| pae-editora-distribuidora-livros | PAE Editora e Distribuidora de Livros Ltda | Brasil | NAO_EXCLUSIVO | — | — |
++| editora-popular | Editora Popular | Angola | NAO_EXCLUSIVO | — | — |
++| editora-progresso | Editora Progresso | Angola | NAO_EXCLUSIVO | — | — |
++
++## Ficheiros a fornecer
++
++Os caminhos abaixo são **propostas**, não ficheiros existentes. Preferir SVG ou PNG com fundo transparente, altura de referência de pelo menos 160 px e peso inferior a 60 KB. Para o autor, fornecer apenas retrato autorizado. A extensão deve corresponder ao ficheiro efetivamente recebido; atualizar `logo` em `data/editoras.ts` e validar o aspeto sobre fundo branco. Quando a base de dados contém um `logo` não vazio para a mesma editora, esse valor prevalece; se estiver vazio, é usado o ficheiro indicado no catálogo estático.
++
++| Editora ou autor | Ficheiro proposto em `public` | Campo em `data/editoras.ts` |
++|---|---|---|
++| Plural Editores | /editoras/plural-editores.png | logo: "/editoras/plural-editores.png" |
++| FFLC — Fundação Fernando Leite Couto | /editoras/fundacao-fernando-leite-couto.png | logo: "/editoras/fundacao-fernando-leite-couto.png" |
++| Gala-Gala Edições | /editoras/gala-gala-edicoes.png | logo: "/editoras/gala-gala-edicoes.png" |
++| Ethale | /editoras/ethale.png | logo: "/editoras/ethale.png" |
++| Renato Matusse | /editoras/renato-matusse.png | logo: "/editoras/renato-matusse.png" |
++| Editora das Letras | /editoras/editora-das-letras.png | logo: "/editoras/editora-das-letras.png" |
++| Editorial Caminho | /editoras/editorial-caminho.png | logo: "/editoras/editorial-caminho.png" |
++| Dom Quixote | /editoras/dom-quixote.png | logo: "/editoras/dom-quixote.png" |
++| Paz e Terra | /editoras/paz-e-terra.png | logo: "/editoras/paz-e-terra.png" |
++| Sá da Costa Editora | /editoras/sa-da-costa-editora.png | logo: "/editoras/sa-da-costa-editora.png" |
++| Alta Life | /editoras/alta-life.png | logo: "/editoras/alta-life.png" |
++| Editora Moderna | /editoras/editora-moderna.png | logo: "/editoras/editora-moderna.png" |
++| Estudo Didáctico | /editoras/estudo-didactico.png | logo: "/editoras/estudo-didactico.png" |
++| PAE Editora e Distribuidora de Livros Ltda | /editoras/pae-editora-distribuidora-livros.png | logo: "/editoras/pae-editora-distribuidora-livros.png" |
++| Editora Popular | /editoras/editora-popular.png | logo: "/editoras/editora-popular.png" |
++| Editora Progresso | /editoras/editora-progresso.png | logo: "/editoras/editora-progresso.png" |
+diff --git a/lib/catalog.ts b/lib/catalog.ts
+index b78d11d..6d20086 100644
+--- a/lib/catalog.ts
++++ b/lib/catalog.ts
+@@ -1,6 +1,7 @@
+ import { BOOKS, CATEGORIES, type Book } from "@/data/books";
+ import {
+   EDITORAS,
++  resolveEditoraLogo,
+   type Editora,
+   type RepresentationGroup,
+ } from "@/data/editoras";
+@@ -227,7 +228,7 @@ export async function getAllPublishers(): Promise<(Editora & { id?: string; book
+       representationGroup: e.representationGroup as RepresentationGroup,
+       sortOrder: e.sortOrder,
+       country: e.country ?? undefined,
+-      logo: e.logo ?? undefined,
++      logo: resolveEditoraLogo(e.slug, e.logo),
+       phone: e.phone ?? undefined,
+       email: e.email ?? undefined,
+       address: e.address ?? undefined,
+diff --git a/lib/i18n/dictionaries/en.ts b/lib/i18n/dictionaries/en.ts
+index 5454ad8..5cd9696 100644
+--- a/lib/i18n/dictionaries/en.ts
++++ b/lib/i18n/dictionaries/en.ts
+@@ -34,6 +34,7 @@ export const en: Dictionary = {
+     title: "We're building the next generation of publishing distribution in the CPLP.",
+     subtitle:
+       "We connect publishers, bookstores, schools and readers through a distribution network built to grow across Mozambique, Angola, Portugal, Brazil and other CPLP markets.",
++    ctaSchool: "School books",
+     ctaCatalog: "Explore Catalog",
+     ctaClientArea: "Client Area",
+     ctaAbout: "About Pro Capital",
+@@ -47,6 +48,8 @@ export const en: Dictionary = {
+       readers: "Readers",
+     },
+   },
++  publisherMark: { provisional: "Provisional symbol" },
++  schoolPriority: { count: "school titles", quote: "Request a school quote" },
+   metrics: {
+     eyebrow: "Pro Capital in numbers",
+     title: "A network built to grow",
+diff --git a/lib/i18n/dictionaries/es.ts b/lib/i18n/dictionaries/es.ts
+index 7df25e8..105c0ca 100644
+--- a/lib/i18n/dictionaries/es.ts
++++ b/lib/i18n/dictionaries/es.ts
+@@ -34,6 +34,7 @@ export const es: Dictionary = {
+     title: "Construimos la próxima generación de la distribución editorial en la CPLP.",
+     subtitle:
+       "Conectamos editoriales, librerías, escuelas y lectores mediante una red de distribución preparada para crecer en Mozambique, Angola, Portugal, Brasil y otros mercados de la CPLP.",
++    ctaSchool: "Libros escolares",
+     ctaCatalog: "Explorar catálogo",
+     ctaClientArea: "Área de Cliente",
+     ctaAbout: "Conocer Pro Capital",
+@@ -47,6 +48,8 @@ export const es: Dictionary = {
+       readers: "Lectores",
+     },
+   },
++  publisherMark: { provisional: "Símbolo provisional" },
++  schoolPriority: { count: "títulos escolares", quote: "Solicitar presupuesto escolar" },
+   metrics: {
+     eyebrow: "Pro Capital en cifras",
+     title: "Una red preparada para crecer",
+diff --git a/lib/i18n/dictionaries/fr.ts b/lib/i18n/dictionaries/fr.ts
+index b95aa5d..5f74fad 100644
+--- a/lib/i18n/dictionaries/fr.ts
++++ b/lib/i18n/dictionaries/fr.ts
+@@ -34,6 +34,7 @@ export const fr: Dictionary = {
+     title: "Nous construisons la prochaine génération de la distribution éditoriale dans la CPLP.",
+     subtitle:
+       "Nous connectons éditeurs, librairies, écoles et lecteurs grâce à un réseau de distribution conçu pour se développer au Mozambique, en Angola, au Portugal, au Brésil et dans d'autres marchés de la CPLP.",
++    ctaSchool: "Livres scolaires",
+     ctaCatalog: "Explorer le catalogue",
+     ctaClientArea: "Espace Client",
+     ctaAbout: "Découvrir Pro Capital",
+@@ -47,6 +48,8 @@ export const fr: Dictionary = {
+       readers: "Lecteurs",
+     },
+   },
++  publisherMark: { provisional: "Symbole provisoire" },
++  schoolPriority: { count: "titres scolaires", quote: "Demander un devis scolaire" },
+   metrics: {
+     eyebrow: "Pro Capital en chiffres",
+     title: "Un réseau conçu pour grandir",
+diff --git a/lib/i18n/dictionaries/hi.ts b/lib/i18n/dictionaries/hi.ts
+index aa7e303..4292f1e 100644
+--- a/lib/i18n/dictionaries/hi.ts
++++ b/lib/i18n/dictionaries/hi.ts
+@@ -34,6 +34,7 @@ export const hi: Dictionary = {
+     title: "हम सीपीएलपी में प्रकाशन वितरण की अगली पीढ़ी का निर्माण कर रहे हैं।",
+     subtitle:
+       "हम प्रकाशकों, किताबों की दुकानों, स्कूलों और पाठकों को एक ऐसे वितरण नेटवर्क से जोड़ते हैं जो मोज़ाम्बीक, अंगोला, पुर्तगाल, ब्राज़ील और अन्य सीपीएलपी बाज़ारों में बढ़ने के लिए तैयार है।",
++    ctaSchool: "स्कूली पुस्तकें",
+     ctaCatalog: "कैटलॉग देखें",
+     ctaClientArea: "ग्राहक क्षेत्र",
+     ctaAbout: "Pro Capital के बारे में जानें",
+@@ -47,6 +48,8 @@ export const hi: Dictionary = {
+       readers: "पाठक",
+     },
+   },
++  publisherMark: { provisional: "अस्थायी प्रतीक" },
++  schoolPriority: { count: "स्कूली शीर्षक", quote: "स्कूल के लिए मूल्य प्रस्ताव माँगें" },
+   metrics: {
+     eyebrow: "आंकड़ों में Pro Capital",
+     title: "बढ़ने के लिए तैयार एक नेटवर्क",
+diff --git a/lib/i18n/dictionaries/pt.ts b/lib/i18n/dictionaries/pt.ts
+index dde4cd4..b5755ae 100644
+--- a/lib/i18n/dictionaries/pt.ts
++++ b/lib/i18n/dictionaries/pt.ts
+@@ -34,6 +34,7 @@ export const pt: Dictionary = {
+     title: "A distribuição editorial que conecta mercados",
+     subtitle:
+       "Livros, editoras e soluções comerciais para os mercados de língua portuguesa.",
++    ctaSchool: "Livros escolares",
+     ctaCatalog: "Explorar catálogo",
+     ctaClientArea: "Área de Cliente",
+     ctaAbout: "Conhecer a Pro Capital",
+@@ -47,6 +48,8 @@ export const pt: Dictionary = {
+       readers: "Leitores",
+     },
+   },
++  publisherMark: { provisional: "Símbolo provisório" },
++  schoolPriority: { count: "títulos escolares", quote: "Pedir cotação escolar" },
+   metrics: {
+     eyebrow: "Rede Editorial",
+     title: "Catálogo real ligado à base de dados",
+diff --git a/lib/i18n/dictionaries/zh.ts b/lib/i18n/dictionaries/zh.ts
+index e949d81..9e677f1 100644
+--- a/lib/i18n/dictionaries/zh.ts
++++ b/lib/i18n/dictionaries/zh.ts
+@@ -33,6 +33,7 @@ export const zh: Dictionary = {
+     badge: "出版分销 • 葡语国家共同体",
+     title: "我们正在打造葡语国家共同体出版分销的新一代网络。",
+     subtitle: "我们通过一个面向莫桑比克、安哥拉、葡萄牙、巴西及其他葡语国家共同体市场持续扩张的分销网络，连接出版社、书店、学校与读者。",
++    ctaSchool: "教材",
+     ctaCatalog: "浏览图书目录",
+     ctaClientArea: "客户专区",
+     ctaAbout: "了解 Pro Capital",
+@@ -46,6 +47,8 @@ export const zh: Dictionary = {
+       readers: "读者",
+     },
+   },
++  publisherMark: { provisional: "临时标识" },
++  schoolPriority: { count: "种教材", quote: "申请学校报价" },
+   metrics: {
+     eyebrow: "数据中的 Pro Capital",
+     title: "一个为增长而生的网络",
+diff --git a/lib/i18n/types.ts b/lib/i18n/types.ts
+index ad8a23d..a98c4ff 100644
+--- a/lib/i18n/types.ts
++++ b/lib/i18n/types.ts
+@@ -41,6 +41,7 @@ export interface Dictionary {
+     badge: string;
+     title: string;
+     subtitle: string;
++    ctaSchool: string;
+     ctaCatalog: string;
+     ctaClientArea: string;
+     ctaAbout: string;
+@@ -54,6 +55,8 @@ export interface Dictionary {
+       readers: string;
+     };
+   };
++  publisherMark: { provisional: string };
++  schoolPriority: { count: string; quote: string };
+   /** Secção institucional de métricas ("10 parceiros", "1000+ títulos", ...), logo abaixo do Hero */
+   metrics: {
+     eyebrow: string;
+diff --git a/tests/publisher-school.test.ts b/tests/publisher-school.test.ts
+new file mode 100644
+index 0000000..3e40e1b
+--- /dev/null
++++ b/tests/publisher-school.test.ts
+@@ -0,0 +1,50 @@
++import { test } from "node:test";
++import assert from "node:assert/strict";
++import { createElement } from "react";
++import { renderToStaticMarkup } from "react-dom/server";
++import EditoraMark, { editoraInitials } from "../components/EditoraMark";
++import HeroSection from "../components/HeroSection";
++import { LanguageProvider } from "../context/LanguageContext";
++import { DICTIONARIES } from "../lib/i18n/languages";
++import { resolveEditoraLogo } from "../data/editoras";
++
++function render(child: React.ReactNode) {
++  // LanguageProvider requires children in its TypeScript props.
++  // eslint-disable-next-line react/no-children-prop
++  return renderToStaticMarkup(createElement(LanguageProvider, { children: child }));
++}
++
++test("marca substituta mostra iniciais decorativas, nome, país e aviso", () => {
++  const html = render(createElement(EditoraMark, { name: "Plural Editores", country: "Moçambique", stacked: true }));
++  assert.equal(editoraInitials("Plural Editores"), "PL");
++  assert.match(html, /aria-hidden="true"/);
++  assert.match(html, /Plural Editores/);
++  assert.match(html, /Moçambique/);
++  assert.match(html, /Símbolo provisório/);
++  assert.match(html, /flex-col text-center/);
++});
++
++test("primeiro botão do hero leva aos livros escolares", () => {
++  const html = render(createElement(HeroSection, { featuredBooks: [], stats: { totalBooks: 0, totalPublishers: 0, schoolBooks: 0, activeMarkets: 0 } }));
++  const school = html.indexOf('href="/livros-escolares"');
++  const catalog = html.indexOf('href="/catalogo"');
++  const partnership = html.indexOf('href="/contactos?motivo=PARCERIA"');
++  assert.ok(school >= 0 && school < catalog && catalog < partnership);
++});
++
++test("novos textos estão preenchidos nos seis idiomas", () => {
++  assert.equal(Object.keys(DICTIONARIES).length, 6);
++  for (const dict of Object.values(DICTIONARIES)) {
++    assert.ok(dict.hero.ctaSchool.trim());
++    assert.ok(dict.publisherMark.provisional.trim());
++    assert.ok(dict.schoolPriority.count.trim());
++    assert.ok(dict.schoolPriority.quote.trim());
++  }
++});
++
++
++test("logo da BD tem prioridade e catálogo estático supre campo vazio", () => {
++  assert.equal(resolveEditoraLogo("alcance-editores", null), "/editoras/alcance.jpg");
++  assert.equal(resolveEditoraLogo("alcance-editores", "/editoras/outro.png"), "/editoras/outro.png");
++  assert.equal(resolveEditoraLogo("plural-editores", null), undefined);
++});

@@ -4,14 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Editora } from "@/data/editoras";
 import EditoraMark from "./EditoraMark";
-import { useLanguage } from "@/context/LanguageContext";
 
 export default function PartnersGrid({
   publishers,
 }: {
   publishers?: Editora[];
 }) {
-  const { dict } = useLanguage();
   const list = publishers ?? [];
 
   if (list.length === 0) return null;
@@ -40,19 +38,19 @@ export default function PartnersGrid({
           <Link
             key={editora.slug}
             href={`/editoras/${editora.slug}`}
-            className="group flex h-28 flex-col items-center justify-center rounded-2xl border border-line bg-white p-4 text-center transition-all hover:border-ink/30 hover:shadow-sm"
+            className="group flex min-h-40 flex-col items-center justify-center rounded-2xl border border-line bg-white p-4 text-center transition-all hover:border-ink/30 hover:shadow-sm"
           >
             {editora.logo ? (
               <Image
                 src={editora.logo}
-                alt={`Logótipo da editora ${editora.name}`}
+                alt={editora.representationGroup === "AUTOR" ? `Retrato de ${editora.name}` : `Logótipo da editora ${editora.name}`}
                 width={180}
                 height={72}
                 sizes="(max-width: 639px) 44vw, 180px"
                 className="max-h-13 w-auto object-contain"
               />
             ) : (
-              <EditoraMark name={editora.name} country={editora.country} />
+              <EditoraMark name={editora.name} country={editora.country} stacked />
             )}
           </Link>
         ))}

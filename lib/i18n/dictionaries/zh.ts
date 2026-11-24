@@ -33,6 +33,7 @@ export const zh: Dictionary = {
     badge: "出版分销 • 葡语国家共同体",
     title: "我们正在打造葡语国家共同体出版分销的新一代网络。",
     subtitle: "我们通过一个面向莫桑比克、安哥拉、葡萄牙、巴西及其他葡语国家共同体市场持续扩张的分销网络，连接出版社、书店、学校与读者。",
+    ctaSchool: "教材",
     ctaCatalog: "浏览图书目录",
     ctaClientArea: "客户专区",
     ctaAbout: "了解 Pro Capital",
@@ -46,6 +47,8 @@ export const zh: Dictionary = {
       readers: "读者",
     },
   },
+  publisherMark: { provisional: "临时标识" },
+  schoolPriority: { count: "种教材", quote: "申请学校报价" },
   metrics: {
     eyebrow: "数据中的 Pro Capital",
     title: "一个为增长而生的网络",

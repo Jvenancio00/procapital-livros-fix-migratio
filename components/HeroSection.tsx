@@ -65,26 +65,24 @@ export default function HeroSection({
             {/* Botões Principais Exatos */}
             <div className="mt-8 flex flex-wrap items-center gap-3.5">
               <Link
-                href="/catalogo"
+                href="/livros-escolares"
                 className="inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark"
+              >
+                <GraduationCap size={16} aria-hidden="true" />
+                <span>{dict.hero.ctaSchool}</span>
+              </Link>
+              <Link
+                href="/catalogo"
+                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/[0.04] px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:border-accent hover:bg-white/[0.09]"
               >
                 <span>{dict.hero.ctaCatalog}</span>
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
-
               <Link
                 href="/contactos?motivo=PARCERIA"
-                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/[0.04] px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:border-accent hover:bg-white/[0.09]"
-              >
-                <span>{dict.hero.ctaPartnership}</span>
-              </Link>
-
-              <Link
-                href="/livros-escolares"
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent transition-opacity hover:opacity-85"
               >
-                <GraduationCap size={15} aria-hidden="true" />
-                <span>Área Escolar Prioritária</span>
+                <span>{dict.hero.ctaPartnership}</span>
               </Link>
             </div>
 

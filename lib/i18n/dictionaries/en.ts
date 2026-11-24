@@ -34,6 +34,7 @@ export const en: Dictionary = {
     title: "We're building the next generation of publishing distribution in the CPLP.",
     subtitle:
       "We connect publishers, bookstores, schools and readers through a distribution network built to grow across Mozambique, Angola, Portugal, Brazil and other CPLP markets.",
+    ctaSchool: "School books",
     ctaCatalog: "Explore Catalog",
     ctaClientArea: "Client Area",
     ctaAbout: "About Pro Capital",
@@ -47,6 +48,8 @@ export const en: Dictionary = {
       readers: "Readers",
     },
   },
+  publisherMark: { provisional: "Provisional symbol" },
+  schoolPriority: { count: "school titles", quote: "Request a school quote" },
   metrics: {
     eyebrow: "Pro Capital in numbers",
     title: "A network built to grow",

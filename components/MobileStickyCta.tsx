@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, FileSpreadsheet, MessageSquare, ShoppingCart } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 import { useCart } from "@/context/CartContext";
 
 const HIDDEN_PREFIXES = [
@@ -20,6 +21,7 @@ const HIDDEN_PREFIXES = [
 export default function MobileStickyCta() {
   const pathname = usePathname() || "/";
   const { totalItems } = useCart();
+  const { dict } = useLanguage();
 
   const shouldHide = HIDDEN_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
@@ -42,14 +44,14 @@ export default function MobileStickyCta() {
       ? "/carrinho"
       : isCatalogOrBookPage
       ? "/cotacoes"
-      : "/catalogo";
+      : pathname === "/" ? "/livros-escolares" : "/catalogo";
 
   const primaryLabel =
     totalItems > 0
       ? `Encomendar (${totalItems})`
       : isCatalogOrBookPage
       ? "Pedir Cotação"
-      : "Explorar Catálogo";
+      : pathname === "/" ? dict.hero.ctaSchool : "Explorar Catálogo";
 
   const PrimaryIcon =
     totalItems > 0

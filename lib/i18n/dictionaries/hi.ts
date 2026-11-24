@@ -34,6 +34,7 @@ export const hi: Dictionary = {
     title: "हम सीपीएलपी में प्रकाशन वितरण की अगली पीढ़ी का निर्माण कर रहे हैं।",
     subtitle:
       "हम प्रकाशकों, किताबों की दुकानों, स्कूलों और पाठकों को एक ऐसे वितरण नेटवर्क से जोड़ते हैं जो मोज़ाम्बीक, अंगोला, पुर्तगाल, ब्राज़ील और अन्य सीपीएलपी बाज़ारों में बढ़ने के लिए तैयार है।",
+    ctaSchool: "स्कूली पुस्तकें",
     ctaCatalog: "कैटलॉग देखें",
     ctaClientArea: "ग्राहक क्षेत्र",
     ctaAbout: "Pro Capital के बारे में जानें",
@@ -47,6 +48,8 @@ export const hi: Dictionary = {
       readers: "पाठक",
     },
   },
+  publisherMark: { provisional: "अस्थायी प्रतीक" },
+  schoolPriority: { count: "स्कूली शीर्षक", quote: "स्कूल के लिए मूल्य प्रस्ताव माँगें" },
   metrics: {
     eyebrow: "आंकड़ों में Pro Capital",
     title: "बढ़ने के लिए तैयार एक नेटवर्क",

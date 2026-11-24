@@ -1,3 +1,7 @@
+"use client";
+
+import { useLanguage } from "@/context/LanguageContext";
+
 const STOP_WORDS = new Set([
   "de",
   "da",
@@ -27,33 +31,34 @@ export function editoraInitials(name: string): string {
     .toUpperCase();
 }
 
-/**
- * Apresentação tipográfica editorial para editoras sem ficheiro de logótipo:
- * exibe sempre o nome real da editora com hierarquia de chancela editorial e
- * filete dourado discreto, sem substituir o nome por círculos de iniciais.
- */
+// A cor é estável por nome e usa exclusivamente as cores da identidade.
+const MARK_COLORS = ["bg-ink", "bg-wine", "bg-brand", "bg-ink-dark"] as const;
+
 export default function EditoraMark({
   name,
   country,
   className = "",
+  stacked = false,
 }: {
   name: string;
   country?: string;
   className?: string;
+  stacked?: boolean;
 }) {
+  const { dict } = useLanguage();
+  const colorIndex = Array.from(name).reduce((hash, char) => (hash * 31 + char.codePointAt(0)!) >>> 0, 0) % MARK_COLORS.length;
+
   return (
-    <div
-      className={`flex flex-col items-center justify-center px-2 text-center ${className}`}
-    >
-      <span className="mb-1.5 h-0.5 w-6 bg-accent/85" aria-hidden="true" />
-      <span className="line-clamp-2 font-serif text-sm font-semibold leading-snug tracking-tight text-ink">
-        {name}
+    <div className={`flex min-w-0 items-center gap-2.5 ${stacked ? "flex-col text-center" : "text-left"} ${className}`}>
+      <span aria-hidden="true" className={`flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg ${MARK_COLORS[colorIndex]} text-white`}>
+        <span className="font-serif text-sm font-semibold leading-none">{editoraInitials(name)}</span>
+        <span className="mt-1.5 h-0.5 w-5 bg-accent" />
       </span>
-      {country && (
-        <span className="mt-1 text-[10px] font-medium uppercase tracking-[0.14em] text-ink/45">
-          {country}
-        </span>
-      )}
+      <span className="min-w-0 break-words leading-snug">
+        <span className="block font-serif text-sm font-semibold text-ink">{name}</span>
+        {country && <span className="mt-0.5 block text-[10px] font-medium text-ink/60">{country}</span>}
+        <span className="mt-0.5 block text-[10px] text-ink/60">{dict.publisherMark.provisional}</span>
+      </span>
     </div>
   );
 }

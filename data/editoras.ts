@@ -169,3 +169,8 @@ export const EDITORAS: Editora[] = [
     country: "Angola",
   },
 ];
+
+/** Dá prioridade ao logo configurado na BD; se estiver vazio, usa o ficheiro do catálogo estático. */
+export function resolveEditoraLogo(slug: string, databaseLogo?: string | null): string | undefined {
+  return databaseLogo?.trim() || EDITORAS.find((editora) => editora.slug === slug)?.logo;
+}
