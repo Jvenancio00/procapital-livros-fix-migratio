@@ -70,7 +70,7 @@ body {
   }
   @keyframes hero-cover-float {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-6px); }
+    50% { transform: translateY(-12px); }
   }
   .hero-banner[data-enter="true"] .hero-heading { animation: hero-enter .55s cubic-bezier(.2,.7,.2,1) both; }
   .hero-banner[data-enter="true"] .hero-tagline,
@@ -83,11 +83,14 @@ body {
   .hero-interactions .hero-actions a:first-child svg { transition: transform 160ms; }
   .hero-interactions .hero-actions a:first-child:hover svg,
   .hero-interactions .hero-actions a:first-child:focus-visible svg { transform: translateX(3px); }
-  @media (min-width: 1024px) {
-    .hero-banner.hero-float .hero-cover { animation: hero-cover-float 9s ease-in-out infinite; animation-play-state: paused; }
-    .hero-banner.hero-float .hero-cover:nth-child(2) { animation-duration: 11s; animation-delay: -3s; }
-    .hero-banner.hero-float .hero-cover:nth-child(3) { animation-duration: 8s; animation-delay: -5s; }
-    .hero-banner.hero-float[data-running="true"]:not(:focus-within):not(:hover) .hero-cover { animation-play-state: running; }
+  .hero-banner.hero-float .hero-cover { animation: hero-cover-float 6s ease-in-out infinite; animation-play-state: paused; }
+  .hero-banner.hero-float .hero-cover:nth-child(2) { animation-duration: 7s; animation-delay: -2s; }
+  .hero-banner.hero-float .hero-cover:nth-child(3) { animation-duration: 8s; animation-delay: -4s; }
+  .hero-banner.hero-float[data-running="true"]:not(:focus-within) .hero-cover { animation-play-state: running; }
+  @media (max-width: 1023px) {
+    /* Limit mobile animation to two layers. */
+    .hero-banner.hero-zoom .hero-poster { animation: none; }
+    .hero-banner.hero-float .hero-cover:nth-child(3) { animation: none; }
   }
   @media (max-width: 767px) {
     .hero-banner[data-enter="true"] .hero-heading,

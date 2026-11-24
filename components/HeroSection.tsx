@@ -22,7 +22,6 @@ export default function HeroSection({ featuredBooks, stats }: { featuredBooks: B
   const heroRef = useRef<HTMLElement>(null);
   const posterRef = useRef<HTMLImageElement>(null);
   const reducedMotion = usePrefersReducedMotion();
-  const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(false);
   const [pageVisible, setPageVisible] = useState(false);
   const [posterPainted, setPosterPainted] = useState(false);
@@ -53,7 +52,7 @@ export default function HeroSection({ featuredBooks, stats }: { featuredBooks: B
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
-  const running = posterPainted && visible && pageVisible && !paused && !reducedMotion;
+  const running = posterPainted && visible && pageVisible && !reducedMotion;
   const effects = [HERO_EFFECTS.posterZoom && "hero-zoom", HERO_EFFECTS.coverFloat && "hero-float", HERO_EFFECTS.interactions && "hero-interactions"].filter(Boolean).join(" ");
 
   return (
@@ -92,11 +91,7 @@ export default function HeroSection({ featuredBooks, stats }: { featuredBooks: B
             </div>
           </div>}
         </div>
-        {!reducedMotion && (HERO_EFFECTS.posterZoom || HERO_EFFECTS.coverFloat) && (
-          <button type="button" onClick={() => setPaused(value => !value)} className="mt-8 min-h-11 border border-white/40 px-4 text-xs font-semibold text-white hover:border-accent focus-visible:outline-accent">
-            {paused ? dict.hero.resumeAnimations : dict.hero.pauseAnimations}
-          </button>
-        )}
+
       </div>
     </section>
   );

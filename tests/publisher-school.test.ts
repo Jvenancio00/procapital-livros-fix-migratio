@@ -59,5 +59,6 @@ test("hero mantém o conteúdo e cartaz acessíveis no HTML inicial", () => {
   assert.match(html, /hero-poster\.jpg/);
   assert.match(html, /Conhecimento que conecta mercados/);
   assert.match(html, />42</);
-  assert.match(html, /Pausar animações/);
+  assert.doesNotMatch(html, /Pausar animações/);
+  assert.match(html, /data-running="false"/);
 });
