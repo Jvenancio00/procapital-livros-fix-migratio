@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import Link from "next/link";
 import { ArrowRight, BookOpen, Building2, Globe2, GraduationCap } from "lucide-react";
 import type { Book } from "@/data/books";
@@ -9,8 +9,8 @@ import { useLanguage } from "@/context/LanguageContext";
 
 const COVER_MOTION = [
   { delay: "0s", tilt: "-1.5deg", offset: "sm:mt-6" },
-  { delay: "1.6s", tilt: "0deg", offset: "" },
-  { delay: "3.2s", tilt: "1.5deg", offset: "sm:mt-10" },
+  { delay: "0.08s", tilt: "0deg", offset: "" },
+  { delay: "0.16s", tilt: "1.5deg", offset: "sm:mt-10" },
 ];
 
 export interface HeroStats {
@@ -28,10 +28,27 @@ export default function HeroSection({
   stats: HeroStats;
 }) {
   const { dict } = useLanguage();
+  const heroRef = useRef<HTMLElement>(null);
+
+  // O conteúdo permanece legível mesmo sem JavaScript ou com movimento reduzido.
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let frame = 0;
+    const start = () => {
+      frame = window.requestAnimationFrame(() => { hero.dataset.motion = "ready"; });
+    };
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => {
+      window.removeEventListener("load", start);
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
   const showcase = featuredBooks.slice(0, 3);
 
   return (
-    <section className="relative overflow-hidden bg-ink text-white">
+    <section ref={heroRef} className="hero-editorial relative overflow-hidden bg-ink text-white">
       {/* Textura editorial subtil sem gradientes berrantes */}
       <div
         aria-hidden="true"
@@ -54,16 +71,16 @@ export default function HeroSection({
               </span>
             </div>
 
-            <h1 className="mt-6 font-serif text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-5xl xl:text-[3.5rem]">
+            <h1 className="hero-title mt-6 font-serif text-4xl font-semibold leading-[1.08] tracking-tight text-white sm:text-5xl xl:text-[3.5rem]">
               {dict.hero.title}
             </h1>
 
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
+            <p className="hero-subtitle mt-5 max-w-2xl text-lg leading-relaxed text-white/80 sm:text-xl">
               {dict.hero.subtitle}
             </p>
 
             {/* Botões Principais Exatos */}
-            <div className="mt-8 flex flex-wrap items-center gap-3.5">
+            <div className="hero-actions mt-8 flex flex-wrap items-center gap-3.5">
               <Link
                 href="/livros-escolares"
                 className="inline-flex items-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-dark"
@@ -147,7 +164,7 @@ export default function HeroSection({
                       className={`group flex flex-col ${motion.offset}`}
                     >
                       <div
-                        className="hero-float-item overflow-hidden rounded-xl border border-white/20 bg-white/5 shadow-xl transition-transform duration-300 group-hover:scale-[1.03]"
+                        className="hero-cover-item overflow-hidden rounded-xl border border-white/20 bg-white/5 shadow-xl transition-transform duration-300 group-hover:scale-[1.03]"
                         style={
                           {
                             "--hero-delay": motion.delay,
