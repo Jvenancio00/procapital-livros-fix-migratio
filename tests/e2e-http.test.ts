@@ -9,10 +9,10 @@ describe("Pro Capital — E2E HTTP, SSR, PDF, Cotações, Documentos & RBAC (Ser
     const res = await fetch(`${BASE}/`);
     assert.equal(res.status, 200);
     const html = await res.text();
-    assert.ok(html.includes("A distribuição editorial que conecta mercados"));
+    assert.ok(html.includes("Livros para escolas e livrarias, a partir de Maputo"));
     assert.ok(
       html.includes(
-        "Livros, editoras e soluções comerciais para os mercados de língua portuguesa.",
+        "Distribuímos livros escolares e outras obras para leitores, escolas e livrarias em Moçambique, Angola, Portugal e Brasil.",
       ),
     );
     assert.ok(html.includes("Explorar catálogo"));

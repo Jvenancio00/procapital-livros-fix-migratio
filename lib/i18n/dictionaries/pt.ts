@@ -31,9 +31,8 @@ export const pt: Dictionary = {
   },
   hero: {
     badge: "PRO CAPITAL · PLATAFORMA EDITORIAL & B2B",
-    title: "A distribuição editorial que conecta mercados",
-    subtitle:
-      "Livros, editoras e soluções comerciais para os mercados de língua portuguesa.",
+    title: "Livros para escolas e livrarias, a partir de Maputo",
+    subtitle: "Distribuímos livros escolares e outras obras para leitores, escolas e livrarias em Moçambique, Angola, Portugal e Brasil.",
     ctaSchool: "Livros escolares",
     ctaCatalog: "Explorar catálogo",
     ctaClientArea: "Área de Cliente",

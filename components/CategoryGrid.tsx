@@ -1,18 +1,5 @@
 import Link from "next/link";
-import {
-  Baby,
-  BookOpen,
-  Compass,
-  GraduationCap,
-  ArrowUpRight,
-} from "lucide-react";
-
-const CATEGORY_ICONS = {
-  Escolar: GraduationCap,
-  Infantil: Baby,
-  "Ficção": BookOpen,
-  "Não-ficção": Compass,
-} as const;
+import { ArrowUpRight } from "lucide-react";
 
 export interface CategorySummaryItem {
   name: string;
@@ -53,12 +40,6 @@ export default function CategoryGrid({
     <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <div className="inline-flex items-center gap-2">
-            <span className="h-0.5 w-6 bg-accent" aria-hidden="true" />
-            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand">
-              Organização Editorial &amp; Curricular
-            </span>
-          </div>
           <h2 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
             Categorias e níveis de ensino
           </h2>
@@ -72,65 +53,28 @@ export default function CategoryGrid({
         </Link>
       </div>
 
-      {/* Categorias Principais com Contagens Reais da Base de Dados */}
-      <div className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {categories.map((cat) => {
-          const Icon =
-            CATEGORY_ICONS[cat.name as keyof typeof CATEGORY_ICONS] ?? BookOpen;
-          return (
-            <Link
-              key={cat.slug}
-              href={`/categoria/${cat.slug}`}
-              className="group flex flex-col justify-between rounded-2xl border border-line/90 bg-white p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-md motion-reduce:transform-none"
-            >
-              <div>
-                <div className="flex items-center justify-between">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cream-deep text-ink transition-colors group-hover:bg-ink group-hover:text-accent">
-                    <Icon size={20} aria-hidden="true" />
-                  </div>
-                  <span className="rounded-full bg-cream px-2.5 py-1 text-xs font-semibold text-ink/70">
-                    {cat.count} {cat.count === 1 ? "título" : "títulos"}
-                  </span>
-                </div>
-
-                <h3 className="mt-5 font-serif text-xl font-semibold text-ink group-hover:text-brand">
-                  {cat.name}
-                </h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-ink/65">
-                  {cat.description}
-                </p>
-              </div>
-
-              <span className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-brand">
-                <span>Ver títulos</span>
-                <ArrowUpRight size={14} aria-hidden="true" />
-              </span>
-            </Link>
-          );
-        })}
-      </div>
-
-      {/* Níveis de Ensino */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {EDUCATION_LEVEL_CARDS.map((level) => (
-          <Link
-            key={level.code}
-            href={`/livros-escolares?nivelEnsino=${level.code}`}
-            className="group flex items-start justify-between gap-3 rounded-2xl border border-line/80 bg-cream-deep/40 p-4 transition-colors hover:border-brand/35 hover:bg-white"
-          >
+      {/* Categorias e níveis em listas editoriais, preservando os destinos. */}
+      <div className="mt-9 grid gap-x-12 md:grid-cols-2">
+        {categories.map((cat, index) => (
+          <Link key={cat.slug} href={`/categoria/${cat.slug}`} className="group grid grid-cols-[2.5rem_1fr_auto] gap-3 border-t border-line py-6 transition-colors hover:text-brand">
+            <span aria-hidden="true" className="font-serif text-sm text-brand">{String(index + 1).padStart(2, "0")}</span>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-brand">
-                {level.title}
-              </p>
-              <p className="mt-1 text-xs leading-relaxed text-ink/70">
-                {level.subtitle}
-              </p>
+              <h3 className="font-serif text-xl font-semibold">{cat.name}</h3>
+              <p className="mt-2 max-w-md text-sm leading-relaxed text-ink/70">{cat.description}</p>
+              <p className="mt-3 text-xs text-ink/60">{cat.count} {cat.count === 1 ? "título" : "títulos"}</p>
             </div>
-            <ArrowUpRight
-              size={15}
-              className="mt-0.5 shrink-0 text-ink/40 transition-colors group-hover:text-brand"
-              aria-hidden="true"
-            />
+            <ArrowUpRight size={17} aria-hidden="true" />
+          </Link>
+        ))}
+      </div>
+      <div className="mt-8 grid gap-x-12 md:grid-cols-2">
+        {EDUCATION_LEVEL_CARDS.map((level) => (
+          <Link key={level.code} href={`/livros-escolares?nivelEnsino=${level.code}`} className="group flex items-start justify-between gap-3 border-t border-line py-5 transition-colors hover:text-brand">
+            <div>
+              <p className="font-serif text-lg font-semibold">{level.title}</p>
+              <p className="mt-1 text-xs leading-relaxed text-ink/70">{level.subtitle}</p>
+            </div>
+            <ArrowUpRight size={15} className="mt-1 shrink-0" aria-hidden="true" />
           </Link>
         ))}
       </div>

@@ -179,3 +179,15 @@ export async function getAllCategorySlugs(): Promise<string[]> {
     return FALLBACK_CATEGORIES.map((c) => c.slug);
   }
 }
+
+/** Liga as subcategorias escolares existentes aos níveis efetivos dos livros. */
+export function schoolBooksForCategory<T extends { educationLevel?: string }>(slug: string, books: T[]): T[] | undefined {
+  const levels: Record<string, string> = {
+    "ensino-primario": "ENSINO_PRIMARIO",
+    "ensino-secundario": "ENSINO_SECUNDARIO",
+    "ensino-tecnico-profissional": "TECNICO_PROFISSIONAL",
+    "ensino-superior": "ENSINO_SUPERIOR",
+  };
+  const level = levels[slug];
+  return level ? books.filter((book) => book.educationLevel === level) : undefined;
+}

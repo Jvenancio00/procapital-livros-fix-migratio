@@ -98,29 +98,26 @@ body {
   }
 }
 
-@keyframes hero-float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(var(--hero-tilt, 0deg));
+/* Movimento de entrada curto, aplicado apenas depois do carregamento. O
+   estado inicial não oculta conteúdo; movimento reduzido fica estático. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes hero-settle {
+    from { transform: translateY(0.65rem); }
+    to { transform: translateY(0); }
   }
-  50% {
-    transform: translateY(-0.45rem) rotate(calc(var(--hero-tilt, 0deg) * 0.5));
+  @keyframes hero-cover-settle {
+    from { transform: translateX(1rem) rotate(0deg); }
+    to { transform: translateX(0) rotate(var(--hero-tilt, 0deg)); }
   }
-}
-
-.hero-float-item {
-  animation: hero-float 9s ease-in-out infinite;
-  animation-delay: var(--hero-delay, 0s);
-  will-change: transform;
-}
-
-.group:hover .hero-float-item {
-  animation-play-state: paused;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-float-item {
-    animation: none;
-    transform: rotate(var(--hero-tilt, 0deg));
+  .hero-editorial[data-motion="ready"] .hero-title,
+  .hero-editorial[data-motion="ready"] .hero-subtitle,
+  .hero-editorial[data-motion="ready"] .hero-actions {
+    animation: hero-settle 600ms ease-out both;
+  }
+  .hero-editorial[data-motion="ready"] .hero-subtitle { animation-delay: 80ms; }
+  .hero-editorial[data-motion="ready"] .hero-actions { animation-delay: 160ms; }
+  .hero-editorial[data-motion="ready"] .hero-cover-item {
+    animation: hero-cover-settle 800ms ease-out both;
+    animation-delay: var(--hero-delay, 0s);
   }
 }

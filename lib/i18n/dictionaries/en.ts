@@ -31,9 +31,8 @@ export const en: Dictionary = {
   },
   hero: {
     badge: "EDITORIAL DISTRIBUTION • CPLP",
-    title: "We're building the next generation of publishing distribution in the CPLP.",
-    subtitle:
-      "We connect publishers, bookstores, schools and readers through a distribution network built to grow across Mozambique, Angola, Portugal, Brazil and other CPLP markets.",
+    title: "Books for schools and bookshops, from Maputo",
+    subtitle: "We distribute school books and other titles to readers, schools and bookshops in Mozambique, Angola, Portugal and Brazil.",
     ctaSchool: "School books",
     ctaCatalog: "Explore Catalog",
     ctaClientArea: "Client Area",
