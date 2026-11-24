@@ -11,7 +11,7 @@ export default function CurrencySelector({ className = "" }: { className?: strin
       value={currency}
       onChange={(e) => setCurrency(e.target.value as typeof currency)}
       aria-label="Moeda"
-      className={`rounded-full border border-line bg-cream px-3 py-1.5 text-xs font-semibold text-ink focus:border-brand/40 focus:outline-none ${className}`}
+      className={`rounded-full border border-line bg-cream px-3 py-1.5 text-xs font-semibold text-ink focus:border-brand/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${className}`}
     >
       {CURRENCIES.map((c) => (
         <option key={c} value={c}>

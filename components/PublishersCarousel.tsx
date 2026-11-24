@@ -12,19 +12,25 @@ function PublisherTile({
     <Link
       href={`/editoras/${editora.slug}`}
       aria-label={editora.name}
-      className="group flex min-h-28 items-center justify-center border-b border-line px-4 py-4 transition-colors hover:border-brand"
+      className="publisher-slot group flex min-h-40 min-w-0 flex-col justify-center rounded-lg border border-line px-4 py-5 text-center"
     >
       {editora.logo ? (
-        <Image
-          src={editora.logo}
-          alt={editora.representationGroup === "AUTOR" ? `Retrato de ${editora.name}` : `Logótipo da editora ${editora.name}`}
-          width={200}
-          height={80}
-          sizes="208px"
-          className="max-h-13 w-auto object-contain opacity-90 transition-opacity duration-200 group-hover:opacity-100"
-        />
+        <>
+          <span className="flex h-16 w-full items-center justify-center">
+            <Image
+              src={editora.logo}
+              alt={editora.representationGroup === "AUTOR" ? `Retrato de ${editora.name}` : `Logótipo da editora ${editora.name}`}
+              width={200}
+              height={80}
+              sizes="(max-width: 640px) 40vw, 200px"
+              className="max-h-16 max-w-full w-auto object-contain"
+            />
+          </span>
+          <span className="mt-2 text-sm font-semibold text-ink group-hover:text-brand">{editora.name}</span>
+          <span className="mt-0.5 text-[10px] text-ink/60">{editora.country}</span>
+        </>
       ) : (
-        <EditoraMark name={editora.name} country={editora.country} />
+        <EditoraMark name={editora.name} country={editora.country} stacked className="justify-center" />
       )}
     </Link>
   );
@@ -71,7 +77,7 @@ export default function PublishersCarousel({
         </Link>
       </div>
 
-      <div role="region" aria-label="Editoras parceiras" className="mt-9 grid grid-cols-2 gap-x-6 sm:grid-cols-3 lg:grid-cols-4">
+      <div role="region" aria-label="Editoras parceiras" className="mt-9 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
         {uniquePublishers.map((editora) => (
           <PublisherTile key={editora.slug} editora={editora} />
         ))}

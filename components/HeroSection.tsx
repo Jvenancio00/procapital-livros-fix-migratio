@@ -62,7 +62,7 @@ export default function HeroSection({ featuredBooks, stats }: { featuredBooks: B
         {/* Native picture preserves the existing local WebP/JPEG fallback and dimensions. */}
         <img ref={posterRef} src={HERO_POSTER_SRC} width={HERO_POSTER_DIMENSIONS.width} height={HERO_POSTER_DIMENSIONS.height} alt="" fetchPriority="high" className="h-full w-full object-cover object-right" />
       </picture>
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-ink/90" />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-ink/85" />
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:py-24">
         <div className="grid gap-14 lg:grid-cols-12 lg:items-center lg:gap-16">
           <div className="lg:col-span-7">
@@ -71,7 +71,7 @@ export default function HeroSection({ featuredBooks, stats }: { featuredBooks: B
             <p className="hero-tagline mt-6 font-serif text-xl text-white sm:text-2xl">{dict.hero.tagline}</p>
             <p className="hero-description mt-4 max-w-xl text-base leading-relaxed text-white/75 sm:text-lg">{dict.hero.subtitle}</p>
             <div className="hero-actions mt-8 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm font-semibold">
-              <Link href="/livros-escolares" className="inline-flex min-h-11 items-center gap-2 bg-brand px-5 text-white hover:bg-brand-dark">{dict.hero.ctaSchool}<ArrowRight size={16} aria-hidden="true" /></Link>
+              <Link href="/livros-escolares" className="inline-flex min-h-11 items-center gap-2 rounded-md bg-brand px-6 text-white hover:bg-brand-dark">{dict.hero.ctaSchool}<ArrowRight size={16} aria-hidden="true" /></Link>
               <Link href="/catalogo" className="inline-flex min-h-11 items-center border-b border-white/40 hover:border-accent">{dict.hero.ctaCatalog}</Link>
               <Link href="/contactos?motivo=PARCERIA" className="inline-flex min-h-11 items-center text-white/80 hover:text-white">{dict.hero.ctaPartnership}</Link>
             </div>
