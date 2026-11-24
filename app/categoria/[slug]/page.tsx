@@ -4,7 +4,7 @@ import Link from "next/link";
 import { FileDown } from "lucide-react";
 import BookCard from "@/components/BookCard";
 import PageHeader from "@/components/PageHeader";
-import { getCategoryBySlug } from "@/lib/categories";
+import { getCategoryBySlug, schoolBooksForCategory } from "@/lib/categories";
 import { getAllCatalogBooks } from "@/lib/catalog";
 import { SITE_URL } from "@/lib/site";
 import { DEFAULT_OG_IMAGE, getEditoraSlugForName } from "@/lib/seo";
@@ -59,7 +59,7 @@ export default async function CategoryPage({ params }: Props) {
   const faq = category.faq as { pergunta: string; resposta: string }[] | null;
   const enrichedMap = new Map(catalogBooks.map((b) => [b.slug, b]));
 
-  const books = category.books.map(
+  const books = schoolBooksForCategory(slug, catalogBooks) ?? category.books.map(
     (b) => enrichedMap.get(b.slug) ?? toCatalogBook(b, category.name),
   );
 

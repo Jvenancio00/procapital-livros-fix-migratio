@@ -35,7 +35,7 @@ export default function ContactForm() {
         body: JSON.stringify({ name, email, phone, company, message, reason: motivo }),
       });
       if (!res.ok) throw new Error("Falha ao gravar o contacto.");
-      setStatus("sent");
+      window.location.assign("/obrigado?origem=contacto");
     } catch {
       window.location.href = `mailto:comercial@procapitalmz.com?subject=${encodeURIComponent(
         `Contacto do site — ${motivo}`,
