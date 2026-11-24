@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { HERO_POSTER_SRC, HERO_POSTER_WEBP_SRC, HERO_POSTER_DIMENSIONS } from "@/lib/hero";
 import { ArrowRight } from "lucide-react";
 import type { Book } from "@/data/books";
 import BookCover from "./BookCover";
@@ -18,7 +19,14 @@ export default function HeroSection({ featuredBooks, stats }: { featuredBooks: B
   const showcase = featuredBooks.slice(0, 3);
 
   return (
-    <section className="bg-ink text-white">
+    <section className="hero-banner relative isolate overflow-hidden bg-ink text-white">
+      <picture aria-hidden="true" className="hero-poster absolute inset-0 -z-20">
+        {HERO_POSTER_WEBP_SRC && <source srcSet={HERO_POSTER_WEBP_SRC} type="image/webp" />}
+        {/* Native picture preserves the existing local WebP/JPEG fallback and dimensions. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={HERO_POSTER_SRC} width={HERO_POSTER_DIMENSIONS.width} height={HERO_POSTER_DIMENSIONS.height} alt="" fetchPriority="high" className="h-full w-full object-cover object-right" />
+      </picture>
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-ink/90" />
       <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:py-24">
         <div className="grid gap-14 lg:grid-cols-12 lg:items-center lg:gap-16">
           <div className="lg:col-span-7">
