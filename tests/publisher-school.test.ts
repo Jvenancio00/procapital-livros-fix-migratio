@@ -35,6 +35,7 @@ test("primeiro botão do hero leva aos livros escolares", () => {
 test("novos textos estão preenchidos nos seis idiomas", () => {
   assert.equal(Object.keys(DICTIONARIES).length, 6);
   for (const dict of Object.values(DICTIONARIES)) {
+    assert.ok(dict.hero.tagline.trim());
     assert.ok(dict.hero.ctaSchool.trim());
     assert.ok(dict.publisherMark.provisional.trim());
     assert.ok(dict.schoolPriority.count.trim());

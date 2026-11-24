@@ -31,6 +31,7 @@ export const zh: Dictionary = {
   },
   hero: {
     badge: "出版分销 • 葡语国家共同体",
+    tagline: "知识连接市场。",
     title: "从马普托为学校和书店提供图书",
     subtitle: "我们向莫桑比克、安哥拉、葡萄牙和巴西的读者、学校和书店分销教材及其他图书。",
     ctaSchool: "教材",

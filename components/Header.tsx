@@ -63,7 +63,7 @@ export default function Header() {
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-line/80 bg-cream/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-line/80 bg-white">
       <div className="bg-ink text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-2 text-xs sm:px-8">
           <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap">

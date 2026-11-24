@@ -39,6 +39,7 @@ export interface Dictionary {
   };
   hero: {
     badge: string;
+    tagline: string;
     title: string;
     subtitle: string;
     ctaSchool: string;

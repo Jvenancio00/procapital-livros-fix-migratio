@@ -63,14 +63,14 @@ export default function BookCard({
     : { label: "Sem stock imediato · Cotação", tone: "text-ink/70 bg-cream-deep border-line" };
 
   return (
-    <article className="group flex h-full flex-col rounded-2xl border border-line/90 bg-white p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-md motion-reduce:transform-none">
+    <article className="group flex h-full flex-col border-b border-line bg-transparent pb-5 transition-colors hover:border-ink/40">
       <div className="relative">
-        <Link href={`/livro/${book.slug}`} className="block overflow-hidden rounded-xl">
+        <Link href={`/livro/${book.slug}`} className="block overflow-hidden">
           <BookCover
             book={book}
             index={index}
             preload={index < 2}
-            className="rounded-xl transition-transform duration-300 group-hover:scale-[1.025] motion-reduce:transform-none"
+            className=""
           />
         </Link>
 

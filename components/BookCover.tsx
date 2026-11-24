@@ -37,7 +37,7 @@ function BookCoverContent({
           {!loaded && (
             <div
               aria-hidden="true"
-              className="absolute inset-0 animate-pulse bg-cream-deep"
+              className="absolute inset-0 bg-cream-deep"
             />
           )}
           <Image
@@ -48,7 +48,7 @@ function BookCoverContent({
             preload={preload}
             onLoad={() => setLoaded(true)}
             onError={() => setFailed(true)}
-            className={`object-cover transition-opacity duration-300 ${
+            className={`object-contain transition-opacity duration-300 ${
               loaded ? "opacity-100" : "opacity-0"
             }`}
           />

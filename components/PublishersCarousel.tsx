@@ -5,17 +5,14 @@ import EditoraMark from "./EditoraMark";
 
 function PublisherTile({
   editora,
-  tabIndex,
 }: {
   editora: Editora;
-  tabIndex?: number;
 }) {
   return (
     <Link
       href={`/editoras/${editora.slug}`}
       aria-label={editora.name}
-      tabIndex={tabIndex}
-      className="group flex min-h-28 w-72 shrink-0 items-center justify-center rounded-2xl border border-line/90 bg-white px-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-sm motion-reduce:transform-none"
+      className="group flex min-h-28 items-center justify-center border-b border-line px-4 py-4 transition-colors hover:border-brand"
     >
       {editora.logo ? (
         <Image
@@ -74,38 +71,10 @@ export default function PublishersCarousel({
         </Link>
       </div>
 
-      <div
-        role="region"
-        aria-label="Editoras parceiras"
-        className="publishers-marquee-window relative mt-9 overflow-hidden py-1"
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-cream to-transparent sm:w-20 motion-reduce:hidden"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-cream to-transparent sm:w-20 motion-reduce:hidden"
-        />
-        <div className="publishers-marquee flex w-max">
-          <div className="publishers-marquee__group flex shrink-0 items-center">
-            {uniquePublishers.map((editora) => (
-              <PublisherTile key={editora.slug} editora={editora} />
-            ))}
-          </div>
-          <div
-            aria-hidden="true"
-            className="publishers-marquee__group flex shrink-0 items-center"
-          >
-            {uniquePublishers.map((editora) => (
-              <PublisherTile
-                key={`dup-${editora.slug}`}
-                editora={editora}
-                tabIndex={-1}
-              />
-            ))}
-          </div>
-        </div>
+      <div role="region" aria-label="Editoras parceiras" className="mt-9 grid grid-cols-2 gap-x-6 sm:grid-cols-3 lg:grid-cols-4">
+        {uniquePublishers.map((editora) => (
+          <PublisherTile key={editora.slug} editora={editora} />
+        ))}
       </div>
     </section>
   );

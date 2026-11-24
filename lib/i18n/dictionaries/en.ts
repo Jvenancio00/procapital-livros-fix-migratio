@@ -31,6 +31,7 @@ export const en: Dictionary = {
   },
   hero: {
     badge: "EDITORIAL DISTRIBUTION • CPLP",
+    tagline: "Knowledge that connects markets.",
     title: "Books for schools and bookshops, from Maputo",
     subtitle: "We distribute school books and other titles to readers, schools and bookshops in Mozambique, Angola, Portugal and Brazil.",
     ctaSchool: "School books",
