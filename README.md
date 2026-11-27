@@ -40,3 +40,9 @@ O teste de contacto é ignorado por defeito e só pode correr com site e `DATABA
 O endereço público temporário é `https://procapital-livros-fix-migration.vercel.app`. O projeto usa-o por defeito para URLs canónicos, sitemap e metadados. Na Vercel, confirme que `NEXT_PUBLIC_SITE_URL` no ambiente Production está definido para esse endereço (uma variável existente tem prioridade sobre o valor por defeito) e faça um novo deployment. Previews continuam a ser bloqueados no robots. O endereço de email comercial não foi alterado; a sua entrega deve ser confirmada separadamente.
 
 Para um futuro domínio próprio, adicione e valide o domínio no projeto Vercel, siga os valores DNS apresentados pela Vercel, confirme HTTPS e redirecionamento da variante secundária; só depois atualize `NEXT_PUBLIC_SITE_URL` em Production, publique novamente e verifique canonical, robots e sitemap. Não elimine registos de email sem os rever.
+
+### Fase demonstrativa sem preços
+
+`DEMO_MODE` em `lib/demo.ts` está ativo. A interface pública apresenta condições sob consulta, o catálogo/PDF não apresenta montantes de livros, pedidos de cotação novos não recebem uma estimativa automática e o checkout devolve 503. A área comercial de compra apresenta uma mensagem temporária; dados de catálogo e encomendas anteriores não são apagados. Os valores históricos e administrativos continuam a existir e podem ser acessíveis em áreas privadas ou ficheiros do projeto: este modo não é uma eliminação de dados nem uma medida de confidencialidade.
+
+Não desative o modo até os preços, stock e regras de checkout serem confirmados pelo proprietário e testados em ambiente isolado. Antes de publicar, teste os percursos e idiomas com dados de teste e verifique a versão em produção.

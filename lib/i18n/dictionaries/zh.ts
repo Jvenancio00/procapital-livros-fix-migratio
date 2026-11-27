@@ -54,6 +54,7 @@ export const zh: Dictionary = {
       readers: "读者",
     },
   },
+  demo: { title: "展示目录", description: "价格和在线购买暂不可用。请浏览目录或联系团队了解图书信息。", contact: "联系团队", consult: "请咨询", productDescription: "这是展示目录。请联系团队了解本书信息。", quote: "请求报价" },
   publisherMark: { provisional: "临时标识" },
   schoolPriority: { count: "种教材", quote: "申请学校报价" },
   metrics: {

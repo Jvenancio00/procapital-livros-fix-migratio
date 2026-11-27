@@ -1,5 +1,8 @@
 "use client";
 
+import { DEMO_MODE } from "@/lib/demo";
+import DemoCommerceNotice from "@/components/DemoCommerceNotice";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, LogOut, FileDown, RefreshCw } from "lucide-react";
@@ -22,6 +25,10 @@ function resolveBookPrice(
 }
 
 export default function ClientCatalogPage() {
+  return DEMO_MODE ? <DemoCommerceNotice /> : <ClientCatalogPageFull />;
+}
+
+function ClientCatalogPageFull() {
   const router = useRouter();
   const { session, loading, logout } = useClientAuth();
   const { currency, market } = useCurrency();

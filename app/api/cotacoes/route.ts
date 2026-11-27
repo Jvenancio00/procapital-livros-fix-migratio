@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DEMO_MODE } from "@/lib/demo";
 import { prisma } from "@/lib/prisma";
 import { getAuthenticatedActor } from "@/lib/admin-auth";
 import { isValidEmailAddress, sendTransactionalEmail } from "@/lib/email";
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
     }) => {
       const qty = Math.max(1, Math.min(50000, Math.floor(Number(item.quantity) || 1)));
       const matched = item.slug ? bookBySlug.get(item.slug) : undefined;
-      const unitRef = matched?.prices[0] ? Number(matched.prices[0].amount) : null;
+      const unitRef = !DEMO_MODE && matched?.prices[0] ? Number(matched.prices[0].amount) : null;
       if (unitRef) estimatedTotal += unitRef * qty;
 
       return {

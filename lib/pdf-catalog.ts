@@ -3,6 +3,7 @@ import path from "node:path";
 import { jsPDF } from "jspdf";
 import type { Book } from "@/data/books";
 import { formatMoney } from "@/lib/currency";
+import { DEMO_MODE } from "@/lib/demo";
 import type { Currency, MarketCode } from "@/lib/enums";
 import { EDUCATION_LEVEL_LABELS, MARKETS } from "@/lib/markets";
 import { getBookAvailableStock, getBookPriceForMarket } from "@/lib/catalog";
@@ -245,7 +246,7 @@ export function generateCatalogPdfBuffer(options: CatalogPdfOptions): Buffer {
     doc.setFontSize(9.2);
     doc.setTextColor(153, 27, 27);
     doc.text(
-      book.free
+      DEMO_MODE ? "Sob consulta" : book.free
         ? "Gratuito"
         : priceVal > 0
         ? formatMoney(priceVal, options.currency)

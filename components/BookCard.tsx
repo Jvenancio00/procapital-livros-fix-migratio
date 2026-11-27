@@ -11,6 +11,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import type { Book } from "@/data/books";
+import { DEMO_MODE } from "@/lib/demo";
 import { formatMoney, getPriceInCurrency } from "@/lib/currency";
 import BookCover from "@/components/BookCover";
 import StarRating from "@/components/StarRating";
@@ -137,7 +138,7 @@ export default function BookCard({
             </span>
 
             <span className="shrink-0 font-sans text-base font-bold text-ink">
-              {book.free
+              {DEMO_MODE ? dict.demo.consult : book.free
                 ? dict.bookCard.free
                 : isMarketEnabled
                 ? formatMoney(marketPrice, currency)
@@ -153,7 +154,9 @@ export default function BookCard({
               {dict.bookCard.viewDetails}
             </Link>
 
-            {book.free ? (
+            {DEMO_MODE && !book.free ? (
+              <Link href={`/cotacoes?livro=${encodeURIComponent(book.slug)}`} className="inline-flex min-h-9 items-center justify-center rounded-full bg-ink px-2.5 py-2 text-xs font-semibold text-white hover:bg-ink/90">{dict.demo.quote}</Link>
+            ) : book.free ? (
               <a
                 href={book.downloadUrl ?? `/livro/${book.slug}`}
                 download={Boolean(book.downloadUrl)}

@@ -1,4 +1,5 @@
 import { BOOKS, CATEGORIES, type Book as StaticBook } from "@/data/books";
+import { publicCatalogBook } from "@/lib/demo";
 import type { BookWithPrices } from "@/lib/types";
 
 export function toCatalogBook(
@@ -19,7 +20,7 @@ export function toCatalogBook(
       ? (categoryName as StaticBook["category"])
       : (fallback?.category ?? "Não-ficção");
 
-  return {
+  return publicCatalogBook({
     id: book.id,
     slug: book.slug,
     title: book.title,
@@ -43,7 +44,7 @@ export function toCatalogBook(
     subject: fallback?.subject,
     academicYear: fallback?.academicYear,
     countryOrigin: fallback?.countryOrigin,
-  };
+  });
 }
 
 export const bookWithPricesToView = toCatalogBook;

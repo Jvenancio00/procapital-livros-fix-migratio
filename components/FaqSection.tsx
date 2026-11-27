@@ -10,7 +10,7 @@ export const PROCAPITAL_FAQ_ITEMS: FaqItem[] = [
   {
     question: "Em que países e moedas opera a distribuidora Pro Capital?",
     answer:
-      "A Pro Capital tem sede operacional na Rua Almeida Garrett, Bairro da Coop, n.º 366, em Maputo (Moçambique), e opera comercialmente em 4 mercados lusófonos: Moçambique (Meticais — MT/MZN), Angola (Kwanzas — KZ/AOA), Portugal (Euros — EUR) e Brasil (Reais — R$/BRL), apresentando preços oficiais definidos por mercado.",
+      "A Pro Capital tem sede operacional na Rua Almeida Garrett, Bairro da Coop, n.º 366, em Maputo (Moçambique), e opera comercialmente em 4 mercados lusófonos: Moçambique (Meticais — MT/MZN), Angola (Kwanzas — KZ/AOA), Portugal (Euros — EUR) e Brasil (Reais — R$/BRL), com condições comerciais a confirmar por mercado.",
   },
   {
     question:
@@ -33,7 +33,7 @@ export const PROCAPITAL_FAQ_ITEMS: FaqItem[] = [
     question:
       "Como funcionam os catálogos oficiais em PDF e a Biblioteca Digital Pro Capital?",
     answer:
-      "Qualquer visitante pode descarregar gratuitamente o catálogo atualizado em PDF por país ou categoria (com capas, ISBN e preços oficiais). Os leitores registados dispõem ainda da Secção Livro Digital (/livro-digital) e da Minha Biblioteca (/loja/biblioteca) com leitor integrado, modo escuro, marcadores e notas por página.",
+      "Qualquer visitante pode descarregar gratuitamente o catálogo atualizado em PDF por país ou categoria (com capas e ISBN). Os leitores registados dispõem ainda da Secção Livro Digital (/livro-digital) e da Minha Biblioteca (/loja/biblioteca) com leitor integrado, modo escuro, marcadores e notas por página.",
   },
 ];
 

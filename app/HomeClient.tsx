@@ -14,6 +14,7 @@ import {
   PackageCheck,
 } from "lucide-react";
 import type { Book } from "@/data/books";
+import { DEMO_MODE } from "@/lib/demo";
 import type { Editora } from "@/data/editoras";
 import BookCard from "@/components/BookCard";
 import BookCover from "@/components/BookCover";
@@ -95,6 +96,9 @@ export default function HomeClient({
     <div>
       {/* 1. Banner Institucional */}
       <HeroSection featuredBooks={featuredBooks} stats={stats} />
+      {DEMO_MODE && <section className="border-b border-line bg-cream px-5 py-5 sm:px-8" aria-label={dict.demo.title}>
+        <div className="mx-auto max-w-7xl"><p className="text-sm font-semibold text-ink">{dict.demo.title}</p><p className="mt-1 text-sm leading-relaxed text-ink/70">{dict.demo.description}</p></div>
+      </section>}
 
       {/* 2. Destaque Prioritário para Livros Escolares */}
       <div className="border-b border-line/80 bg-white">
@@ -153,7 +157,7 @@ export default function HomeClient({
                 </h3>
                 <p className="mt-0.5 text-sm text-ink/65">
                   Submeta listas completas por classe ou exporte o catálogo escolar
-                  em PDF com preços do mercado {MARKETS[market].name}.
+                  em PDF para o mercado {MARKETS[market].name}.
                 </p>
               </div>
             </div>
@@ -296,9 +300,7 @@ export default function HomeClient({
                 Operação multi-mercado com regras comerciais próprias
               </h2>
               <p className="mt-2.5 text-sm leading-relaxed text-ink/70">
-                Alterne o mercado ativo para consultar preços oficiais configurados,
-                stock em armazém local, prazos de expedição e meios de pagamento
-                disponíveis em cada país.
+                {DEMO_MODE ? "Consulte o catálogo por mercado. Condições comerciais e disponibilidade estão sujeitas a confirmação." : "Alterne o mercado ativo para consultar preços, disponibilidade e condições de entrega."}
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -323,7 +325,7 @@ export default function HomeClient({
                           {m.currency} ({m.isoCurrency})
                         </span>
                       </div>
-                      <p className="mt-1.5 text-xs text-ink/65">{m.shippingSummary}</p>
+                      <p className="mt-1.5 text-xs text-ink/65">{DEMO_MODE ? "Condições sob consulta" : m.shippingSummary}</p>
                     </button>
                   );
                 })}
@@ -561,7 +563,7 @@ export default function HomeClient({
                 Receber lançamentos e catálogos sazonais
               </h3>
               <p className="mt-1 mb-4 text-xs leading-relaxed text-white/65">
-                Notificações sobre novas edições escolares, tabelas de preços e feiras
+                Notificações sobre novas edições escolares, catálogos e feiras
                 do livro. Sem spam.
               </p>
               <NewsletterForm />

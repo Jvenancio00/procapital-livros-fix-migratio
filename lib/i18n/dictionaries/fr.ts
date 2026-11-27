@@ -54,6 +54,7 @@ export const fr: Dictionary = {
       readers: "Lecteurs",
     },
   },
+  demo: { title: "Catalogue de démonstration", description: "Les prix et les achats en ligne ne sont pas encore disponibles. Consultez le catalogue ou contactez notre équipe.", contact: "Contacter l’équipe", consult: "Sur demande", productDescription: "Catalogue de démonstration. Contactez notre équipe pour en savoir plus sur ce titre.", quote: "Demander un devis" },
   publisherMark: { provisional: "Symbole provisoire" },
   schoolPriority: { count: "titres scolaires", quote: "Demander un devis scolaire" },
   metrics: {

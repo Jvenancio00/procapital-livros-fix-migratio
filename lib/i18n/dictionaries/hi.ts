@@ -54,6 +54,7 @@ export const hi: Dictionary = {
       readers: "पाठक",
     },
   },
+  demo: { title: "प्रदर्शन सूची", description: "कीमतें और ऑनलाइन खरीद अभी उपलब्ध नहीं हैं। पुस्तकों की जानकारी के लिए सूची देखें या टीम से संपर्क करें।", contact: "टीम से संपर्क करें", consult: "पूछताछ पर", productDescription: "यह प्रदर्शन सूची है। इस पुस्तक की जानकारी के लिए टीम से संपर्क करें।", quote: "कोटेशन का अनुरोध करें" },
   publisherMark: { provisional: "अस्थायी प्रतीक" },
   schoolPriority: { count: "स्कूली शीर्षक", quote: "स्कूल के लिए मूल्य प्रस्ताव माँगें" },
   metrics: {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DEMO_MODE } from "@/lib/demo";
 import { filterAndSortBooks, getAllCatalogBooks } from "@/lib/catalog";
 import { generateCatalogPdfBuffer } from "@/lib/pdf-catalog";
 import { getAuthenticatedActor } from "@/lib/admin-auth";
@@ -44,8 +45,8 @@ export async function GET(request: Request) {
     category: categoryFilter,
     educationLevel: educationLevelFilter,
     availability,
-    minPrice,
-    maxPrice,
+    minPrice: DEMO_MODE ? undefined : minPrice,
+    maxPrice: DEMO_MODE ? undefined : maxPrice,
     currency,
     sort: "title_asc",
   });

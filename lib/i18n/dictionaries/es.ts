@@ -54,6 +54,7 @@ export const es: Dictionary = {
       readers: "Lectores",
     },
   },
+  demo: { title: "Catálogo en fase de demostración", description: "Los precios y la compra en línea aún no están disponibles. Consulte el catálogo o contacte al equipo para obtener información.", contact: "Contactar al equipo", consult: "Consultar", productDescription: "Catálogo en fase de demostración. Contacte al equipo para información sobre este título.", quote: "Solicitar presupuesto" },
   publisherMark: { provisional: "Símbolo provisional" },
   schoolPriority: { count: "títulos escolares", quote: "Solicitar presupuesto escolar" },
   metrics: {

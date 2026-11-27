@@ -40,7 +40,7 @@ const COMO_TRABALHAMOS = [
     icon: Globe2,
     title: "Território Lusófono",
     description:
-      "Distribuição estruturada em Moçambique, Angola, Portugal e Brasil, com preços oficiais por moeda local.",
+      "Catálogo dirigido a leitores e instituições em Moçambique, Angola, Portugal e Brasil.",
   },
   {
     icon: Truck,

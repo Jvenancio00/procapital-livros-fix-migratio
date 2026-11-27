@@ -54,6 +54,7 @@ export const en: Dictionary = {
       readers: "Readers",
     },
   },
+  demo: { title: "Demonstration catalog", description: "Prices and online purchasing are not yet available. Browse the catalog or contact the team for information about the titles.", contact: "Contact the team", consult: "On request", productDescription: "This catalog is for demonstration. Contact the team for information about this title.", quote: "Request a quote" },
   publisherMark: { provisional: "Provisional symbol" },
   schoolPriority: { count: "school titles", quote: "Request a school quote" },
   metrics: {

@@ -6,6 +6,7 @@ import BookCover from "@/components/BookCover";
 import BookPurchasePanel from "@/components/BookPurchasePanel";
 import BookReviews from "@/components/BookReviews";
 import { SITE_URL } from "@/lib/site";
+import { DEMO_MODE } from "@/lib/demo";
 import {
   DEFAULT_OG_IMAGE,
   buildBreadcrumbJsonLd,
@@ -166,7 +167,7 @@ export default async function LivroPage({
       name: book.editora,
       url: `${SITE_URL}/editoras/${editoraSlug}`,
     },
-    ...(book.free || book.price > 0 ? { offers: {
+    ...(!DEMO_MODE && (book.free || book.price > 0) ? { offers: {
       "@type": "Offer",
       price: book.free ? 0 : book.price,
       priceCurrency: "MZN",
