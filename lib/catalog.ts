@@ -1,4 +1,5 @@
 import { BOOKS, CATEGORIES, type Book } from "@/data/books";
+import { publicCatalogBook } from "@/lib/demo";
 import {
   EDITORAS,
   resolveEditoraLogo,
@@ -132,7 +133,7 @@ function mapDbRecordToBook(
 
 export async function getAllCatalogBooks(options?: { includeInactive?: boolean }): Promise<Book[]> {
   if (!isDatabaseConfigured()) {
-    return BOOKS;
+    return BOOKS.map(publicCatalogBook);
   }
 
   try {
@@ -165,12 +166,12 @@ export async function getAllCatalogBooks(options?: { includeInactive?: boolean }
         .catch(() => []),
     ]);
 
-    if (records.length === 0) return BOOKS;
+    if (records.length === 0) return BOOKS.map(publicCatalogBook);
 
     const bestsellerSet = new Set(paidRanking.map((r) => r.bookId));
-    return records.map((r) => mapDbRecordToBook(r, bestsellerSet));
+    return records.map((r) => publicCatalogBook(mapDbRecordToBook(r, bestsellerSet)));
   } catch {
-    return BOOKS;
+    return BOOKS.map(publicCatalogBook);
   }
 }
 
@@ -194,7 +195,7 @@ export async function getCatalogBookBySlug(slug: string): Promise<Book | undefin
     }
   }
 
-  return staticBook;
+  return publicCatalogBook(staticBook);
 }
 
 export function bookMatchesPublisherEntry(

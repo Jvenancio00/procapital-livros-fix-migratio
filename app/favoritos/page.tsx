@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Heart, TrendingDown } from "lucide-react";
 import { BOOKS, type Book } from "@/data/books";
+import { DEMO_MODE } from "@/lib/demo";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCurrency } from "@/context/CurrencyContext";
 import { crossSellSuggestions } from "@/lib/cart-pricing";
@@ -71,7 +72,7 @@ export default function FavoritosPage() {
           <>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {favorites.map((book, index) => {
-                const drop = priceDropPercent(book.slug);
+                const drop = DEMO_MODE ? null : priceDropPercent(book.slug);
                 return (
                   <div key={book.slug} className="relative">
                     {drop && (

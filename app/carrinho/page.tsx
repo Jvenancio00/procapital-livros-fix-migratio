@@ -1,5 +1,8 @@
 "use client";
 
+import { DEMO_MODE } from "@/lib/demo";
+import DemoCommerceNotice from "@/components/DemoCommerceNotice";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,6 +31,10 @@ import { CLIENT_TYPE_LABELS, MARKET_LIST, MARKETS } from "@/lib/markets";
 import type { ClientType, MarketCode } from "@/lib/enums";
 
 export default function CarrinhoPage() {
+  return DEMO_MODE ? <DemoCommerceNotice /> : <CarrinhoPageFull />;
+}
+
+function CarrinhoPageFull() {
   const { items, setQuantity, removeItem, clear } = useCart();
   const { currency, market, setMarket } = useCurrency();
   const { data: session, status } = useSession();

@@ -34,7 +34,7 @@ const STEPS = [
     icon: ShoppingCart,
     title: "1. Escolha obras no catálogo multi-país",
     description:
-      "Consulte disponibilidade e preços comerciais oficiais em Kwanzas (KZ), Meticais (MT), Euros (€) ou Reais (R$).",
+      "Consulte os títulos disponíveis no catálogo e contacte a equipa para informações comerciais.",
   },
   {
     icon: Heart,

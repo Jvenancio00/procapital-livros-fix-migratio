@@ -11,15 +11,18 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import type { Book } from "@/data/books";
+import { DEMO_MODE } from "@/lib/demo";
 import { formatMoney, getPriceInCurrency } from "@/lib/currency";
 import StarRating from "@/components/StarRating";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCurrency } from "@/context/CurrencyContext";
+import { useLanguage } from "@/context/LanguageContext";
 import { MARKET_LIST, MARKETS } from "@/lib/markets";
 import { knownMarketStock } from "@/lib/availability";
 
 export default function BookPurchasePanel({ book }: { book: Book }) {
+  const { dict } = useLanguage();
   const { addItem } = useCart();
   const { toggle, isFavorite } = useWishlist();
   const { currency, market, setMarket } = useCurrency();
@@ -46,6 +49,17 @@ export default function BookPurchasePanel({ book }: { book: Book }) {
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   }
+
+  if (DEMO_MODE && !book.free) return (
+    <div className="mt-6 rounded-2xl border border-line bg-white p-6">
+      <p className="font-semibold text-ink">{dict.demo.consult}</p>
+      <p className="mt-2 text-sm text-ink/70">{dict.demo.productDescription}</p>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link href={`/cotacoes?livro=${encodeURIComponent(book.slug)}&pais=${market}`} className="rounded-full bg-brand px-5 py-3 text-sm font-semibold text-white hover:bg-brand-dark">{dict.demo.quote}</Link>
+        <button type="button" onClick={() => toggle(book.slug)} className="rounded-full border border-line px-5 py-3 text-sm font-semibold text-ink">{favorite ? dict.bookCard.removeFromFavorites : dict.bookCard.addToFavorites}</button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="mt-6 rounded-2xl border border-line bg-white p-6">

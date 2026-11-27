@@ -18,6 +18,7 @@ import BookCard from "@/components/BookCard";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useCart } from "@/context/CartContext";
 import { formatMoney, getPriceInCurrency } from "@/lib/currency";
+import { DEMO_MODE } from "@/lib/demo";
 import { EDUCATION_LEVEL_LABELS, type EducationLevelCode, type MarketCode } from "@/lib/enums";
 import { MARKET_LIST, MARKETS } from "@/lib/markets";
 import { parseIsbn } from "@/lib/isbn";
@@ -438,7 +439,7 @@ export default function SchoolCatalogClient({
                   <th className="px-4 py-3.5">Disciplina</th>
                   <th className="px-4 py-3.5">Editora</th>
                   <th className="px-4 py-3.5">Stock ({market})</th>
-                  <th className="px-4 py-3.5">Preço Unit.</th>
+                  {!DEMO_MODE && <th className="px-4 py-3.5">Preço Unit.</th>}
                   <th className="px-4 py-3.5 text-right">Quantidade</th>
                 </tr>
               </thead>
@@ -479,11 +480,11 @@ export default function SchoolCatalogClient({
                           <span className="text-amber-700">Sob cotação</span>
                         )}
                       </td>
-                      <td className="px-4 py-3.5 font-serif font-semibold text-ink">
+                      {!DEMO_MODE && <td className="px-4 py-3.5 font-serif font-semibold text-ink">
                         {unitPrice > 0
                           ? formatMoney(unitPrice, currency)
                           : "Sob consulta"}
-                      </td>
+                      </td>}
                       <td className="px-4 py-3.5 text-right">
                         <input
                           type="number"

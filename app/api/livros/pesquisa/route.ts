@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DEMO_MODE } from "@/lib/demo";
 import {
   filterAndSortBooks,
   getAllCatalogBooks,
@@ -56,10 +57,10 @@ export async function GET(request: Request) {
       subject,
       academicYear,
       availability,
-      minPrice,
-      maxPrice,
+      minPrice: DEMO_MODE ? undefined : minPrice,
+      maxPrice: DEMO_MODE ? undefined : maxPrice,
       currency,
-      sort,
+      sort: DEMO_MODE && (sort === "price_asc" || sort === "price_desc") ? "relevance" : sort,
     });
 
   const total = items.length;
@@ -67,12 +68,14 @@ export async function GET(request: Request) {
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * pageSize;
 
-  const paginated = items.slice(start, start + pageSize).map((book) => ({
-    ...book,
-    displayPrice: getBookPriceForMarket(book, effectiveCurrency),
-    displayCurrency: effectiveCurrency,
-    availableStock: getBookAvailableStock(book, effectiveMarket),
-  }));
+  const paginated = items.slice(start, start + pageSize).map((book) => {
+    if (DEMO_MODE) {
+      const { price, priceKZ, priceEUR, priceBRL, ...publicBook } = book;
+      void price; void priceKZ; void priceEUR; void priceBRL;
+      return { ...publicBook, availableStock: getBookAvailableStock(book, effectiveMarket) };
+    }
+    return { ...book, displayPrice: getBookPriceForMarket(book, effectiveCurrency), displayCurrency: effectiveCurrency, availableStock: getBookAvailableStock(book, effectiveMarket) };
+  });
 
   return NextResponse.json({
     total,

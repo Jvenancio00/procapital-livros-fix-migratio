@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { DEMO_MODE } from "@/lib/demo";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatMoney, type Currency } from "@/lib/currency";
@@ -25,6 +26,7 @@ interface CheckoutItem {
 }
 
 export async function POST(request: Request) {
+  if (DEMO_MODE) return NextResponse.json({ error: "Compra online indisponível durante a fase demonstrativa." }, { status: 503 });
   const session = await auth();
   const userEmail = session?.user?.email?.trim().toLowerCase();
   if (!userEmail) {

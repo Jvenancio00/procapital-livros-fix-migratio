@@ -1,5 +1,8 @@
 "use client";
 
+import { DEMO_MODE } from "@/lib/demo";
+import DemoCommerceNotice from "@/components/DemoCommerceNotice";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useClientAuth } from "@/hooks/useClientAuth";
@@ -12,6 +15,10 @@ interface OrderItem extends Book {
 }
 
 export default function ClientOrderPage() {
+  return DEMO_MODE ? <DemoCommerceNotice /> : <ClientOrderPageFull />;
+}
+
+function ClientOrderPageFull() {
   const router = useRouter();
   const { session, loading } = useClientAuth();
   const [cart, setCart] = useState<OrderItem[]>([]);

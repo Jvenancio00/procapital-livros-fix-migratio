@@ -54,6 +54,7 @@ export const pt: Dictionary = {
       readers: "Leitores",
     },
   },
+  demo: { title: "Catálogo em fase demonstrativa", description: "Os preços e a compra online ainda não estão disponíveis. Consulte o catálogo ou contacte a equipa para informações sobre os títulos.", contact: "Contactar equipa", consult: "Sob consulta", productDescription: "Catálogo em fase demonstrativa. Contacte a equipa para informações sobre este título.", quote: "Solicitar cotação" },
   publisherMark: { provisional: "Símbolo provisório" },
   schoolPriority: { count: "títulos escolares", quote: "Pedir cotação escolar" },
   metrics: {

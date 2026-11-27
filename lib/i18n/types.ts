@@ -62,6 +62,7 @@ export interface Dictionary {
       readers: string;
     };
   };
+  demo: { title: string; description: string; contact: string; consult: string; productDescription: string; quote: string };
   publisherMark: { provisional: string };
   schoolPriority: { count: string; quote: string };
   /** Secção institucional de métricas ("10 parceiros", "1000+ títulos", ...), logo abaixo do Hero */

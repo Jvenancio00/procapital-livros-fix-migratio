@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { BookOpen, FileSpreadsheet, MessageSquare, ShoppingCart } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCart } from "@/context/CartContext";
+import { DEMO_MODE } from "@/lib/demo";
 
 const HIDDEN_PREFIXES = [
   "/carrinho",
@@ -40,21 +41,21 @@ export default function MobileStickyCta() {
     pathname === "/mais-vendidos";
 
   const primaryHref =
-    totalItems > 0
+    !DEMO_MODE && totalItems > 0
       ? "/carrinho"
       : isCatalogOrBookPage
       ? "/cotacoes"
       : pathname === "/" ? "/livros-escolares" : "/catalogo";
 
   const primaryLabel =
-    totalItems > 0
+    !DEMO_MODE && totalItems > 0
       ? `Encomendar (${totalItems})`
       : isCatalogOrBookPage
       ? "Pedir Cotação"
       : pathname === "/" ? dict.hero.ctaSchool : "Explorar Catálogo";
 
   const PrimaryIcon =
-    totalItems > 0
+    !DEMO_MODE && totalItems > 0
       ? ShoppingCart
       : isCatalogOrBookPage
       ? FileSpreadsheet

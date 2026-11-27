@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import type { Book } from "@/data/books";
+import { DEMO_MODE } from "@/lib/demo";
 import BookCard from "@/components/BookCard";
 import PageHeader from "@/components/PageHeader";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -94,7 +95,7 @@ export default function CatalogClient({
       const price = getPriceInCurrency(book, currency);
       const isEnabled =
         book.free ||
-        (price > 0 && (!book.activeMarkets || book.activeMarkets.includes(market)));
+        ((DEMO_MODE || price > 0) && (!book.activeMarkets || book.activeMarkets.includes(market)));
 
       if (availability === "DISPONIVEL" && (!isEnabled || stock <= 0)) return false;
       if (availability === "COTACAO" && isEnabled && stock > 0) return false;
@@ -204,7 +205,7 @@ export default function CatalogClient({
       <PageHeader
         eyebrow="Catálogo Editorial Multi-Mercado"
         title={`Catálogo ${MARKETS[market].name} (${MARKETS[market].currency})`}
-        description={`Consulte o acervo completo comercializado para ${MARKETS[market].name} com preços oficiais em ${MARKETS[market].isoCurrency}, stock real por armazém e pesquisa prioritária por ISBN.`}
+        description={DEMO_MODE ? "Explore o catálogo demonstrativo por título, autor, editora ou ISBN. Condições comerciais sob consulta." : `Consulte o acervo completo comercializado para ${MARKETS[market].name} com preços oficiais em ${MARKETS[market].isoCurrency}, stock real por armazém e pesquisa prioritária por ISBN.`}
         breadcrumbs={[
           { label: "Início", href: "/" },
           { label: "Catálogo Editorial" },
@@ -386,7 +387,7 @@ export default function CatalogClient({
                   </select>
                 </div>
 
-                <div>
+                {!DEMO_MODE && <div>
                   <span className="block text-xs font-semibold text-ink/75">
                     Intervalo de Preço ({currency})
                   </span>
@@ -414,7 +415,7 @@ export default function CatalogClient({
                       className="w-full rounded-xl border border-line bg-cream/50 px-3 py-2 text-xs text-ink"
                     />
                   </div>
-                </div>
+                </div>}
               </div>
             </div>
 
@@ -423,7 +424,7 @@ export default function CatalogClient({
               <p className="font-semibold text-ink">
                 Condições logísticas · {MARKETS[market].name}
               </p>
-              <p className="mt-1 leading-relaxed">{MARKETS[market].shippingSummary}</p>
+              <p className="mt-1 leading-relaxed">{DEMO_MODE ? "Condições de entrega sob consulta." : MARKETS[market].shippingSummary}</p>
             </div>
           </aside>
 
@@ -466,8 +467,8 @@ export default function CatalogClient({
                   className="rounded-xl border border-line bg-cream/40 px-3.5 py-2.5 text-xs font-semibold text-ink"
                 >
                   <option value="destaque">Ordenar: Destaques editoriais</option>
-                  <option value="preco_asc">Preço: menor para maior</option>
-                  <option value="preco_desc">Preço: maior para menor</option>
+                  {!DEMO_MODE && <><option value="preco_asc">Preço: menor para maior</option>
+                  <option value="preco_desc">Preço: maior para menor</option></>}
                   <option value="titulo_asc">Título: A a Z</option>
                   <option value="autor_asc">Autor: A a Z</option>
                   <option value="recentes">Edições mais recentes</option>
